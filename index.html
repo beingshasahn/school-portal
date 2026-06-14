@@ -6,47 +6,69 @@
 <title>School Portal Login</title>
 
 <style>
+*{
+  box-sizing:border-box;
+  font-family: Arial, sans-serif;
+}
+
 body{
   margin:0;
-  font-family: Arial, sans-serif;
-  background: linear-gradient(135deg, #1e3c72, #2a5298);
   height:100vh;
   display:flex;
   justify-content:center;
   align-items:center;
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  padding:15px;
 }
 
 .card{
   background:white;
-  padding:30px;
-  width:320px;
+  width:100%;
+  max-width:380px;
+  padding:25px;
   border-radius:15px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.3);
-  text-align:center;
+  box-shadow:0 10px 30px rgba(0,0,0,0.25);
 }
 
 h2{
-  margin-bottom:20px;
+  text-align:center;
   color:#1e3c72;
+  margin-bottom:20px;
 }
 
 input{
   width:100%;
   padding:12px;
-  margin:8px 0;
+  margin-top:10px;
   border:1px solid #ccc;
   border-radius:8px;
+  font-size:14px;
+}
+
+.password-wrapper{
+  position:relative;
+}
+
+.toggle{
+  position:absolute;
+  right:10px;
+  top:50%;
+  transform:translateY(-50%);
+  cursor:pointer;
+  font-size:13px;
+  color:#1e3c72;
+  font-weight:bold;
 }
 
 button{
   width:100%;
   padding:12px;
-  margin-top:10px;
+  margin-top:15px;
   border:none;
   border-radius:8px;
   background:#1e3c72;
   color:white;
-  font-weight:bold;
+  font-size:15px;
   cursor:pointer;
 }
 
@@ -64,8 +86,12 @@ button:hover{
 <div class="card">
 <h2>School Portal</h2>
 
-<input id="email" placeholder="Email">
+<input id="email" type="email" placeholder="Email">
+
+<div class="password-wrapper">
 <input id="password" type="password" placeholder="Password">
+<span class="toggle" onclick="togglePassword()">Show</span>
+</div>
 
 <button onclick="login()">Login</button>
 </div>
@@ -76,18 +102,34 @@ const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
+// LOGIN FUNCTION
 async function login(){
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
   const { data, error } = await supabaseClient.auth.signInWithPassword({
-    email, password
+    email,
+    password
   });
 
   if(error){
     alert(error.message);
   } else {
     window.location.href = "dashboard.html";
+  }
+}
+
+// SHOW/HIDE PASSWORD
+function togglePassword(){
+  const pass = document.getElementById("password");
+  const toggle = document.querySelector(".toggle");
+
+  if(pass.type === "password"){
+    pass.type = "text";
+    toggle.innerText = "Hide";
+  } else {
+    pass.type = "password";
+    toggle.innerText = "Show";
   }
 }
 </script>
