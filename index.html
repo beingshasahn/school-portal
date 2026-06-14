@@ -1,21 +1,74 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>School Portal Login</title>
-</head>
-<body>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>School Portal Login</title>
 
-<h2>School Login</h2>
+<style>
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
 
-<input id="email" placeholder="Email" />
-<br><br>
+.card{
+  background:white;
+  padding:30px;
+  width:320px;
+  border-radius:15px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.3);
+  text-align:center;
+}
 
-<input id="password" type="password" placeholder="Password" />
-<br><br>
+h2{
+  margin-bottom:20px;
+  color:#1e3c72;
+}
 
-<button onclick="login()">Login</button>
+input{
+  width:100%;
+  padding:12px;
+  margin:8px 0;
+  border:1px solid #ccc;
+  border-radius:8px;
+}
+
+button{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border:none;
+  border-radius:8px;
+  background:#1e3c72;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+button:hover{
+  background:#16325c;
+}
+</style>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+</head>
+
+<body>
+
+<div class="card">
+<h2>School Portal</h2>
+
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+
+<button onclick="login()">Login</button>
+</div>
 
 <script>
 const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
@@ -23,22 +76,17 @@ const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-async function login() {
+async function login(){
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
   const { data, error } = await supabaseClient.auth.signInWithPassword({
-    email,
-    password
+    email, password
   });
 
-  if (error) {
+  if(error){
     alert(error.message);
   } else {
-    alert("Login successful 👍");
-    console.log(data);
-
-    // redirect to dashboard
     window.location.href = "dashboard.html";
   }
 }
