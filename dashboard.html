@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard</title>
+<title>Teacher Dashboard</title>
 
 <style>
 body{
@@ -20,7 +20,7 @@ body{
 }
 
 .container{
-  padding:20px;
+  padding:15px;
 }
 
 .card{
@@ -38,8 +38,11 @@ button{
   background:#1e3c72;
   color:white;
   cursor:pointer;
+  margin-top:10px;
 }
 </style>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 </head>
 
@@ -52,8 +55,14 @@ button{
 <div class="container">
 
 <div class="card">
-<h3>Welcome 👋</h3>
-<p>Manage your students and results here.</p>
+<h3 id="welcome">Loading...</h3>
+<p>Welcome to your dashboard</p>
+</div>
+
+<div class="card">
+<h4>Your Assigned Students</h4>
+<ul id="students"></ul>
+<button onclick="loadStudents()">Load Students</button>
 </div>
 
 <div class="card">
@@ -63,9 +72,64 @@ button{
 </div>
 
 <script>
+const supabaseUrl = "PASTE_URL_HAPA";
+const supabaseKey = "PASTE_ANON_KEY_HAPA";
+
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+// GET USER
+async function getUser(){
+  const { data } = await supabaseClient.auth.getUser();
+  return data.user;
+}
+
+// LOAD WELCOME NAME
+async function loadUser(){
+  const user = await getUser();
+  if(user){
+    document.getElementById("welcome").innerText =
+      "Welcome, " + user.email;
+  }
+}
+
+// LOAD STUDENTS
+async function loadStudents(){
+  const user = await getUser();
+
+  const { data: assignments } = await supabaseClient
+    .from("teacher_assignments")
+    .select("*")
+    .eq("teacher_id", user.id);
+
+  if(!assignments.length){
+    alert("No assignments found");
+    return;
+  }
+
+  const classId = assignments[0].class_id;
+
+  const { data: students } = await supabaseClient
+    .from("students")
+    .select("*")
+    .eq("class_id", classId);
+
+  const list = document.getElementById("students");
+  list.innerHTML = "";
+
+  students.forEach(s=>{
+    let li = document.createElement("li");
+    li.textContent = s.name;
+    list.appendChild(li);
+  });
+}
+
+// LOGOUT
 function logout(){
+  supabaseClient.auth.signOut();
   window.location.href = "index.html";
 }
+
+loadUser();
 </script>
 
 </body>
