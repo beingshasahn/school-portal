@@ -79,13 +79,20 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
 // GET USER
 async function getUser(){
-  const { data } = await supabaseClient.auth.getUser();
+  const { data, error } = await supabaseClient.auth.getUser();
+
+  if(error){
+    alert(error.message);
+    return null;
+  }
+
   return data.user;
 }
 
 // LOAD WELCOME NAME
 async function loadUser(){
   const user = await getUser();
+
   if(user){
     document.getElementById("welcome").innerText =
       "Welcome, " + user.email;
@@ -96,29 +103,52 @@ async function loadUser(){
 async function loadStudents(){
   const user = await getUser();
 
-  const { data: assignments } = await supabaseClient
+  if(!user){
+    alert("User not logged in");
+    return;
+  }
+
+  const { data: assignments, error: aError } = await supabaseClient
     .from("teacher_assignments")
     .select("*")
     .eq("teacher_id", user.id);
 
-  if(!assignments.length){
+  if(aError){
+    alert(aError.message);
+    return;
+  }
+
+  if(!assignments || assignments.length === 0){
     alert("No assignments found");
     return;
   }
 
   const classId = assignments[0].class_id;
 
-  const { data: students } = await supabaseClient
+  const { data: students, error } = await supabaseClient
     .from("students")
     .select("*")
     .eq("class_id", classId);
 
+  if(error){
+    alert(error.message);
+    return;
+  }
+
   const list = document.getElementById("students");
   list.innerHTML = "";
 
-  students.forEach(s=>{
+  if(!students || students.length === 0){
+    list.innerHTML = "<li>No students found</li>";
+    return;
+  }
+
+  students.forEach(s => {
     let li = document.createElement("li");
-    li.textContent = s.name;
+
+    // FIXED HERE 👇
+    li.textContent = s.student_name;
+
     list.appendChild(li);
   });
 }
