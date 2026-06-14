@@ -24,26 +24,21 @@ body{
   background:#1e3c72;
   color:white;
   padding:20px;
-  display:flex;
-  flex-direction:column;
 }
 
 .sidebar h2{
   font-size:18px;
-  margin-bottom:20px;
+  margin-bottom:15px;
 }
 
 .sidebar a{
+  display:block;
   color:white;
   text-decoration:none;
   padding:10px;
   margin:5px 0;
-  border-radius:6px;
   background:rgba(255,255,255,0.1);
-}
-
-.sidebar a:hover{
-  background:rgba(255,255,255,0.2);
+  border-radius:6px;
 }
 
 /* MAIN */
@@ -53,19 +48,19 @@ body{
   overflow:auto;
 }
 
-/* CARDS */
-.cards{
+/* FILTERS */
+.filters{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  grid-template-columns:1fr 1fr;
   gap:10px;
   margin-bottom:15px;
 }
 
-.card{
-  background:white;
-  padding:15px;
-  border-radius:10px;
-  box-shadow:0 3px 10px rgba(0,0,0,0.1);
+select{
+  width:100%;
+  padding:10px;
+  border-radius:6px;
+  border:1px solid #ccc;
 }
 
 /* TABLE */
@@ -83,27 +78,9 @@ th,td{
   text-align:left;
 }
 
-/* MARKS FORM */
-input, select{
-  width:100%;
-  padding:10px;
-  margin-top:8px;
-  border-radius:6px;
-  border:1px solid #ccc;
-}
-
-button{
-  margin-top:10px;
-  padding:10px;
-  border:none;
-  border-radius:6px;
-  background:#1e3c72;
-  color:white;
-  cursor:pointer;
-}
-
-button:hover{
-  background:#16325c;
+input{
+  width:80px;
+  padding:6px;
 }
 
 /* RESPONSIVE */
@@ -113,6 +90,9 @@ button:hover{
   }
   .sidebar{
     width:100%;
+  }
+  .filters{
+    grid-template-columns:1fr;
   }
 }
 </style>
@@ -126,38 +106,22 @@ button:hover{
 <!-- SIDEBAR -->
 <div class="sidebar">
   <h2>School Portal</h2>
-
   <p id="user">Loading...</p>
 
   <a href="#">Dashboard</a>
-  <a href="#">My Classes</a>
-  <a href="#">My Subjects</a>
+  <a href="#">Marks Entry</a>
   <a href="#" onclick="logout()">Logout</a>
 </div>
 
 <!-- MAIN -->
 <div class="main">
 
-<h2>Dashboard</h2>
+<h2>Marks Entry System</h2>
 
-<div class="cards">
-  <div class="card">
-    <h3 id="classCount">0</h3>
-    <p>Classes</p>
-  </div>
-
-  <div class="card">
-    <h3 id="subjectCount">0</h3>
-    <p>Subjects</p>
-  </div>
-
-  <div class="card">
-    <h3 id="studentCount">0</h3>
-    <p>Students</p>
-  </div>
+<div class="filters">
+  <select id="classSelect" onchange="loadStudents()"></select>
+  <select id="subjectSelect"></select>
 </div>
-
-<h3>Students List</h3>
 
 <table>
   <thead>
@@ -165,22 +129,12 @@ button:hover{
       <th>Admission No</th>
       <th>Name</th>
       <th>Gender</th>
+      <th>Marks</th>
+      <th>Action</th>
     </tr>
   </thead>
   <tbody id="studentsTable"></tbody>
 </table>
-
-<!-- MARKS SECTION -->
-<h3 style="margin-top:20px;">Enter Marks</h3>
-
-<div class="card">
-  <select id="studentSelect"></select>
-  <select id="subjectSelect"></select>
-
-  <input id="marks" type="number" placeholder="Enter Marks">
-
-  <button onclick="saveMarks()">Save Marks</button>
-</div>
 
 </div>
 
@@ -197,17 +151,15 @@ let assignments = [];
 async function init(){
 
   const { data } = await supabaseClient.auth.getUser();
-  const user = data.user;
-
-  teacherId = user.id;
+  teacherId = data.user.id;
 
   document.getElementById("user").innerText =
-    "Welcome: " + user.email;
+    "Welcome " + data.user.email;
 
   loadAssignments();
 }
 
-// LOAD ASSIGNMENTS
+// LOAD ASSIGNMENTS (FILTERS)
 async function loadAssignments(){
 
   const { data } = await supabaseClient
@@ -217,31 +169,44 @@ async function loadAssignments(){
 
   assignments = data || [];
 
-  document.getElementById("classCount").innerText =
-    new Set(assignments.map(a=>a.class_id)).size;
-
-  document.getElementById("subjectCount").innerText =
-    new Set(assignments.map(a=>a.subject_id)).size;
-
-  loadStudents();
-  loadDropdowns();
+  loadFilters();
 }
 
-// LOAD STUDENTS TABLE
+// LOAD CLASS + SUBJECT DROPDOWNS (ONLY ASSIGNED)
+function loadFilters(){
+
+  const classSelect = document.getElementById("classSelect");
+  const subjectSelect = document.getElementById("subjectSelect");
+
+  classSelect.innerHTML = "";
+  subjectSelect.innerHTML = "";
+
+  let classes = [...new Set(assignments.map(a=>a.class_id))];
+  let subjects = [...new Set(assignments.map(a=>a.subject_id))];
+
+  classes.forEach(c=>{
+    classSelect.innerHTML += `<option value="${c}">Class ${c}</option>`;
+  });
+
+  subjects.forEach(s=>{
+    subjectSelect.innerHTML += `<option value="${s}">Subject ${s}</option>`;
+  });
+
+  loadStudents();
+}
+
+// LOAD STUDENTS BY CLASS
 async function loadStudents(){
 
-  let classIds = [...new Set(assignments.map(a=>a.class_id))];
+  const classId = document.getElementById("classSelect").value;
 
   const { data } = await supabaseClient
     .from("students")
     .select("*")
-    .in("class_id", classIds);
+    .eq("class_id", classId);
 
   const table = document.getElementById("studentsTable");
   table.innerHTML = "";
-
-  document.getElementById("studentCount").innerText =
-    data.length;
 
   data.forEach(s=>{
     table.innerHTML += `
@@ -249,64 +214,38 @@ async function loadStudents(){
         <td>${s.admission_no}</td>
         <td>${s.student_name}</td>
         <td>${s.gender}</td>
+        <td>
+          <input type="number" id="mark-${s.id}" placeholder="0-100">
+        </td>
+        <td>
+          <button onclick="saveMark('${s.id}')">Save</button>
+        </td>
       </tr>
     `;
   });
 }
 
-// LOAD DROPDOWNS
-async function loadDropdowns(){
+// SAVE MARK PER STUDENT
+async function saveMark(studentId){
 
-  const { data: students } = await supabaseClient
-    .from("students")
-    .select("*");
+  const subjectId = document.getElementById("subjectSelect").value;
+  const marks = document.getElementById("mark-"+studentId).value;
 
-  const studentSelect = document.getElementById("studentSelect");
-  studentSelect.innerHTML = "";
-
-  students.forEach(s=>{
-    studentSelect.innerHTML += `
-      <option value="${s.id}">${s.student_name}</option>
-    `;
-  });
-
-  const { data: subjects } = await supabaseClient
-    .from("subjects")
-    .select("*");
-
-  const subjectSelect = document.getElementById("subjectSelect");
-  subjectSelect.innerHTML = "";
-
-  subjects.forEach(s=>{
-    subjectSelect.innerHTML += `
-      <option value="${s.id}">${s.subject_name}</option>
-    `;
-  });
-}
-
-// SAVE MARKS
-async function saveMarks(){
-
-  const student_id = document.getElementById("studentSelect").value;
-  const subject_id = document.getElementById("subjectSelect").value;
-  const marks = document.getElementById("marks").value;
-
-  const { data: user } = await supabaseClient.auth.getUser();
+  const { data } = await supabaseClient.auth.getUser();
 
   const { error } = await supabaseClient
     .from("results")
     .insert([{
-      student_id,
-      subject_id,
-      teacher_id: user.user.id,
-      marks
+      student_id: studentId,
+      subject_id: subjectId,
+      teacher_id: data.user.id,
+      marks: marks
     }]);
 
   if(error){
     alert(error.message);
   } else {
-    alert("Marks saved successfully 👍");
-    document.getElementById("marks").value = "";
+    alert("Saved 👍");
   }
 }
 
