@@ -31,14 +31,15 @@ body{
   box-shadow:0 5px 15px rgba(0,0,0,0.1);
 }
 
-button{
+select{
+  width:100%;
   padding:10px;
-  border:none;
-  border-radius:6px;
-  background:#1e3c72;
-  color:white;
-  cursor:pointer;
   margin-top:10px;
+  border-radius:8px;
+}
+
+ul{
+  padding-left:20px;
 }
 </style>
 
@@ -56,17 +57,19 @@ button{
 
 <div class="card">
 <h3 id="welcome">Loading...</h3>
-<p>Welcome to your dashboard</p>
 </div>
 
 <div class="card">
-<h4>Your Assigned Students</h4>
+<h4>Select Class</h4>
+<select id="classSelect" onchange="loadStudents()"></select>
+
+<h4>Select Subject</h4>
+<select id="subjectSelect"></select>
+</div>
+
+<div class="card">
+<h4>Students</h4>
 <ul id="students"></ul>
-<button onclick="loadStudents()">Load Students</button>
-</div>
-
-<div class="card">
-<button onclick="logout()">Logout</button>
 </div>
 
 </div>
@@ -77,89 +80,88 @@ const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
+let assignments = [];
+
 // GET USER
 async function getUser(){
-  const { data, error } = await supabaseClient.auth.getUser();
-
-  if(error){
-    alert(error.message);
-    return null;
-  }
-
+  const { data } = await supabaseClient.auth.getUser();
   return data.user;
 }
 
-// LOAD WELCOME NAME
-async function loadUser(){
-  const user = await getUser();
-
-  if(user){
-    document.getElementById("welcome").innerText =
-      "Welcome, " + user.email;
-  }
-}
-
-// LOAD STUDENTS
-async function loadStudents(){
+// LOAD USER + ASSIGNMENTS
+async function init(){
   const user = await getUser();
 
   if(!user){
-    alert("User not logged in");
+    alert("Not logged in");
     return;
   }
 
-  const { data: assignments, error: aError } = await supabaseClient
+  document.getElementById("welcome").innerText =
+    "Welcome " + user.email;
+
+  const { data } = await supabaseClient
     .from("teacher_assignments")
     .select("*")
     .eq("teacher_id", user.id);
 
-  if(aError){
-    alert(aError.message);
-    return;
-  }
+  assignments = data || [];
 
-  if(!assignments || assignments.length === 0){
-    alert("No assignments found");
-    return;
-  }
+  loadDropdowns();
+}
 
-  const classId = assignments[0].class_id;
+// LOAD DROPDOWNS
+function loadDropdowns(){
+  const classSelect = document.getElementById("classSelect");
+  const subjectSelect = document.getElementById("subjectSelect");
 
-  const { data: students, error } = await supabaseClient
+  classSelect.innerHTML = "";
+  subjectSelect.innerHTML = "";
+
+  let classes = [...new Set(assignments.map(a => a.class_id))];
+  let subjects = [...new Set(assignments.map(a => a.subject_id))];
+
+  classes.forEach(c=>{
+    let opt = document.createElement("option");
+    opt.value = c;
+    opt.textContent = "Class " + c;
+    classSelect.appendChild(opt);
+  });
+
+  subjects.forEach(s=>{
+    let opt = document.createElement("option");
+    opt.value = s;
+    opt.textContent = "Subject " + s;
+    subjectSelect.appendChild(opt);
+  });
+
+  loadStudents();
+}
+
+// LOAD STUDENTS AUTOMATICALLY
+async function loadStudents(){
+
+  const classId = document.getElementById("classSelect").value;
+
+  if(!classId) return;
+
+  const { data } = await supabaseClient
     .from("students")
     .select("*")
     .eq("class_id", classId);
 
-  if(error){
-    alert(error.message);
-    return;
-  }
-
   const list = document.getElementById("students");
   list.innerHTML = "";
 
-  if(!students || students.length === 0){
-    list.innerHTML = "<li>No students found</li>";
-    return;
-  }
-
-  students.forEach(s => {
+  data.forEach(s=>{
     let li = document.createElement("li");
-
-    // FIXED HERE 👇
     li.textContent = s.student_name;
-
     list.appendChild(li);
   });
 }
 
-// LOGOUT
-function logout(){
-  supabaseClient.auth.signOut();
-  window.location.href = "index.html";
-}
-
-loadUser();
+// INIT
+init();
 </script>
 
 </body>
