@@ -48,6 +48,30 @@ body{
   overflow:auto;
 }
 
+/* HEADER */
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:15px;
+  background:white;
+  padding:10px 15px;
+  border-radius:10px;
+}
+
+.header h3{
+  margin:0;
+}
+
+.logoutBtn{
+  background:#d9534f;
+  color:white;
+  border:none;
+  padding:8px 12px;
+  border-radius:6px;
+  cursor:pointer;
+}
+
 /* FILTERS */
 .filters{
   display:grid;
@@ -78,6 +102,7 @@ th,td{
   text-align:left;
 }
 
+/* INPUT */
 input{
   width:80px;
   padding:6px;
@@ -106,23 +131,32 @@ input{
 <!-- SIDEBAR -->
 <div class="sidebar">
   <h2>School Portal</h2>
-  <p id="user">Loading...</p>
-
   <a href="#">Dashboard</a>
   <a href="#">Marks Entry</a>
-  <a href="#" onclick="logout()">Logout</a>
 </div>
 
 <!-- MAIN -->
 <div class="main">
 
-<h2>Marks Entry System</h2>
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <h3>KOROSHO ENGLISH MEDIUM PRE AND PRIMARY SCHOOL</h3>
+    <small>P.O. Box 03, TANDAHIMBA</small>
+  </div>
 
+  <button class="logoutBtn" onclick="logout()">Logout</button>
+</div>
+
+<h3 id="userWelcome">Loading...</h3>
+
+<!-- FILTERS -->
 <div class="filters">
   <select id="classSelect" onchange="loadStudents()"></select>
   <select id="subjectSelect"></select>
 </div>
 
+<!-- STUDENTS TABLE -->
 <table>
   <thead>
     <tr>
@@ -139,6 +173,7 @@ input{
 </div>
 
 <script>
+
 const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
 
@@ -147,19 +182,19 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 let teacherId = null;
 let assignments = [];
 
-// INIT
+/* INIT */
 async function init(){
 
   const { data } = await supabaseClient.auth.getUser();
   teacherId = data.user.id;
 
-  document.getElementById("user").innerText =
-    "Welcome " + data.user.email;
+  document.getElementById("userWelcome").innerText =
+    "Welcome, " + data.user.email;
 
   loadAssignments();
 }
 
-// LOAD ASSIGNMENTS (FILTERS)
+/* LOAD ASSIGNMENTS */
 async function loadAssignments(){
 
   const { data } = await supabaseClient
@@ -172,8 +207,8 @@ async function loadAssignments(){
   loadFilters();
 }
 
-// LOAD CLASS + SUBJECT DROPDOWNS (ONLY ASSIGNED)
-function loadFilters(){
+/* LOAD CLASS + SUBJECT NAMES */
+async function loadFilters(){
 
   const classSelect = document.getElementById("classSelect");
   const subjectSelect = document.getElementById("subjectSelect");
@@ -181,21 +216,33 @@ function loadFilters(){
   classSelect.innerHTML = "";
   subjectSelect.innerHTML = "";
 
-  let classes = [...new Set(assignments.map(a=>a.class_id))];
-  let subjects = [...new Set(assignments.map(a=>a.subject_id))];
+  let classIds = [...new Set(assignments.map(a=>a.class_id))];
+  let subjectIds = [...new Set(assignments.map(a=>a.subject_id))];
 
-  classes.forEach(c=>{
-    classSelect.innerHTML += `<option value="${c}">Class ${c}</option>`;
-  });
+  for(let id of classIds){
+    const { data } = await supabaseClient
+      .from("classes")
+      .select("id, class_name")
+      .eq("id", id)
+      .single();
 
-  subjects.forEach(s=>{
-    subjectSelect.innerHTML += `<option value="${s}">Subject ${s}</option>`;
-  });
+    classSelect.innerHTML += `<option value="${data.id}">${data.class_name}</option>`;
+  }
+
+  for(let id of subjectIds){
+    const { data } = await supabaseClient
+      .from("subjects")
+      .select("id, subject_name")
+      .eq("id", id)
+      .single();
+
+    subjectSelect.innerHTML += `<option value="${data.id}">${data.subject_name}</option>`;
+  }
 
   loadStudents();
 }
 
-// LOAD STUDENTS BY CLASS
+/* LOAD STUDENTS */
 async function loadStudents(){
 
   const classId = document.getElementById("classSelect").value;
@@ -225,37 +272,62 @@ async function loadStudents(){
   });
 }
 
-// SAVE MARK PER STUDENT
+/* SAVE MARK (NO DUPLICATES - UPDATE OR INSERT) */
 async function saveMark(studentId){
 
   const subjectId = document.getElementById("subjectSelect").value;
   const marks = document.getElementById("mark-"+studentId).value;
 
-  const { data } = await supabaseClient.auth.getUser();
+  const { data: userData } = await supabaseClient.auth.getUser();
 
-  const { error } = await supabaseClient
+  // CHECK EXISTING
+  const { data: existing } = await supabaseClient
     .from("results")
-    .insert([{
-      student_id: studentId,
-      subject_id: subjectId,
-      teacher_id: data.user.id,
-      marks: marks
-    }]);
+    .select("*")
+    .eq("student_id", studentId)
+    .eq("subject_id", subjectId)
+    .maybeSingle();
 
-  if(error){
-    alert(error.message);
+  if(existing){
+
+    const { error } = await supabaseClient
+      .from("results")
+      .update({ marks: marks })
+      .eq("id", existing.id);
+
+    if(error){
+      alert(error.message);
+    } else {
+      alert("Updated 👍");
+    }
+
   } else {
-    alert("Saved 👍");
+
+    const { error } = await supabaseClient
+      .from("results")
+      .insert([{
+        student_id: studentId,
+        subject_id: subjectId,
+        teacher_id: userData.user.id,
+        marks: marks
+      }]);
+
+    if(error){
+      alert(error.message);
+    } else {
+      alert("Saved 👍");
+    }
   }
 }
 
-// LOGOUT
+/* LOGOUT */
 async function logout(){
   await supabaseClient.auth.signOut();
   window.location.href = "index.html";
 }
 
 init();
+
 </script>
 
 </body>
