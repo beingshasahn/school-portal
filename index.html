@@ -1,17 +1,46 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>School Portal</title>
+  <title>School Portal Login</title>
 </head>
 <body>
 
-<h2>GitHub is Working 👍</h2>
+<h2>School Login</h2>
 
-<button onclick="test()">Test Button</button>
+<input id="email" placeholder="Email" />
+<br><br>
+
+<input id="password" type="password" placeholder="Password" />
+<br><br>
+
+<button onclick="login()">Login</button>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-function test() {
-  alert("Website iko live 🔥");
+const supabaseUrl = "PASTE_YOUR_URL_HAPA";
+const supabaseKey = "PASTE_YOUR_ANON_KEY_HAPA";
+
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+async function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    alert(error.message);
+  } else {
+    alert("Login successful 👍");
+    console.log(data);
+
+    // redirect to dashboard
+    window.location.href = "dashboard.html";
+  }
 }
 </script>
 
