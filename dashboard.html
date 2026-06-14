@@ -53,14 +53,10 @@ body{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  margin-bottom:15px;
   background:white;
   padding:10px 15px;
   border-radius:10px;
-}
-
-.header h3{
-  margin:0;
+  margin-bottom:15px;
 }
 
 .logoutBtn{
@@ -102,10 +98,18 @@ th,td{
   text-align:left;
 }
 
-/* INPUT */
 input{
   width:80px;
   padding:6px;
+}
+
+button{
+  padding:6px 10px;
+  background:#1e3c72;
+  color:white;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
 }
 
 /* RESPONSIVE */
@@ -152,8 +156,15 @@ input{
 
 <!-- FILTERS -->
 <div class="filters">
-  <select id="classSelect" onchange="loadStudents()"></select>
-  <select id="subjectSelect"></select>
+
+  <select id="classSelect" onchange="onClassChange()">
+    <option value="">-- Select Class --</option>
+  </select>
+
+  <select id="subjectSelect" onchange="onSubjectChange()">
+    <option value="">-- Select Subject --</option>
+  </select>
+
 </div>
 
 <!-- STUDENTS TABLE -->
@@ -167,6 +178,7 @@ input{
       <th>Action</th>
     </tr>
   </thead>
+
   <tbody id="studentsTable"></tbody>
 </table>
 
@@ -204,39 +216,72 @@ async function loadAssignments(){
 
   assignments = data || [];
 
-  loadFilters();
+  loadClassesOnly();
 }
 
-/* LOAD CLASS + SUBJECT NAMES */
-async function loadFilters(){
+/* LOAD ONLY CLASSES (EMPTY INIT) */
+async function loadClassesOnly(){
 
   const classSelect = document.getElementById("classSelect");
-  const subjectSelect = document.getElementById("subjectSelect");
-
-  classSelect.innerHTML = "";
-  subjectSelect.innerHTML = "";
+  classSelect.innerHTML = `<option value="">-- Select Class --</option>`;
 
   let classIds = [...new Set(assignments.map(a=>a.class_id))];
-  let subjectIds = [...new Set(assignments.map(a=>a.subject_id))];
 
   for(let id of classIds){
+
     const { data } = await supabaseClient
       .from("classes")
       .select("id, class_name")
       .eq("id", id)
       .single();
 
-    classSelect.innerHTML += `<option value="${data.id}">${data.class_name}</option>`;
+    classSelect.innerHTML += `
+      <option value="${data.id}">${data.class_name}</option>
+    `;
   }
 
+  document.getElementById("subjectSelect").innerHTML =
+    `<option value="">-- Select Subject --</option>`;
+}
+
+/* CLASS CHANGE → LOAD SUBJECTS */
+async function onClassChange(){
+
+  const classId = document.getElementById("classSelect").value;
+
+  document.getElementById("studentsTable").innerHTML = "";
+  document.getElementById("subjectSelect").innerHTML =
+    `<option value="">-- Select Subject --</option>`;
+
+  if(!classId) return;
+
+  let filtered = assignments.filter(a=>a.class_id == classId);
+
+  let subjectIds = [...new Set(filtered.map(a=>a.subject_id))];
+
   for(let id of subjectIds){
+
     const { data } = await supabaseClient
       .from("subjects")
       .select("id, subject_name")
       .eq("id", id)
       .single();
 
-    subjectSelect.innerHTML += `<option value="${data.id}">${data.subject_name}</option>`;
+    document.getElementById("subjectSelect").innerHTML += `
+      <option value="${data.id}">${data.subject_name}</option>
+    `;
+  }
+}
+
+/* SUBJECT CHANGE → LOAD STUDENTS */
+function onSubjectChange(){
+
+  const classId = document.getElementById("classSelect").value;
+  const subjectId = document.getElementById("subjectSelect").value;
+
+  if(!classId || !subjectId){
+    document.getElementById("studentsTable").innerHTML = "";
+    return;
   }
 
   loadStudents();
@@ -261,18 +306,14 @@ async function loadStudents(){
         <td>${s.admission_no}</td>
         <td>${s.student_name}</td>
         <td>${s.gender}</td>
-        <td>
-          <input type="number" id="mark-${s.id}" placeholder="0-100">
-        </td>
-        <td>
-          <button onclick="saveMark('${s.id}')">Save</button>
-        </td>
+        <td><input type="number" id="mark-${s.id}"></td>
+        <td><button onclick="saveMark('${s.id}')">Save</button></td>
       </tr>
     `;
   });
 }
 
-/* SAVE MARK (NO DUPLICATES - UPDATE OR INSERT) */
+/* SAVE MARK (NO DUPLICATES) */
 async function saveMark(studentId){
 
   const subjectId = document.getElementById("subjectSelect").value;
@@ -280,7 +321,6 @@ async function saveMark(studentId){
 
   const { data: userData } = await supabaseClient.auth.getUser();
 
-  // CHECK EXISTING
   const { data: existing } = await supabaseClient
     .from("results")
     .select("*")
@@ -290,20 +330,16 @@ async function saveMark(studentId){
 
   if(existing){
 
-    const { error } = await supabaseClient
+    await supabaseClient
       .from("results")
       .update({ marks: marks })
       .eq("id", existing.id);
 
-    if(error){
-      alert(error.message);
-    } else {
-      alert("Updated 👍");
-    }
+    alert("Updated 👍");
 
   } else {
 
-    const { error } = await supabaseClient
+    await supabaseClient
       .from("results")
       .insert([{
         student_id: studentId,
@@ -312,11 +348,7 @@ async function saveMark(studentId){
         marks: marks
       }]);
 
-    if(error){
-      alert(error.message);
-    } else {
-      alert("Saved 👍");
-    }
+    alert("Saved 👍");
   }
 }
 
