@@ -6,40 +6,91 @@
 <title>Teacher Dashboard</title>
 
 <style>
+*{
+  box-sizing:border-box;
+  font-family:Arial;
+}
+
 body{
   margin:0;
-  font-family:Arial;
+  display:flex;
+  height:100vh;
   background:#f4f6f9;
 }
 
-.header{
+/* SIDEBAR */
+.sidebar{
+  width:250px;
   background:#1e3c72;
   color:white;
-  padding:15px;
-  text-align:center;
+  padding:20px;
+  display:flex;
+  flex-direction:column;
 }
 
-.container{
-  padding:15px;
+.sidebar h2{
+  font-size:18px;
+  margin-bottom:20px;
+}
+
+.sidebar a{
+  color:white;
+  text-decoration:none;
+  padding:10px;
+  margin:5px 0;
+  border-radius:6px;
+  background:rgba(255,255,255,0.1);
+}
+
+.sidebar a:hover{
+  background:rgba(255,255,255,0.2);
+}
+
+/* MAIN */
+.main{
+  flex:1;
+  padding:20px;
+  overflow:auto;
+}
+
+/* CARDS */
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:10px;
+  margin-bottom:15px;
 }
 
 .card{
   background:white;
   padding:15px;
-  margin-bottom:10px;
   border-radius:10px;
-  box-shadow:0 5px 15px rgba(0,0,0,0.1);
+  box-shadow:0 3px 10px rgba(0,0,0,0.1);
 }
 
-select{
+/* TABLE */
+table{
   width:100%;
-  padding:10px;
-  margin-top:10px;
-  border-radius:8px;
+  border-collapse:collapse;
+  background:white;
+  border-radius:10px;
+  overflow:hidden;
 }
 
-ul{
-  padding-left:20px;
+th,td{
+  padding:10px;
+  border-bottom:1px solid #eee;
+  text-align:left;
+}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  body{
+    flex-direction:column;
+  }
+  .sidebar{
+    width:100%;
+  }
 }
 </style>
 
@@ -49,28 +100,52 @@ ul{
 
 <body>
 
-<div class="header">
-<h2>Teacher Dashboard</h2>
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <h2>School Portal</h2>
+
+  <p id="user">Loading...</p>
+
+  <a href="#">Dashboard</a>
+  <a href="#">My Classes</a>
+  <a href="#">My Subjects</a>
+  <a href="#" onclick="logout()">Logout</a>
 </div>
 
-<div class="container">
+<!-- MAIN -->
+<div class="main">
 
-<div class="card">
-<h3 id="welcome">Loading...</h3>
+<h2>Dashboard</h2>
+
+<div class="cards">
+  <div class="card">
+    <h3 id="classCount">0</h3>
+    <p>Classes</p>
+  </div>
+
+  <div class="card">
+    <h3 id="subjectCount">0</h3>
+    <p>Subjects</p>
+  </div>
+
+  <div class="card">
+    <h3 id="studentCount">0</h3>
+    <p>Students</p>
+  </div>
 </div>
 
-<div class="card">
-<h4>Select Class</h4>
-<select id="classSelect" onchange="loadStudents()"></select>
+<h3>Students List</h3>
 
-<h4>Select Subject</h4>
-<select id="subjectSelect"></select>
-</div>
-
-<div class="card">
-<h4>Students</h4>
-<ul id="students"></ul>
-</div>
+<table>
+  <thead>
+    <tr>
+      <th>Admission No</th>
+      <th>Name</th>
+      <th>Gender</th>
+    </tr>
+  </thead>
+  <tbody id="studentsTable"></tbody>
+</table>
 
 </div>
 
@@ -80,87 +155,74 @@ const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
+let teacherId = null;
 let assignments = [];
 
 // GET USER
-async function getUser(){
+async function init(){
   const { data } = await supabaseClient.auth.getUser();
-  return data.user;
+
+  const user = data.user;
+  teacherId = user.id;
+
+  document.getElementById("user").innerText =
+    "Welcome: " + user.email;
+
+  loadAssignments();
 }
 
-// LOAD USER + ASSIGNMENTS
-async function init(){
-  const user = await getUser();
-
-  if(!user){
-    alert("Not logged in");
-    return;
-  }
-
-  document.getElementById("welcome").innerText =
-    "Welcome " + user.email;
+// LOAD ASSIGNMENTS
+async function loadAssignments(){
 
   const { data } = await supabaseClient
     .from("teacher_assignments")
     .select("*")
-    .eq("teacher_id", user.id);
+    .eq("teacher_id", teacherId);
 
   assignments = data || [];
 
-  loadDropdowns();
-}
+  document.getElementById("classCount").innerText =
+    new Set(assignments.map(a=>a.class_id)).size;
 
-// LOAD DROPDOWNS
-function loadDropdowns(){
-  const classSelect = document.getElementById("classSelect");
-  const subjectSelect = document.getElementById("subjectSelect");
-
-  classSelect.innerHTML = "";
-  subjectSelect.innerHTML = "";
-
-  let classes = [...new Set(assignments.map(a => a.class_id))];
-  let subjects = [...new Set(assignments.map(a => a.subject_id))];
-
-  classes.forEach(c=>{
-    let opt = document.createElement("option");
-    opt.value = c;
-    opt.textContent = "Class " + c;
-    classSelect.appendChild(opt);
-  });
-
-  subjects.forEach(s=>{
-    let opt = document.createElement("option");
-    opt.value = s;
-    opt.textContent = "Subject " + s;
-    subjectSelect.appendChild(opt);
-  });
+  document.getElementById("subjectCount").innerText =
+    new Set(assignments.map(a=>a.subject_id)).size;
 
   loadStudents();
 }
 
-// LOAD STUDENTS AUTOMATICALLY
+// LOAD STUDENTS
 async function loadStudents(){
 
-  const classId = document.getElementById("classSelect").value;
-
-  if(!classId) return;
+  let classIds = [...new Set(assignments.map(a=>a.class_id))];
 
   const { data } = await supabaseClient
     .from("students")
     .select("*")
-    .eq("class_id", classId);
+    .in("class_id", classIds);
 
-  const list = document.getElementById("students");
-  list.innerHTML = "";
+  const table = document.getElementById("studentsTable");
+  table.innerHTML = "";
+
+  document.getElementById("studentCount").innerText =
+    data.length;
 
   data.forEach(s=>{
-    let li = document.createElement("li");
-    li.textContent = s.student_name;
-    list.appendChild(li);
+    table.innerHTML += `
+      <tr>
+        <td>${s.admission_no}</td>
+        <td>${s.student_name}</td>
+        <td>${s.gender}</td>
+      </tr>
+    `;
   });
 }
 
-// INIT
+// LOGOUT
+async function logout(){
+  await supabaseClient.auth.signOut();
+  window.location.href = "index.html";
+}
+
 init();
 </script>
 
