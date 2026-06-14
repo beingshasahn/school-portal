@@ -83,6 +83,29 @@ th,td{
   text-align:left;
 }
 
+/* MARKS FORM */
+input, select{
+  width:100%;
+  padding:10px;
+  margin-top:8px;
+  border-radius:6px;
+  border:1px solid #ccc;
+}
+
+button{
+  margin-top:10px;
+  padding:10px;
+  border:none;
+  border-radius:6px;
+  background:#1e3c72;
+  color:white;
+  cursor:pointer;
+}
+
+button:hover{
+  background:#16325c;
+}
+
 /* RESPONSIVE */
 @media(max-width:768px){
   body{
@@ -147,6 +170,18 @@ th,td{
   <tbody id="studentsTable"></tbody>
 </table>
 
+<!-- MARKS SECTION -->
+<h3 style="margin-top:20px;">Enter Marks</h3>
+
+<div class="card">
+  <select id="studentSelect"></select>
+  <select id="subjectSelect"></select>
+
+  <input id="marks" type="number" placeholder="Enter Marks">
+
+  <button onclick="saveMarks()">Save Marks</button>
+</div>
+
 </div>
 
 <script>
@@ -158,11 +193,12 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 let teacherId = null;
 let assignments = [];
 
-// GET USER
+// INIT
 async function init(){
-  const { data } = await supabaseClient.auth.getUser();
 
+  const { data } = await supabaseClient.auth.getUser();
   const user = data.user;
+
   teacherId = user.id;
 
   document.getElementById("user").innerText =
@@ -188,9 +224,10 @@ async function loadAssignments(){
     new Set(assignments.map(a=>a.subject_id)).size;
 
   loadStudents();
+  loadDropdowns();
 }
 
-// LOAD STUDENTS
+// LOAD STUDENTS TABLE
 async function loadStudents(){
 
   let classIds = [...new Set(assignments.map(a=>a.class_id))];
@@ -215,6 +252,62 @@ async function loadStudents(){
       </tr>
     `;
   });
+}
+
+// LOAD DROPDOWNS
+async function loadDropdowns(){
+
+  const { data: students } = await supabaseClient
+    .from("students")
+    .select("*");
+
+  const studentSelect = document.getElementById("studentSelect");
+  studentSelect.innerHTML = "";
+
+  students.forEach(s=>{
+    studentSelect.innerHTML += `
+      <option value="${s.id}">${s.student_name}</option>
+    `;
+  });
+
+  const { data: subjects } = await supabaseClient
+    .from("subjects")
+    .select("*");
+
+  const subjectSelect = document.getElementById("subjectSelect");
+  subjectSelect.innerHTML = "";
+
+  subjects.forEach(s=>{
+    subjectSelect.innerHTML += `
+      <option value="${s.id}">${s.subject_name}</option>
+    `;
+  });
+}
+
+// SAVE MARKS
+async function saveMarks(){
+
+  const student_id = document.getElementById("studentSelect").value;
+  const subject_id = document.getElementById("subjectSelect").value;
+  const marks = document.getElementById("marks").value;
+
+  const { data: user } = await supabaseClient.auth.getUser();
+
+  const { error } = await supabaseClient
+    .from("results")
+    .insert([{
+      student_id,
+      subject_id,
+      teacher_id: user.user.id,
+      marks
+    }]);
+
+  if(error){
+    alert(error.message);
+  } else {
+    alert("Marks saved successfully 👍");
+    document.getElementById("marks").value = "";
+  }
 }
 
 // LOGOUT
