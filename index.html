@@ -89,37 +89,68 @@ button:hover{
 <input id="email" type="email" placeholder="Email">
 
 <div class="password-wrapper">
-<input id="password" type="password" placeholder="Password">
-<span class="toggle" onclick="togglePassword()">Show</span>
+  <input id="password" type="password" placeholder="Password">
+  <span class="toggle" onclick="togglePassword()">Show</span>
 </div>
 
 <button onclick="login()">Login</button>
 </div>
 
 <script>
+
 const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
 
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-// LOGIN FUNCTION
+/* LOGIN FUNCTION (FIXED) */
 async function login(){
+
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  const { data, error } = await supabaseClient.auth.signInWithPassword({
-    email,
-    password
-  });
+  const { data, error } =
+    await supabaseClient.auth.signInWithPassword({
+      email,
+      password
+    });
 
   if(error){
     alert(error.message);
-  } else {
-    window.location.href = "dashboard.html";
+    return;
+  }
+
+  const userId = data.user.id;
+
+  /* GET USER ROLE */
+  const { data: profile, error: profileError } =
+    await supabaseClient
+      .from("profiles")
+      .select("role")
+      .eq("id", userId)
+      .single();
+
+  if(profileError || !profile){
+    alert("Profile not found");
+    return;
+  }
+
+  /* REDIRECT BY ROLE (IMPORTANT FIX) */
+  if(profile.role === "admin"){
+    window.location.href = "admin/dashboard.html";
+  }
+  else if(profile.role === "teacher"){
+    window.location.href = "teacher/dashboard.html";
+  }
+  else if(profile.role === "headteacher"){
+    window.location.href = "headteacher/dashboard.html";
+  }
+  else{
+    alert("Unknown role");
   }
 }
 
-// SHOW/HIDE PASSWORD
+/* PASSWORD TOGGLE */
 function togglePassword(){
   const pass = document.getElementById("password");
   const toggle = document.querySelector(".toggle");
@@ -132,6 +163,7 @@ function togglePassword(){
     toggle.innerText = "Show";
   }
 }
+
 </script>
 
 </body>
