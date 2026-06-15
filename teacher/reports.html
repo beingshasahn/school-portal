@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Necta fixed results Final</title>
+<title>NECTA Report Fixed Final</title>
 
 <style>
 body{
@@ -19,6 +19,12 @@ body{
   text-align:center;
 }
 
+.school{
+  text-align:center;
+  padding:10px;
+  font-weight:bold;
+}
+
 .container{
   padding:15px;
 }
@@ -27,6 +33,17 @@ select{
   width:100%;
   padding:10px;
   margin:10px 0;
+}
+
+button{
+  width:100%;
+  padding:10px;
+  margin:5px 0;
+  border:none;
+  background:#1e3c72;
+  color:white;
+  border-radius:6px;
+  cursor:pointer;
 }
 
 .card{
@@ -54,6 +71,31 @@ th{
   background:#1e3c72;
   color:white;
 }
+
+/* ANALYTICS */
+.analytics{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  margin:10px 0;
+}
+
+.box{
+  background:white;
+  padding:10px;
+  border-radius:8px;
+  text-align:center;
+}
+
+/* PRINT */
+@media print {
+  button, select, .header{
+    display:none;
+  }
+  body{
+    background:white;
+  }
+}
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -63,12 +105,39 @@ th{
 <body>
 
 <div class="header">
-  <h2>KOROSHO ENGLISH MEDIUM PRE AND PRIMARY SCHOOL</h2>
+  <h2>NECTA STYLE REPORT CARD</h2>
+</div>
+
+<div class="school">
+  KOROSHO ENGLISH MEDIUM PRE AND PRIMARY SCHOOL<br>
+  P.O. Box 03, TANDAHIMBA
 </div>
 
 <div class="container">
 
+<button onclick="window.print()">Print / Download Report</button>
+
 <select id="class" onchange="loadReport()"></select>
+
+<!-- ANALYTICS -->
+<div class="analytics">
+  <div class="box">
+    <h3 id="totalStudents">0</h3>
+    <p>Students</p>
+  </div>
+  <div class="box">
+    <h3 id="avgScore">0</h3>
+    <p>Avg Score</p>
+  </div>
+  <div class="box">
+    <h3 id="topScore">0</h3>
+    <p>Top Score</p>
+  </div>
+  <div class="box">
+    <h3 id="passRate">0%</h3>
+    <p>Pass Rate</p>
+  </div>
+</div>
 
 <div class="card">
 <table>
@@ -97,7 +166,6 @@ const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-/* SUBJECT SHORT CODES */
 const subjectShort = {
   "ENGLISH": "ENGL",
   "GEOGRAPHY AND ENVIRONMENT": "GEOGR",
@@ -108,31 +176,25 @@ const subjectShort = {
   "ARTS AND SPORTS": "ARTS & SPORTS"
 };
 
-/* NORMALIZER */
-function normalize(name){
-  return name.toUpperCase().trim();
+function normalize(n){
+  return n.toUpperCase().trim();
 }
 
-/* GRADE FUNCTION */
+/* GRADE */
 function getGrade(avg){
-  if(avg >= 80) return "A";
-  if(avg >= 60) return "B";
-  if(avg >= 50) return "C";
-  if(avg >= 40) return "D";
+  if(avg >= 81) return "A";
+  if(avg >= 61) return "B";
+  if(avg >= 41) return "C";
+  if(avg >= 21) return "D";
   return "F";
 }
 
-/* INIT */
 async function init(){
   loadClasses();
 }
 
-/* LOAD CLASSES */
 async function loadClasses(){
-
-  const { data } = await supabaseClient
-    .from("classes")
-    .select("*");
+  const { data } = await supabaseClient.from("classes").select("*");
 
   let el = document.getElementById("class");
   el.innerHTML = `<option value="">Select Class</option>`;
@@ -142,13 +204,11 @@ async function loadClasses(){
   });
 }
 
-/* LOAD REPORT */
 async function loadReport(){
 
   let class_id = document.getElementById("class").value;
   if(!class_id) return;
 
-  /* STUDENTS */
   const studentsRes = await supabaseClient
     .from("students")
     .select("*")
@@ -156,21 +216,13 @@ async function loadReport(){
 
   let students = studentsRes.data || [];
 
-  if(students.length === 0){
-    document.getElementById("tbody").innerHTML =
-      `<tr><td colspan="7">No students found</td></tr>`;
-    return;
-  }
-
-  /* SUBJECTS */
   const subjectsRes = await supabaseClient
     .from("subjects")
     .select("*");
 
   let subjects = subjectsRes.data || [];
 
-  /* RESULTS (FIXED MATCHING SOURCE) */
-  const studentIds = students.map(s => s.id);
+  const studentIds = students.map(s=>s.id);
 
   const resultsRes = await supabaseClient
     .from("results")
@@ -193,20 +245,18 @@ async function loadReport(){
         Number(x.subject_id) === Number(sub.id)
       );
 
-      let mark = r && r.marks !== null ? Number(r.marks) : 0;
-
+      let mark = r ? Number(r.marks) : 0;
       total += mark;
 
       let grade =
-        mark >= 80 ? "A" :
-        mark >= 60 ? "B" :
-        mark >= 50 ? "C" :
-        mark >= 40 ? "D" : "F";
+        mark >= 81 ? "A" :
+        mark >= 61 ? "B" :
+        mark >= 41 ? "C" :
+        mark >= 21 ? "D" : "F";
 
       let code = subjectShort[normalize(sub.subject_name)]
         || sub.subject_name.substring(0,4).toUpperCase();
 
-      /* FIXED FORMAT (NO COMMA, SPACED CLEAN) */
       detail.push(`${code} - ${grade}`);
     });
 
@@ -214,20 +264,18 @@ async function loadReport(){
       name: stu.student_name,
       gender: stu.gender,
       total,
-      avg: subjects.length ? (total / subjects.length) : 0,
-      detail: detail.join("   ")
+      avg: subjects.length ? total/subjects.length : 0,
+      detail: detail.join(" | ")
     });
   });
 
-  /* POSITION SORT */
-  final.sort((a,b)=>b.total - a.total);
+  final.sort((a,b)=>b.total-a.total);
 
-  /* RENDER */
+  /* TABLE */
   let tbody = document.getElementById("tbody");
   tbody.innerHTML = "";
 
   final.forEach((s,i)=>{
-
     tbody.innerHTML += `
       <tr>
         <td>${i+1}</td>
@@ -240,6 +288,19 @@ async function loadReport(){
       </tr>
     `;
   });
+
+  /* ANALYTICS */
+  document.getElementById("totalStudents").innerText = final.length;
+
+  let avg = final.reduce((a,b)=>a+b.avg,0)/final.length || 0;
+  document.getElementById("avgScore").innerText = avg.toFixed(1);
+
+  let top = Math.max(...final.map(s=>s.total),0);
+  document.getElementById("topScore").innerText = top;
+
+  let pass = final.filter(s=>s.avg>=41).length;
+  let rate = (pass/final.length)*100 || 0;
+  document.getElementById("passRate").innerText = rate.toFixed(1)+"%";
 }
 
 init();
