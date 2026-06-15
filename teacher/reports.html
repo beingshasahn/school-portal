@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Necta fixed results Final</title>
+
+<style>
+body{
+  font-family:Arial;
+  margin:0;
+  background:#f4f6f9;
+}
+
+.header{
+  background:#1e3c72;
+  color:white;
+  padding:15px;
+  text-align:center;
+}
+
+.container{
+  padding:15px;
+}
+
+select{
+  width:100%;
+  padding:10px;
+  margin:10px 0;
+}
+
+.card{
+  background:white;
+  padding:10px;
+  border-radius:10px;
+  overflow-x:auto;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px;
+  background:white;
+}
+
+th,td{
+  border:1px solid #ddd;
+  padding:8px;
+  text-align:left;
+  white-space:nowrap;
+}
+
+th{
+  background:#1e3c72;
+  color:white;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+</head>
+
+<body>
+
+<div class="header">
+  <h2>KOROSHO ENGLISH MEDIUM PRE AND PRIMARY SCHOOL</h2>
+</div>
+
+<div class="container">
+
+<select id="class" onchange="loadReport()"></select>
+
+<div class="card">
+<table>
+  <thead>
+    <tr>
+      <th>POS</th>
+      <th>NAME</th>
+      <th>GENDER</th>
+      <th>DETAILED SUBJECTS</th>
+      <th>TOTAL</th>
+      <th>AVG</th>
+      <th>GRADE</th>
+    </tr>
+  </thead>
+
+  <tbody id="tbody"></tbody>
+</table>
+</div>
+
+</div>
+
+<script>
+
+const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
+
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+/* SUBJECT SHORT CODES */
+const subjectShort = {
+  "ENGLISH": "ENGL",
+  "GEOGRAPHY AND ENVIRONMENT": "GEOGR",
+  "HISTORIA YA TANZANIA NA MAADILI": "H/TZ/MAADILI",
+  "KISWAHILI": "KISW",
+  "MATHEMATICS": "MATH",
+  "SCIENCE": "SCIENCE",
+  "ARTS AND SPORTS": "ARTS & SPORTS"
+};
+
+/* NORMALIZER */
+function normalize(name){
+  return name.toUpperCase().trim();
+}
+
+/* GRADE FUNCTION */
+function getGrade(avg){
+  if(avg >= 80) return "A";
+  if(avg >= 60) return "B";
+  if(avg >= 50) return "C";
+  if(avg >= 40) return "D";
+  return "F";
+}
+
+/* INIT */
+async function init(){
+  loadClasses();
+}
+
+/* LOAD CLASSES */
+async function loadClasses(){
+
+  const { data } = await supabaseClient
+    .from("classes")
+    .select("*");
+
+  let el = document.getElementById("class");
+  el.innerHTML = `<option value="">Select Class</option>`;
+
+  data.forEach(c=>{
+    el.innerHTML += `<option value="${c.id}">${c.class_name}</option>`;
+  });
+}
+
+/* LOAD REPORT */
+async function loadReport(){
+
+  let class_id = document.getElementById("class").value;
+  if(!class_id) return;
+
+  /* STUDENTS */
+  const studentsRes = await supabaseClient
+    .from("students")
+    .select("*")
+    .eq("class_id", class_id);
+
+  let students = studentsRes.data || [];
+
+  if(students.length === 0){
+    document.getElementById("tbody").innerHTML =
+      `<tr><td colspan="7">No students found</td></tr>`;
+    return;
+  }
+
+  /* SUBJECTS */
+  const subjectsRes = await supabaseClient
+    .from("subjects")
+    .select("*");
+
+  let subjects = subjectsRes.data || [];
+
+  /* RESULTS (FIXED MATCHING SOURCE) */
+  const studentIds = students.map(s => s.id);
+
+  const resultsRes = await supabaseClient
+    .from("results")
+    .select("*")
+    .in("student_id", studentIds);
+
+  let results = resultsRes.data || [];
+
+  let final = [];
+
+  students.forEach(stu=>{
+
+    let total = 0;
+    let detail = [];
+
+    subjects.forEach(sub=>{
+
+      let r = results.find(x =>
+        Number(x.student_id) === Number(stu.id) &&
+        Number(x.subject_id) === Number(sub.id)
+      );
+
+      let mark = r && r.marks !== null ? Number(r.marks) : 0;
+
+      total += mark;
+
+      let grade =
+        mark >= 80 ? "A" :
+        mark >= 60 ? "B" :
+        mark >= 50 ? "C" :
+        mark >= 40 ? "D" : "F";
+
+      let code = subjectShort[normalize(sub.subject_name)]
+        || sub.subject_name.substring(0,4).toUpperCase();
+
+      /* FIXED FORMAT (NO COMMA, SPACED CLEAN) */
+      detail.push(`${code} - ${grade}`);
+    });
+
+    final.push({
+      name: stu.student_name,
+      gender: stu.gender,
+      total,
+      avg: subjects.length ? (total / subjects.length) : 0,
+      detail: detail.join("   ")
+    });
+  });
+
+  /* POSITION SORT */
+  final.sort((a,b)=>b.total - a.total);
+
+  /* RENDER */
+  let tbody = document.getElementById("tbody");
+  tbody.innerHTML = "";
+
+  final.forEach((s,i)=>{
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${i+1}</td>
+        <td>${s.name}</td>
+        <td>${s.gender || ""}</td>
+        <td>${s.detail}</td>
+        <td>${s.total}</td>
+        <td>${s.avg.toFixed(1)}</td>
+        <td>${getGrade(s.avg)}</td>
+      </tr>
+    `;
+  });
+}
+
+init();
+
+</script>
+
+</body>
+</html>
