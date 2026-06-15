@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  font-family:Arial;
+}
+
+body{
+  margin:0;
+  display:flex;
+  min-height:100vh;
+  background:#f4f6f9;
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:250px;
+  background:#1e3c72;
+  color:white;
+  padding:20px;
+}
+
+.sidebar h2{
+  font-size:18px;
+  margin-bottom:15px;
+}
+
+.sidebar a{
+  display:block;
+  color:white;
+  text-decoration:none;
+  padding:10px;
+  margin:6px 0;
+  background:rgba(255,255,255,0.1);
+  border-radius:6px;
+}
+
+.sidebar a:hover{
+  background:rgba(255,255,255,0.2);
+}
+
+/* MAIN */
+.main{
+  flex:1;
+  padding:20px;
+}
+
+/* HEADER */
+.header{
+  background:white;
+  padding:15px;
+  border-radius:10px;
+  margin-bottom:15px;
+}
+
+.header h2{
+  margin:0;
+}
+
+.small{
+  color:gray;
+  font-size:13px;
+}
+
+/* WELCOME */
+.welcome{
+  margin:10px 0 20px 0;
+  font-weight:bold;
+}
+
+/* CARDS */
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:10px;
+}
+
+.card{
+  background:white;
+  padding:15px;
+  border-radius:10px;
+  box-shadow:0 2px 10px rgba(0,0,0,0.08);
+}
+
+.card h3{
+  margin:0;
+  font-size:22px;
+}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  body{
+    flex-direction:column;
+  }
+  .sidebar{
+    width:100%;
+  }
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <h2>Admin Panel</h2>
+
+  <a href="dashboard.html">Dashboard</a>
+  <a href="teachers.html">Teachers</a>
+  <a href="students.html">Students</a>
+  <a href="classes.html">Classes</a>
+  <a href="subjects.html">Subjects</a>
+  <a href="assignments.html">Assignments</a>
+  <a href="../index.html">Logout</a>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<div class="header">
+  <h2>KOROSHO ENGLISH MEDIUM PRE AND PRIMARY SCHOOL</h2>
+  <div class="small">P.O. Box 03, TANDAHIMBA</div>
+</div>
+
+<div class="welcome" id="welcome">Loading...</div>
+
+<!-- CARDS -->
+<div class="cards">
+
+  <div class="card">
+    <h3 id="teachers">0</h3>
+    <p>Teachers</p>
+  </div>
+
+  <div class="card">
+    <h3 id="students">0</h3>
+    <p>Students</p>
+  </div>
+
+  <div class="card">
+    <h3 id="classes">0</h3>
+    <p>Classes</p>
+  </div>
+
+  <div class="card">
+    <h3 id="subjects">0</h3>
+    <p>Subjects</p>
+  </div>
+
+</div>
+
+</div>
+
+<script>
+
+const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
+
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+async function init(){
+
+  const { data } = await supabaseClient.auth.getUser();
+  const user = data.user;
+
+  document.getElementById("welcome").innerText =
+    "Welcome, " + user.email + " (Admin)";
+
+  loadStats();
+}
+
+/* STATS */
+async function loadStats(){
+
+  const teachers = await supabaseClient
+    .from("profiles")
+    .select("*", { count:"exact", head:true })
+    .eq("role","teacher");
+
+  const students = await supabaseClient
+    .from("students")
+    .select("*", { count:"exact", head:true });
+
+  const classes = await supabaseClient
+    .from("classes")
+    .select("*", { count:"exact", head:true });
+
+  const subjects = await supabaseClient
+    .from("subjects")
+    .select("*", { count:"exact", head:true });
+
+  document.getElementById("teachers").innerText = teachers.count || 0;
+  document.getElementById("students").innerText = students.count || 0;
+  document.getElementById("classes").innerText = classes.count || 0;
+  document.getElementById("subjects").innerText = subjects.count || 0;
+}
+
+init();
+
+</script>
+
+</body>
+  </html>
