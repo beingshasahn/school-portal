@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teacher Assignments</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  font-family:Arial;
+}
+
+body{
+  margin:0;
+  display:flex;
+  min-height:100vh;
+  background:#f4f6f9;
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:250px;
+  background:#1e3c72;
+  color:white;
+  padding:20px;
+}
+
+.sidebar a{
+  display:block;
+  color:white;
+  text-decoration:none;
+  padding:10px;
+  margin:6px 0;
+  background:rgba(255,255,255,0.1);
+  border-radius:6px;
+}
+
+/* MAIN */
+.main{
+  flex:1;
+  padding:20px;
+}
+
+/* HEADER */
+.header{
+  background:white;
+  padding:15px;
+  border-radius:10px;
+  margin-bottom:15px;
+}
+
+/* FORM */
+.form{
+  background:white;
+  padding:15px;
+  border-radius:10px;
+  margin-bottom:15px;
+}
+
+select, button{
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  border-radius:6px;
+  border:1px solid #ccc;
+}
+
+button{
+  background:#1e3c72;
+  color:white;
+  border:none;
+  cursor:pointer;
+}
+
+/* TABLE */
+table{
+  width:100%;
+  border-collapse:collapse;
+  background:white;
+  border-radius:10px;
+  overflow:hidden;
+}
+
+th,td{
+  padding:10px;
+  border-bottom:1px solid #eee;
+}
+
+.deleteBtn{
+  background:red;
+  color:white;
+  border:none;
+  padding:6px 10px;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  body{flex-direction:column;}
+  .sidebar{width:100%;}
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <h3>Admin Panel</h3>
+
+  <a href="dashboard.html">Dashboard</a>
+  <a href="teachers.html">Teachers</a>
+  <a href="students.html">Students</a>
+  <a href="classes.html">Classes</a>
+  <a href="subjects.html">Subjects</a>
+  <a href="assignments.html">Assignments</a>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<div class="header">
+  <h2>Teacher Assignments</h2>
+</div>
+
+<!-- FORM -->
+<div class="form">
+
+  <select id="teacher"></select>
+  <select id="class"></select>
+  <select id="subject"></select>
+
+  <button onclick="assign()">Assign Teacher</button>
+
+</div>
+
+<!-- TABLE -->
+<table>
+  <thead>
+    <tr>
+      <th>Teacher</th>
+      <th>Class</th>
+      <th>Subject</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+
+  <tbody id="table"></tbody>
+</table>
+
+</div>
+
+<script>
+
+const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
+
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+async function init(){
+  loadTeachers();
+  loadClasses();
+  loadSubjects();
+  loadAssignments();
+}
+
+/* LOAD TEACHERS */
+async function loadTeachers(){
+
+  const { data } = await supabaseClient
+    .from("profiles")
+    .select("*")
+    .eq("role","teacher");
+
+  const el = document.getElementById("teacher");
+  el.innerHTML = "";
+
+  data.forEach(t=>{
+    el.innerHTML += `<option value="${t.id}">${t.full_name}</option>`;
+  });
+}
+
+/* LOAD CLASSES */
+async function loadClasses(){
+
+  const { data } = await supabaseClient
+    .from("classes")
+    .select("*");
+
+  const el = document.getElementById("class");
+  el.innerHTML = "";
+
+  data.forEach(c=>{
+    el.innerHTML += `<option value="${c.id}">${c.class_name}</option>`;
+  });
+}
+
+/* LOAD SUBJECTS */
+async function loadSubjects(){
+
+  const { data } = await supabaseClient
+    .from("subjects")
+    .select("*");
+
+  const el = document.getElementById("subject");
+  el.innerHTML = "";
+
+  data.forEach(s=>{
+    el.innerHTML += `<option value="${s.id}">${s.subject_name}</option>`;
+  });
+}
+
+/* ASSIGN */
+async function assign(){
+
+  const teacher_id = document.getElementById("teacher").value;
+  const class_id = document.getElementById("class").value;
+  const subject_id = document.getElementById("subject").value;
+
+  const { error } = await supabaseClient
+    .from("teacher_assignments")
+    .insert([{
+      teacher_id,
+      class_id,
+      subject_id
+    }]);
+
+  if(error){
+    alert(error.message);
+  } else {
+    alert("Assigned successfully 👍");
+    loadAssignments();
+  }
+}
+
+/* LOAD ASSIGNMENTS */
+async function loadAssignments(){
+
+  const { data } = await supabaseClient
+    .from("teacher_assignments")
+    .select("*");
+
+  const table = document.getElementById("table");
+  table.innerHTML = "";
+
+  for(let a of data){
+
+    const t = await supabaseClient.from("profiles").select("*").eq("id", a.teacher_id).single();
+    const c = await supabaseClient.from("classes").select("*").eq("id", a.class_id).single();
+    const s = await supabaseClient.from("subjects").select("*").eq("id", a.subject_id).single();
+
+    table.innerHTML += `
+      <tr>
+        <td>${t.data.full_name}</td>
+        <td>${c.data.class_name}</td>
+        <td>${s.data.subject_name}</td>
+        <td><button class="deleteBtn" onclick="remove('${a.id}')">Delete</button></td>
+      </tr>
+    `;
+  }
+}
+
+/* DELETE */
+async function remove(id){
+
+  await supabaseClient
+    .from("teacher_assignments")
+    .delete()
+    .eq("id", id);
+
+  loadAssignments();
+}
+
+init();
+
+</script>
+
+</body>
+</html>
