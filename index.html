@@ -6,10 +6,7 @@
 <title>School Portal Login</title>
 
 <style>
-*{
-  box-sizing:border-box;
-  font-family: Arial, sans-serif;
-}
+*{box-sizing:border-box;font-family:Arial,sans-serif}
 
 body{
   margin:0;
@@ -17,7 +14,7 @@ body{
   display:flex;
   justify-content:center;
   align-items:center;
-  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  background:linear-gradient(135deg,#1e3c72,#2a5298);
   padding:15px;
 }
 
@@ -42,12 +39,9 @@ input{
   margin-top:10px;
   border:1px solid #ccc;
   border-radius:8px;
-  font-size:14px;
 }
 
-.password-wrapper{
-  position:relative;
-}
+.password-wrapper{position:relative}
 
 .toggle{
   position:absolute;
@@ -68,12 +62,7 @@ button{
   border-radius:8px;
   background:#1e3c72;
   color:white;
-  font-size:15px;
   cursor:pointer;
-}
-
-button:hover{
-  background:#16325c;
 }
 </style>
 
@@ -98,72 +87,77 @@ button:hover{
 
 <script>
 
-const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
+const SUPABASE_URL = "https://bslofdobcvxkjphbjyzb.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
 
-const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-/* LOGIN FUNCTION (ROLE BASED FIXED) */
+/* AUTO SESSION CHECK (IMPORTANT FOR AUTO LOGIN) */
+window.addEventListener("load", async () => {
+  const { data } = await supabaseClient.auth.getSession();
+
+  if(data.session){
+    redirectByRole();
+  }
+});
+
+/* LOGIN */
 async function login(){
 
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
 
   if(!email || !password){
-    alert("Please fill all fields");
+    alert("Fill all fields");
     return;
   }
 
-  const { data, error } =
-    await supabaseClient.auth.signInWithPassword({
-      email,
-      password
-    });
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
 
   if(error){
     alert(error.message);
     return;
   }
 
-  const user = data.user;
+  await redirectByRole();
+}
+
+/* ROLE ROUTING */
+async function redirectByRole(){
+
+  const { data: { user } } = await supabaseClient.auth.getUser();
 
   if(!user){
-    alert("Login failed");
     return;
   }
 
-  /* FETCH PROFILE (ROLE) */
-  const { data: profile, error: profileError } =
-    await supabaseClient
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
+  const { data: profile, error } = await supabaseClient
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
 
-  if(profileError || !profile){
-    alert("Profile not found. Contact admin.");
+  if(error || !profile){
+    alert("Profile not found");
     return;
   }
 
   const role = profile.role;
 
-  /* SAFE ROLE ROUTING */
-  switch(role){
-
-    case "admin":
-      window.location.href = "admin/dashboard.html";
-      break;
-
-    case "teacher":
-      window.location.href = "teacher/dashboard.html";
-      break;
-
-    case "headteacher":
-      window.location.href = "headteacher/dashboard.html";
-      break;
-
-    default:
-      alert("Unknown role: " + role);
+  if(role === "admin"){
+    window.location.href = "admin/dashboard.html";
+  }
+  else if(role === "teacher"){
+    window.location.href = "teacher/dashboard.html";
+  }
+  else if(role === "headteacher"){
+    window.location.href = "headteacher/dashboard.html";
+  }
+  else{
+    alert("Unknown role");
   }
 }
 
@@ -172,13 +166,8 @@ function togglePassword(){
   const pass = document.getElementById("password");
   const toggle = document.querySelector(".toggle");
 
-  if(pass.type === "password"){
-    pass.type = "text";
-    toggle.innerText = "Hide";
-  } else {
-    pass.type = "password";
-    toggle.innerText = "Show";
-  }
+  pass.type = pass.type === "password" ? "text" : "password";
+  toggle.innerText = pass.type === "password" ? "Show" : "Hide";
 }
 
 </script>
