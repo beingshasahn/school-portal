@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Dashboard</title>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 *{
   box-sizing:border-box;
@@ -79,6 +81,7 @@ body{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
   gap:10px;
+  margin-bottom:20px;
 }
 
 .card{
@@ -93,6 +96,26 @@ body{
   font-size:22px;
 }
 
+/* TABLE */
+table{
+  width:100%;
+  border-collapse:collapse;
+  background:white;
+  border-radius:10px;
+  overflow:hidden;
+}
+
+th,td{
+  padding:10px;
+  border-bottom:1px solid #eee;
+  text-align:left;
+}
+
+th{
+  background:#1e3c72;
+  color:white;
+}
+
 /* RESPONSIVE */
 @media(max-width:768px){
   body{
@@ -102,9 +125,23 @@ body{
     width:100%;
   }
 }
-</style>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+/* TOP BAR */
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.logout{
+  background:red;
+  color:white;
+  border:none;
+  padding:8px 12px;
+  border-radius:6px;
+  cursor:pointer;
+}
+</style>
 
 </head>
 
@@ -120,20 +157,25 @@ body{
   <a href="classes.html">Classes</a>
   <a href="subjects.html">Subjects</a>
   <a href="assignments.html">Assignments</a>
-  <a href="../index.html">Logout</a>
+
+  <a href="#" onclick="logout()">Logout</a>
 </div>
 
 <!-- MAIN -->
 <div class="main">
 
-<div class="header">
-  <h2>KOROSHO ENGLISH MEDIUM PRE AND PRIMARY SCHOOL</h2>
-  <div class="small">P.O. Box 03, TANDAHIMBA</div>
+<div class="topbar">
+  <div class="header">
+    <h2>KOROSHO ENGLISH MEDIUM PRE & PRIMARY SCHOOL</h2>
+    <div class="small">P.O. Box 03, TANDAHIMBA</div>
+  </div>
+
+  <button class="logout" onclick="logout()">Logout</button>
 </div>
 
 <div class="welcome" id="welcome">Loading...</div>
 
-<!-- CARDS -->
+<!-- STATS -->
 <div class="cards">
 
   <div class="card">
@@ -158,54 +200,58 @@ body{
 
 </div>
 
+<!-- TEACHERS WORKLOAD TABLE -->
+<h3>Teachers Overview</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>No</th>
+      <th>Teacher</th>
+      <th>Classes</th>
+      <th>Subjects</th>
+      <th>Students</th>
+    </tr>
+  </thead>
+
+  <tbody id="teachersTable"></tbody>
+</table>
+
 </div>
 
 <script>
+
 const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
 
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-async function protect(roleRequired){
+/* SESSION + ROLE PROTECTION */
+async function protect(){
 
   const { data: { user } } = await supabaseClient.auth.getUser();
 
-  // 1. Kama hakuna login → rudisha login page
   if(!user){
     window.location.href = "../index.html";
     return;
   }
 
-  // 2. pata role ya user
   const { data: profile } = await supabaseClient
     .from("profiles")
-    .select("role")
+    .select("role, full_name")
     .eq("id", user.id)
     .single();
 
-  // 3. kama role si sahihi → kataa
-  if(!profile || profile.role !== roleRequired){
-    alert("Huna ruhusa ya kuingia hapa!");
+  if(!profile || profile.role !== "admin"){
     window.location.href = "../index.html";
+    return;
   }
-}
-const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
-
-const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-
-async function init(){
-
-  const { data } = await supabaseClient.auth.getUser();
-  const user = data.user;
 
   document.getElementById("welcome").innerText =
-    "Welcome, " + user.email + " (Admin)";
-
-  loadStats();
+    "Welcome, " + (profile.full_name || user.email) + " (Admin)";
 }
 
-/* STATS */
+/* LOAD STATS */
 async function loadStats(){
 
   const teachers = await supabaseClient
@@ -231,9 +277,63 @@ async function loadStats(){
   document.getElementById("subjects").innerText = subjects.count || 0;
 }
 
+/* LOAD TEACHERS WORKLOAD (OPTION A) */
+async function loadTeachers(){
+
+  const { data: teachers } = await supabaseClient
+    .from("profiles")
+    .select("*")
+    .eq("role","teacher");
+
+  const { data: assignments } = await supabaseClient
+    .from("teacher_assignments")
+    .select("*, classes(class_name), subjects(subject_name)");
+
+  const { data: students } = await supabaseClient
+    .from("students")
+    .select("*");
+
+  let tbody = document.getElementById("teachersTable");
+  tbody.innerHTML = "";
+
+  teachers.forEach((t,index)=>{
+
+    let teacherAssignments = assignments.filter(a => a.teacher_id === t.id);
+
+    let classNames = [...new Set(teacherAssignments.map(a => a.classes.class_name))];
+    let subjectNames = [...new Set(teacherAssignments.map(a => a.subjects.subject_name))];
+
+    let classIds = teacherAssignments.map(a => a.class_id);
+    let studentCount = students.filter(s => classIds.includes(s.class_id)).length;
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${index+1}</td>
+        <td>${t.full_name || t.email || "N/A"}</td>
+        <td>${classNames.join(", ")}</td>
+        <td>${subjectNames.join(", ")}</td>
+        <td>${studentCount}</td>
+      </tr>
+    `;
+  });
+}
+
+/* LOGOUT */
+async function logout(){
+  await supabaseClient.auth.signOut();
+  window.location.href = "../index.html";
+}
+
+/* INIT */
+async function init(){
+  await protect();
+  loadStats();
+  loadTeachers();
+}
+
 init();
-protect("admin");
+
 </script>
 
 </body>
-  </html>
+</html>
