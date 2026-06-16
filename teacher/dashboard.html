@@ -147,7 +147,34 @@ button{
 </div>
 
 <script>
+const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
 
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+async function protect(roleRequired){
+
+  const { data: { user } } = await supabaseClient.auth.getUser();
+
+  // 1. Kama hakuna login → rudisha login page
+  if(!user){
+    window.location.href = "../index.html";
+    return;
+  }
+
+  // 2. pata role ya user
+  const { data: profile } = await supabaseClient
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  // 3. kama role si sahihi → kataa
+  if(!profile || profile.role !== roleRequired){
+    alert("Huna ruhusa ya kuingia hapa!");
+    window.location.href = "../index.html";
+  }
+}
 const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
 
@@ -272,7 +299,7 @@ async function logout(){
 }
 
 init();
-
+protect("teacher");
 </script>
 
 </body>
