@@ -3,60 +3,27 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NECTA Results Clone</title>
+<title>NECTA PRO MAX REPORT</title>
 
 <style>
 body{
   font-family:Arial;
   margin:0;
-  background:#b9dce8; /* NECTA light blue */
-  color:#000;
+  background:#c7e3ee;
 }
 
-/* TOP HEADER */
-.topbar{
+.header{
+  text-align:center;
   padding:10px;
   font-weight:bold;
-  font-size:14px;
   text-transform:uppercase;
 }
 
-/* TITLE */
-.title{
-  text-align:left;
-  padding:5px 10px;
-  font-weight:bold;
-  font-size:18px;
-}
-
-/* SCHOOL INFO */
 .school{
-  padding:5px 10px;
+  text-align:center;
   font-size:13px;
 }
 
-/* SUMMARY BOX */
-.summary{
-  margin:10px;
-  background:#dff1f7;
-  border:1px solid #999;
-  padding:5px;
-  font-size:12px;
-}
-
-/* SMALL TABLE (A-E DISTRIBUTION) */
-.small-table{
-  margin:10px;
-  font-size:12px;
-  border-collapse:collapse;
-}
-
-.small-table td, .small-table th{
-  border:1px solid #999;
-  padding:3px 6px;
-}
-
-/* MAIN TABLE */
 .table-wrap{
   margin:10px;
   background:#fff7cc;
@@ -71,7 +38,7 @@ table{
 }
 
 th{
-  background:#e8e8e8;
+  background:#e6e6e6;
   border:1px solid #999;
   padding:5px;
 }
@@ -82,27 +49,13 @@ td{
   white-space:nowrap;
 }
 
-/* SUBJECT TABLE */
-.subject-box{
+select,button{
   margin:10px;
-  background:#fff7cc;
-  border:1px solid #999;
+  padding:8px;
 }
 
-button, select{
-  margin:10px;
-  padding:6px;
-  font-size:12px;
-}
-
-/* PRINT */
 @media print{
-  button, select{
-    display:none;
-  }
-  body{
-    background:white;
-  }
+  select,button{display:none;}
 }
 </style>
 
@@ -111,45 +64,24 @@ button, select{
 
 <body>
 
-<div class="topbar">
-NATIONAL EXAMINATIONS COUNCIL OF TANZANIA
-</div>
+<div class="header">NATIONAL EXAMINATIONS COUNCIL OF TANZANIA</div>
+<div class="header">PSLE / SCHOOL EXAMINATION REPORT</div>
+<div class="school">KOROSHO ENGLISH MEDIUM PRE AND PRIMARY SCHOOL</div>
 
-<div class="title">
-PSLE EXAMINATION RESULTS
-</div>
-
-<div class="school">
-KOROSHO ENGLISH MEDIUM PRE AND PRIMARY SCHOOL - PS CODE: KOR-001
-</div>
-
-<select id="class" onchange="loadReport()">
-  <option value="">Select Class</option>
-</select>
-
+<select id="class" onchange="loadReport()"></select>
 <button onclick="window.print()">PRINT</button>
 
-<!-- SUMMARY -->
-<div class="summary">
-WALIOFANYA MTIHANI: <b id="totalStudents">0</b> |
-WASTANI: <b id="avgScore">0</b> |
-DARAJA: <b id="overallGrade">-</b>
-</div>
-
-<!-- A-E TABLE -->
-<table class="small-table">
+<!-- GRADE PERFORMANCE -->
+<div class="table-wrap">
+<table>
+<thead>
 <tr>
 <th>SEX</th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th>
 </tr>
-<tr>
-<td>WAVULANA</td>
-<td id="mA">0</td><td id="mB">0</td><td id="mC">0</td><td id="mD">0</td><td id="mE">0</td>
-</tr>
-<tr>
-<td>WASICHANA</td>
-<td id="fA">0</td><td id="fB">0</td><td id="fC">0</td><td id="fD">0</td><td id="fE">0</td>
-</tr>
+</thead>
+<tbody id="gradePerf"></tbody>
 </table>
+</div>
 
 <!-- MAIN TABLE -->
 <div class="table-wrap">
@@ -157,7 +89,7 @@ DARAJA: <b id="overallGrade">-</b>
 <thead>
 <tr>
 <th>CAND NO</th>
-<th>ADM NO</th>
+<th>PREM NO</th>
 <th>SEX</th>
 <th>SUBJECTS</th>
 </tr>
@@ -167,13 +99,17 @@ DARAJA: <b id="overallGrade">-</b>
 </div>
 
 <!-- SUBJECT PERFORMANCE -->
-<div class="subject-box">
+<div class="table-wrap">
 <table>
 <thead>
 <tr>
+<th>NO</th>
 <th>SUBJECT</th>
-<th>AVG</th>
-<th>GRADE</th>
+<th>REGISTERED</th>
+<th>SAT</th>
+<th>PASSED (A-C)</th>
+<th>AVER. MARKS</th>
+<th>COMPETENCY (GPA)</th>
 </tr>
 </thead>
 <tbody id="subtbody"></tbody>
@@ -182,11 +118,12 @@ DARAJA: <b id="overallGrade">-</b>
 
 <script>
 
+/* ================= SUPABASE ================= */
 const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
+const client = supabase.createClient(supabaseUrl, supabaseKey);
 
-const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-
+/* ================= HELPERS ================= */
 function grade(m){
   if(m>=81) return "A";
   if(m>=61) return "B";
@@ -195,114 +132,176 @@ function grade(m){
   return "E";
 }
 
-const subjectShort = {
-  "ENGLISH":"ENGL",
-  "KISWAHILI":"KISW",
-  "MATHEMATICS":"MATH",
-  "SCIENCE":"SCI",
-  "GEOGRAPHY AND ENVIRONMENT":"GEO"
-};
+function gpa(g){
+  if(g==="A") return 5;
+  if(g==="B") return 4;
+  if(g==="C") return 3;
+  if(g==="D") return 2;
+  return 1;
+}
 
-function norm(n){return n.toUpperCase().trim();}
-
-/* LOAD CLASSES */
+/* ================= LOAD CLASSES ================= */
 async function loadClasses(){
-  const { data } = await supabaseClient.from("classes").select("*");
-  let el=document.getElementById("class");
+  const { data } = await client.from("classes").select("*");
+
+  let el = document.getElementById("class");
+  el.innerHTML = `<option value="">Select Class</option>`;
+
   data.forEach(c=>{
-    el.innerHTML+=`<option value="${c.id}">${c.class_name}</option>`;
+    el.innerHTML += `<option value="${String(c.id).trim()}">${c.class_name}</option>`;
   });
 }
 
-/* LOAD REPORT */
+/* ================= LOAD REPORT ================= */
 async function loadReport(){
 
-  let class_id=document.getElementById("class").value;
-  if(!class_id) return;
+  let classId = String(document.getElementById("class").value).trim();
+  if(!classId) return;
 
-  const { data:students } = await supabaseClient.from("students").select("*").eq("class_id",class_id);
-  const { data:subjects } = await supabaseClient.from("subjects").select("*");
+  const { data:students } = await client.from("students").select("*");
+  const { data:subjects } = await client.from("subjects").select("*");
+  const { data:results } = await client.from("results").select("*");
 
-  const ids=students.map(s=>s.id);
+  let filteredStudents = students.filter(s =>
+    String(s.class_id).trim() === classId
+  );
 
-  const { data:results } = await supabaseClient.from("results").select("*").in("student_id",ids);
+  if(filteredStudents.length === 0){
+    document.getElementById("tbody").innerHTML =
+      "<tr><td colspan='4'>NO STUDENTS FOUND</td></tr>";
+    return;
+  }
 
-  let final=[];
-  let subStats={};
+  /* ================= SUBJECT STATS ================= */
+  let subStats = {};
+  subjects.forEach(sub=>{
+    subStats[sub.id] = {
+      sat:0,
+      pass:0,
+      total:0
+    };
+  });
 
-  subjects.forEach(s=>subStats[s.id]=0);
+  let final = [];
 
-  students.forEach(stu=>{
+  let gradePerf = {
+    Male:{A:0,B:0,C:0,D:0,E:0},
+    Female:{A:0,B:0,C:0,D:0,E:0}
+  };
 
-    let total=0;
-    let detail=[];
+  /* ================= STUDENTS LOOP ================= */
+  filteredStudents.forEach(stu=>{
+
+    let total = 0;
+    let count = 0;
+    let detail = [];
 
     subjects.forEach(sub=>{
 
-      let r=results.find(x=>x.student_id==stu.id && x.subject_id==sub.id);
-      let m=r?Number(r.marks):0;
+      let r = results.find(x =>
+        String(x.student_id).trim() === String(stu.id).trim() &&
+        String(x.subject_id).trim() === String(sub.id).trim()
+      );
 
-      total+=m;
-      subStats[sub.id]+=m;
+      if(!r || r.marks === null || r.marks === "" || r.marks === undefined) return;
 
-      detail.push(subjectShort[norm(sub.subject_name)]+" - "+grade(m));
+      let m = Number(r.marks);
+      if(isNaN(m)) return;
+
+      subStats[sub.id].sat += 1;
+      subStats[sub.id].total += m;
+
+      if(m >= 41){
+        subStats[sub.id].pass += 1;
+      }
+
+      total += m;
+      count++;
+
+      let code = sub.subject_name.substring(0,4).toUpperCase();
+      detail.push(`${code} - ${grade(m)}`);
     });
 
+    if(count === 0) return;
+
+    let avg = total / count;
+    let avgGrade = grade(avg);
+
+    let sex = stu.gender === "Male" ? "Male" : "Female";
+    gradePerf[sex][avgGrade]++;
+
+    detail.push(`AVERAGE - ${avgGrade}`);
+
     final.push({
-      adm:stu.admission_no,
-      sex:stu.gender,
-      total,
-      avg:total/subjects.length,
-      detail:detail.join(" ")
+      adm: stu.admission_no,
+      prem: stu.admission_no,
+      sex: sex === "Male" ? "M" : "F",
+      detail: detail.join(" ")
     });
   });
 
-  final.sort((a,b)=>b.total-a.total);
-
-  document.getElementById("totalStudents").innerText=final.length;
-  let avg=final.reduce((a,b)=>a+b.avg,0)/final.length;
-  document.getElementById("avgScore").innerText=avg.toFixed(1);
-  document.getElementById("overallGrade").innerText=grade(avg);
-
-  let tbody=document.getElementById("tbody");
-  tbody.innerHTML="";
+  /* ================= MAIN TABLE ================= */
+  let tb = document.getElementById("tbody");
+  tb.innerHTML = "";
 
   final.forEach((s,i)=>{
-    tbody.innerHTML+=`
+    tb.innerHTML += `
     <tr>
       <td>${i+1}</td>
-      <td>${s.adm}</td>
+      <td>${s.prem}</td>
       <td>${s.sex}</td>
       <td>${s.detail}</td>
     </tr>`;
   });
 
-  /* SUBJECT TABLE */
-  let subbody=document.getElementById("subtbody");
-  subbody.innerHTML="";
+  /* ================= GRADE PERFORMANCE ================= */
+  let gp = document.getElementById("gradePerf");
+  gp.innerHTML = "";
 
-  subjects.forEach(s=>{
-    let avg=subStats[s.id]/final.length || 0;
-    subbody.innerHTML+=`
-      <tr>
-        <td>${subjectShort[norm(s.subject_name)]||s.subject_name}</td>
-        <td>${avg.toFixed(1)}</td>
-        <td>${grade(avg)}</td>
-      </tr>`;
+  ["Female","Male"].forEach(sex=>{
+    let r = gradePerf[sex];
+    gp.innerHTML += `
+    <tr>
+      <td>${sex}</td>
+      <td>${r.A}</td>
+      <td>${r.B}</td>
+      <td>${r.C}</td>
+      <td>${r.D}</td>
+      <td>${r.E}</td>
+    </tr>`;
   });
 
-  /* A-E DISTRIBUTION */
-  let dist={A:0,B:0,C:0,D:0,E:0};
+  /* ================= SUBJECT PERFORMANCE ================= */
+  let subbody = document.getElementById("subtbody");
+  subbody.innerHTML = "";
 
-  final.forEach(s=>dist[grade(s.avg)]++);
+  let i = 1;
 
-  document.getElementById("mA").innerText=dist.A;
-  document.getElementById("mB").innerText=dist.B;
-  document.getElementById("mC").innerText=dist.C;
-  document.getElementById("mD").innerText=dist.D;
-  document.getElementById("mE").innerText=dist.E;
+  // 🔥 IMPORTANT FILTER: ONLY SUBJECTS WITH DATA
+  subjects
+    .filter(sub => subStats[sub.id].sat > 0)
+    .forEach(sub=>{
+
+      let st = subStats[sub.id];
+
+      let avg = st.sat ? (st.total / st.sat) : 0;
+      let letter = grade(avg);
+
+      subbody.innerHTML += `
+      <tr>
+        <td>${i++}</td>
+        <td>${sub.subject_name}</td>
+        <td>${st.sat}</td>
+        <td>${st.sat}</td>
+        <td>${st.pass}</td>
+        <td>${avg.toFixed(1)}</td>
+        <td>${gpa(letter).toFixed(2)}</td>
+      </tr>
+      `;
+    });
 }
 
+/* INIT */
 loadClasses();
 
 </script>
