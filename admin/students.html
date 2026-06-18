@@ -126,6 +126,11 @@ th,td{
 
   <h3>Import Students (Excel)</h3>
 
+  <!-- TEMPLATE DOWNLOAD BUTTON -->
+  <button onclick="downloadTemplate()" style="background:green;">
+    Download Excel Template
+  </button>
+
   <input type="file" id="excelFile" accept=".xlsx,.xls">
 
   <button onclick="importExcel()">Upload & Preview</button>
@@ -213,6 +218,33 @@ async function loadClasses(){
     classSelect.innerHTML += `<option value="${c.id}">${c.class_name}</option>`;
     filterSelect.innerHTML += `<option value="${c.id}">${c.class_name}</option>`;
   });
+}
+
+/* TEMPLATE DOWNLOAD */
+function downloadTemplate(){
+
+  const data = [
+    {
+      admission_no: "1001",
+      prem_no: "1",
+      student_name: "John Doe",
+      gender: "Male",
+      class_name: "Form 1"
+    },
+    {
+      admission_no: "1002",
+      prem_no: "2",
+      student_name: "Jane Doe",
+      gender: "Female",
+      class_name: "Form 1"
+    }
+  ];
+
+  const worksheet = XLSX.utils.json_to_sheet(data);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Students Template");
+
+  XLSX.writeFile(workbook, "students_template.xlsx");
 }
 
 /* RESET */
