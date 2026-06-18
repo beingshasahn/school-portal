@@ -6,10 +6,7 @@
 <title>Students Management</title>
 
 <style>
-*{
-  box-sizing:border-box;
-  font-family:Arial;
-}
+*{box-sizing:border-box;font-family:Arial}
 
 body{
   margin:0;
@@ -18,7 +15,6 @@ body{
   background:#f4f6f9;
 }
 
-/* SIDEBAR */
 .sidebar{
   width:250px;
   background:#1e3c72;
@@ -36,13 +32,8 @@ body{
   border-radius:6px;
 }
 
-/* MAIN */
-.main{
-  flex:1;
-  padding:20px;
-}
+.main{flex:1;padding:20px}
 
-/* HEADER */
 .header{
   background:white;
   padding:15px;
@@ -50,7 +41,6 @@ body{
   margin-bottom:15px;
 }
 
-/* FORM */
 .form{
   background:white;
   padding:15px;
@@ -73,36 +63,24 @@ button{
   border:none;
   border-radius:6px;
   cursor:pointer;
+  margin:2px;
 }
 
-/* TABLE */
+.deleteBtn{background:red}
+
+.editBtn{
+  background:#f0ad4e;
+}
+
 table{
   width:100%;
   border-collapse:collapse;
   background:white;
-  border-radius:10px;
-  overflow:hidden;
 }
 
 th,td{
   padding:10px;
   border-bottom:1px solid #eee;
-  text-align:left;
-}
-
-.deleteBtn{
-  background:red;
-  color:white;
-  border:none;
-  padding:6px 10px;
-  border-radius:6px;
-  cursor:pointer;
-}
-
-/* RESPONSIVE */
-@media(max-width:768px){
-  body{flex-direction:column;}
-  .sidebar{width:100%;}
 }
 </style>
 
@@ -112,10 +90,8 @@ th,td{
 
 <body>
 
-<!-- SIDEBAR -->
 <div class="sidebar">
   <h3>Admin Panel</h3>
-
   <a href="dashboard.html">Dashboard</a>
   <a href="teachers.html">Teachers</a>
   <a href="students.html">Students</a>
@@ -124,7 +100,6 @@ th,td{
   <a href="assignments.html">Assignments</a>
 </div>
 
-<!-- MAIN -->
 <div class="main">
 
 <div class="header">
@@ -137,6 +112,9 @@ th,td{
   <input type="text" id="admission_no" placeholder="Admission Number">
   <input type="text" id="name" placeholder="Student Name">
 
+  <!-- NEW: PREM NUMBER -->
+  <input type="number" id="prem_no" placeholder="Prem Number (Numbers only)">
+
   <select id="gender">
     <option value="">Select Gender</option>
     <option value="Male">Male</option>
@@ -146,14 +124,13 @@ th,td{
   <select id="class"></select>
 
   <button onclick="addStudent()">Add Student</button>
-
 </div>
 
-<!-- TABLE -->
 <table>
   <thead>
     <tr>
       <th>Admission No</th>
+      <th>Prem No</th>
       <th>Name</th>
       <th>Gender</th>
       <th>Class</th>
@@ -173,6 +150,8 @@ const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
+let editingId = null;
+
 async function init(){
   loadClasses();
   loadStudents();
@@ -181,9 +160,7 @@ async function init(){
 /* LOAD CLASSES */
 async function loadClasses(){
 
-  const { data } = await supabaseClient
-    .from("classes")
-    .select("*");
+  const { data } = await supabaseClient.from("classes").select("*");
 
   const el = document.getElementById("class");
   el.innerHTML = `<option value="">Select Class</option>`;
@@ -193,24 +170,62 @@ async function loadClasses(){
   });
 }
 
-/* ADD STUDENT */
+/* RESET FORM */
+function resetForm(){
+  document.getElementById("admission_no").value = "";
+  document.getElementById("name").value = "";
+  document.getElementById("prem_no").value = "";
+  document.getElementById("gender").value = "";
+  document.getElementById("class").value = "";
+  editingId = null;
+}
+
+/* ADD OR UPDATE STUDENT */
 async function addStudent(){
 
   const admission_no = document.getElementById("admission_no").value;
   const student_name = document.getElementById("name").value;
+  const prem_no = document.getElementById("prem_no").value;
   const gender = document.getElementById("gender").value;
   const class_id = document.getElementById("class").value;
 
   if(!admission_no || !student_name || !class_id){
-    alert("Fill all fields");
+    alert("Fill required fields");
     return;
   }
 
+  // UPDATE MODE
+  if(editingId){
+
+    const { error } = await supabaseClient
+      .from("students")
+      .update({
+        admission_no,
+        student_name,
+        prem_no,
+        gender,
+        class_id
+      })
+      .eq("id", editingId);
+
+    if(error){
+      alert(error.message);
+    } else {
+      alert("Student updated 👍");
+      resetForm();
+      loadStudents();
+    }
+
+    return;
+  }
+
+  // INSERT MODE
   const { error } = await supabaseClient
     .from("students")
     .insert([{
       admission_no,
       student_name,
+      prem_no,
       gender,
       class_id
     }]);
@@ -219,6 +234,7 @@ async function addStudent(){
     alert(error.message);
   } else {
     alert("Student added 👍");
+    resetForm();
     loadStudents();
   }
 }
@@ -245,15 +261,29 @@ async function loadStudents(){
     table.innerHTML += `
       <tr>
         <td>${s.admission_no}</td>
+        <td>${s.prem_no || ""}</td>
         <td>${s.student_name}</td>
         <td>${s.gender || ""}</td>
         <td>${cls.data?.class_name || ""}</td>
         <td>
+          <button class="editBtn" onclick='editStudent(${JSON.stringify(s)})'>Edit</button>
           <button class="deleteBtn" onclick="deleteStudent('${s.id}')">Delete</button>
         </td>
       </tr>
     `;
   }
+}
+
+/* EDIT STUDENT */
+function editStudent(s){
+
+  editingId = s.id;
+
+  document.getElementById("admission_no").value = s.admission_no;
+  document.getElementById("name").value = s.student_name;
+  document.getElementById("prem_no").value = s.prem_no || "";
+  document.getElementById("gender").value = s.gender;
+  document.getElementById("class").value = s.class_id;
 }
 
 /* DELETE */
