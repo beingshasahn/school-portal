@@ -250,32 +250,50 @@ function handleSubjectChange(){
 }
 
 /* LOAD STUDENTS */
+/* LOAD STUDENTS */
 async function loadStudents(class_id){
 
-  const { data } = await supabaseClient
+  // Pata wanafunzi
+  const { data: students } = await supabaseClient
     .from("students")
     .select("*")
     .eq("class_id", class_id);
 
-  studentsList = data || [];
+  studentsList = students || [];
+
+  // Pata marks zilizopo tayari kwa subject iliyochaguliwa
+  const { data: existingResults } = await supabaseClient
+    .from("results")
+    .select("student_id, marks")
+    .eq("subject_id", selectedSubject);
+
+  const marksMap = {};
+
+  (existingResults || []).forEach(r => {
+    marksMap[r.student_id] = r.marks;
+  });
 
   const table = document.getElementById("students");
   table.innerHTML = "";
 
-  studentsList.forEach(s=>{
+  studentsList.forEach(s => {
+
+    const existingMark = marksMap[s.id] ?? "";
+
     table.innerHTML += `
       <tr>
         <td>${s.admission_no}</td>
         <td>${s.student_name}</td>
         <td>
-          <input type="number"
-            value=""
+          <input
+            type="number"
+            value="${existingMark}"
             oninput="autoSave('${s.id}', this.value)">
         </td>
       </tr>
     `;
   });
-}
+    }
 
 /* AUTO SAVE (UPSERT + DELETE LOGIC) */
 async function autoSave(student_id, value){
