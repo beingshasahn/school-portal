@@ -138,7 +138,6 @@ th,td{
 
   <div class="form-grid">
 
-    <input type="text" id="admission_no" placeholder="Admission No">
     <input type="text" id="name" placeholder="Student Name">
     <input type="number" id="prem_no" placeholder="Prem No">
 
@@ -163,21 +162,22 @@ th,td{
     Download Excel Template
   </button>
 
+  <select id="import_class">
+    <option value="">Select Class For Import</option>
+  </select>
+
   <input type="file" id="excelFile">
 
   <button onclick="importExcel()">Upload & Preview</button>
-
   <div id="previewSection" style="display:none;margin-top:10px;">
     <h4>Preview</h4>
 
     <table>
       <thead>
         <tr>
-          <th>Adm</th>
-          <th>Prem</th>
+          <th>Prem No</th>
           <th>Name</th>
-          <th>Gender</th>
-          <th>Class</th>
+          <th>Sex</th>
         </tr>
       </thead>
       <tbody id="previewTable"></tbody>
@@ -236,26 +236,28 @@ async function loadClasses(){
 
   const c1 = document.getElementById("class");
   const c2 = document.getElementById("filter_class");
-
+  const c3 = document.getElementById("import_class");
+c3.innerHTML = `<option value="">Select Class For Import</option>`;
   c1.innerHTML = `<option value="">Class</option>`;
   c2.innerHTML = `<option value="">Filter</option>`;
 
   data.forEach(c=>{
     c1.innerHTML += `<option value="${c.id}">${c.class_name}</option>`;
     c2.innerHTML += `<option value="${c.id}">${c.class_name}</option>`;
+    c3.innerHTML += `<option value="${c.id}">${c.class_name}</option>`;
   });
 }
 
 /* ADD */
 async function addStudent(){
 
-  const admission_no = document.getElementById("admission_no").value;
+  const admission_no = generateAdmissionNo();
   const student_name = document.getElementById("name").value;
   const prem_no = document.getElementById("prem_no").value;
   const gender = document.getElementById("gender").value;
   const class_id = document.getElementById("class").value;
 
-  if(!admission_no || !student_name || !class_id){
+  if(!student_name || !class_id){
     alert("Fill required fields");
     return;
   }
@@ -335,17 +337,32 @@ async function deleteStudent(id){
 
 /* TEMPLATE */
 function downloadTemplate(){
-  const data=[
-    {admission_no:"1001",prem_no:"1",student_name:"John",gender:"Male",class_name:"Form 1"}
+
+  const data = [
+    {
+      prem_no: "202611076",
+      student_name: "Shadafi Saidi",
+      gender: "Male"
+    },
+    {
+      prem_no: "202611077",
+      student_name: "Shamim Bashiru Baisa",
+      gender: "Female"
+    }
   ];
 
-  const ws=XLSX.utils.json_to_sheet(data);
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,"Template");
-  XLSX.writeFile(wb,"students_template.xlsx");
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+
+  XLSX.utils.book_append_sheet(wb, ws, "Students");
+
+  XLSX.writeFile(wb, "students_template.xlsx");
 }
 
 /* IMPORT */
+  <select id="import_class">
+  <option value="">Select Class For Import</option>
+</select>
 async function importExcel(){
 
   const file=document.getElementById("excelFile").files[0];
@@ -367,8 +384,12 @@ async function importExcel(){
       let id=map[(r.class_name||"").toLowerCase()];
       if(!id) return;
 
-      previewData.push({...r,class_id:id});
-    });
+      previewData.push({admission_no: generateAdmissionNo(),
+  prem_no: r.prem_no,
+  student_name: r.student_name,
+  gender: r.gender,
+  class_id: selectedClass
+});
 
     showPreview();
   };
@@ -381,16 +402,12 @@ function showPreview(){
   const t=document.getElementById("previewTable");
   const s=document.getElementById("previewSection");
 
-  t.innerHTML="";
-  previewData.forEach(r=>{
-    t.innerHTML+=`
-      <tr>
-        <td>${r.admission_no}</td>
-        <td>${r.prem_no}</td>
-        <td>${r.student_name}</td>
-        <td>${r.gender}</td>
-        <td>${r.class_name}</td>
-      </tr>`;
+  t.innerHTML += `
+<tr>
+  <td>${r.prem_no}</td>
+  <td>${r.student_name}</td>
+  <td>${r.gender}</td>
+</tr>`;
   });
 
   s.style.display="block";
@@ -403,7 +420,14 @@ async function confirmImport(){
   document.getElementById("previewSection").style.display="none";
   loadStudents();
 }
+function generateAdmissionNo(){
 
+  const year = new Date().getFullYear();
+
+  return "KEMPS/" + year + "/" +
+         Math.floor(Math.random()*100000);
+}
+  
 </script>
 
 </body>
