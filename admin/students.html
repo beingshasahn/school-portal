@@ -125,7 +125,13 @@ th,td{
 
   <button onclick="addStudent()">Add Student</button>
 </div>
+<div class="form">
 
+  <select id="filter_class" onchange="loadStudents()">
+    <option value="">Filter by Class (All)</option>
+  </select>
+
+</div>
 <table>
   <thead>
     <tr>
@@ -157,19 +163,23 @@ async function init(){
   loadStudents();
 }
 
-/* LOAD CLASSES */
 async function loadClasses(){
 
-  const { data } = await supabaseClient.from("classes").select("*");
+  const { data } = await supabaseClient
+    .from("classes")
+    .select("*");
 
-  const el = document.getElementById("class");
-  el.innerHTML = `<option value="">Select Class</option>`;
+  const classSelect = document.getElementById("class");
+  const filterSelect = document.getElementById("filter_class");
+
+  classSelect.innerHTML = `<option value="">Select Class</option>`;
+  filterSelect.innerHTML = `<option value="">Filter by Class (All)</option>`;
 
   data.forEach(c=>{
-    el.innerHTML += `<option value="${c.id}">${c.class_name}</option>`;
+    classSelect.innerHTML += `<option value="${c.id}">${c.class_name}</option>`;
+    filterSelect.innerHTML += `<option value="${c.id}">${c.class_name}</option>`;
   });
 }
-
 /* RESET FORM */
 function resetForm(){
   document.getElementById("admission_no").value = "";
@@ -242,10 +252,19 @@ async function addStudent(){
 /* LOAD STUDENTS */
 async function loadStudents(){
 
-  const { data } = await supabaseClient
+  const filterClass = document.getElementById("filter_class").value;
+
+  let query = supabaseClient
     .from("students")
     .select("*")
     .order("id",{ascending:false});
+
+  // FILTER BY CLASS
+  if(filterClass){
+    query = query.eq("class_id", filterClass);
+  }
+
+  const { data } = await query;
 
   const table = document.getElementById("table");
   table.innerHTML = "";
@@ -272,7 +291,7 @@ async function loadStudents(){
       </tr>
     `;
   }
-}
+    }
 
 /* EDIT STUDENT */
 function editStudent(s){
