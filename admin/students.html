@@ -67,10 +67,7 @@ button{
 }
 
 .deleteBtn{background:red}
-
-.editBtn{
-  background:#f0ad4e;
-}
+.editBtn{background:#f0ad4e}
 
 table{
   width:100%;
@@ -86,6 +83,7 @@ th,td{
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
 </head>
 
 <body>
@@ -96,8 +94,6 @@ th,td{
   <a href="teachers.html">Teachers</a>
   <a href="students.html">Students</a>
   <a href="classes.html">Classes</a>
-  <a href="subjects.html">Subjects</a>
-  <a href="assignments.html">Assignments</a>
 </div>
 
 <div class="main">
@@ -111,8 +107,6 @@ th,td{
 
   <input type="text" id="admission_no" placeholder="Admission Number">
   <input type="text" id="name" placeholder="Student Name">
-
-  <!-- NEW: PREM NUMBER -->
   <input type="number" id="prem_no" placeholder="Prem Number (Numbers only)">
 
   <select id="gender">
@@ -123,50 +117,52 @@ th,td{
 
   <select id="class"></select>
 
-  <button onclick="addStudent()">Add Student</button>
+  <button onclick="addStudent()">Add / Update Student</button>
+
+</div>
+
+<!-- IMPORT -->
 <div class="form">
 
   <h3>Import Students (Excel)</h3>
 
-  <input type="file" id="excelFile" accept=".xlsx, .xls">
+  <input type="file" id="excelFile" accept=".xlsx,.xls">
 
-  <button onclick="importExcel()">Upload & Import</button>
-<div id="previewSection" style="display:none; margin-top:15px;">
+  <button onclick="importExcel()">Upload & Preview</button>
 
-  <h4>Preview Data</h4>
+  <div id="previewSection" style="display:none;margin-top:15px;">
 
-  <table border="1" width="100%">
-    <thead>
-      <tr>
-        <th>Admission No</th>
-        <th>Prem No</th>
-        <th>Name</th>
-        <th>Gender</th>
-        <th>Class</th>
-      </tr>
-    </thead>
-    <tbody id="previewTable"></tbody>
-  </table>
+    <h4>Preview Data</h4>
 
-  <button onclick="confirmImport()" style="margin-top:10px;background:green;">
-    Confirm Import
-  </button>
+    <table border="1" width="100%">
+      <thead>
+        <tr>
+          <th>Admission No</th>
+          <th>Prem No</th>
+          <th>Name</th>
+          <th>Gender</th>
+          <th>Class</th>
+        </tr>
+      </thead>
+      <tbody id="previewTable"></tbody>
+    </table>
 
-</div>
-  
-  <small>
-    Format columns: admission_no | prem_no | student_name | gender | class_name
-  </small>
+    <button onclick="confirmImport()" style="margin-top:10px;background:green;">
+      Confirm Import
+    </button>
+
+  </div>
 
 </div>
-</div>
+
+<!-- FILTER -->
 <div class="form">
-
   <select id="filter_class" onchange="loadStudents()">
     <option value="">Filter by Class (All)</option>
   </select>
-
 </div>
+
+<!-- TABLE -->
 <table>
   <thead>
     <tr>
@@ -185,19 +181,22 @@ th,td{
 </div>
 
 <script>
+
 let previewData = [];
+let editingId = null;
+
 const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
-
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-let editingId = null;
+init();
 
 async function init(){
   loadClasses();
   loadStudents();
 }
 
+/* LOAD CLASSES */
 async function loadClasses(){
 
   const { data } = await supabaseClient
@@ -215,7 +214,8 @@ async function loadClasses(){
     filterSelect.innerHTML += `<option value="${c.id}">${c.class_name}</option>`;
   });
 }
-/* RESET FORM */
+
+/* RESET */
 function resetForm(){
   document.getElementById("admission_no").value = "";
   document.getElementById("name").value = "";
@@ -225,7 +225,7 @@ function resetForm(){
   editingId = null;
 }
 
-/* ADD OR UPDATE STUDENT */
+/* ADD / UPDATE */
 async function addStudent(){
 
   const admission_no = document.getElementById("admission_no").value;
@@ -239,49 +239,24 @@ async function addStudent(){
     return;
   }
 
-  // UPDATE MODE
   if(editingId){
 
-    const { error } = await supabaseClient
+    await supabaseClient
       .from("students")
-      .update({
-        admission_no,
-        student_name,
-        prem_no,
-        gender,
-        class_id
-      })
+      .update({ admission_no, student_name, prem_no, gender, class_id })
       .eq("id", editingId);
 
-    if(error){
-      alert(error.message);
-    } else {
-      alert("Student updated 👍");
-      resetForm();
-      loadStudents();
-    }
-
+    resetForm();
+    loadStudents();
     return;
   }
 
-  // INSERT MODE
-  const { error } = await supabaseClient
+  await supabaseClient
     .from("students")
-    .insert([{
-      admission_no,
-      student_name,
-      prem_no,
-      gender,
-      class_id
-    }]);
+    .insert([{ admission_no, student_name, prem_no, gender, class_id }]);
 
-  if(error){
-    alert(error.message);
-  } else {
-    alert("Student added 👍");
-    resetForm();
-    loadStudents();
-  }
+  resetForm();
+  loadStudents();
 }
 
 /* LOAD STUDENTS */
@@ -294,7 +269,6 @@ async function loadStudents(){
     .select("*")
     .order("id",{ascending:false});
 
-  // FILTER BY CLASS
   if(filterClass){
     query = query.eq("class_id", filterClass);
   }
@@ -326,11 +300,10 @@ async function loadStudents(){
       </tr>
     `;
   }
-    }
+}
 
-/* EDIT STUDENT */
+/* EDIT */
 function editStudent(s){
-
   editingId = s.id;
 
   document.getElementById("admission_no").value = s.admission_no;
@@ -342,20 +315,17 @@ function editStudent(s){
 
 /* DELETE */
 async function deleteStudent(id){
-
-  await supabaseClient
-    .from("students")
-    .delete()
-    .eq("id", id);
-
+  await supabaseClient.from("students").delete().eq("id", id);
   loadStudents();
 }
+
+/* IMPORT EXCEL */
 async function importExcel(){
 
   const fileInput = document.getElementById("excelFile");
 
   if(!fileInput.files.length){
-    alert("Chagua Excel file");
+    alert("Chagua file");
     return;
   }
 
@@ -365,81 +335,12 @@ async function importExcel(){
   reader.onload = async function(e){
 
     const data = new Uint8Array(e.target.result);
-    const workbook = XLSX.read(data, {type:'array'});
+    const workbook = XLSX.read(data,{type:'array'});
 
-    const sheetName = workbook.SheetNames[0];
-    const sheet = workbook.Sheets[sheetName];
-
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const rows = XLSX.utils.sheet_to_json(sheet);
 
-    // pata classes
-    const { data: classes } = await supabaseClient
-      .from("classes")
-      .select("*");
-
-    let classMap = {};
-    classes.forEach(c=>{
-      classMap[c.class_name.toLowerCase()] = c.id;
-    });
-
-    let students = [];
-
-    rows.forEach(r=>{
-
-      let classId = classMap[(r.class_name || "").toLowerCase()];
-
-      if(!classId) return;
-
-      students.push({
-        admission_no: r.admission_no,
-        prem_no: r.prem_no || null,
-        student_name: r.student_name,
-        gender: r.gender || null,
-        class_id: classId
-      });
-
-    });
-
-    const { error } = await supabaseClient
-      .from("students")
-      .insert(students);
-
-    if(error){
-      alert(error.message);
-    } else {
-      alert("Import successful 👍");
-      loadStudents();
-    }
-
-  };
-
-  reader.readAsArrayBuffer(file);
-}
-async function importExcel(){
-
-  const fileInput = document.getElementById("excelFile");
-
-  if(!fileInput.files.length){
-    alert("Chagua Excel file");
-    return;
-  }
-
-  const file = fileInput.files[0];
-  const reader = new FileReader();
-
-  reader.onload = async function(e){
-
-    const data = new Uint8Array(e.target.result);
-    const workbook = XLSX.read(data, {type:'array'});
-
-    const sheetName = workbook.SheetNames[0];
-    const sheet = workbook.Sheets[sheetName];
-
-    const rows = XLSX.utils.sheet_to_json(sheet);
-
-    const { data: classes } = await supabaseClient
-      .from("classes")
-      .select("*");
+    const { data: classes } = await supabaseClient.from("classes").select("*");
 
     let classMap = {};
     classes.forEach(c=>{
@@ -449,9 +350,7 @@ async function importExcel(){
     previewData = [];
 
     rows.forEach(r=>{
-
       let classId = classMap[(r.class_name || "").toLowerCase()];
-
       if(!classId) return;
 
       previewData.push({
@@ -462,19 +361,19 @@ async function importExcel(){
         class_name: r.class_name,
         class_id: classId
       });
-
     });
 
     showPreview();
-
   };
 
   reader.readAsArrayBuffer(file);
 }
-  function showPreview(){
 
-  const previewSection = document.getElementById("previewSection");
+/* SHOW PREVIEW */
+function showPreview(){
+
   const table = document.getElementById("previewTable");
+  const section = document.getElementById("previewSection");
 
   table.innerHTML = "";
 
@@ -490,16 +389,13 @@ async function importExcel(){
     `;
   });
 
-  previewSection.style.display = "block";
-  }
-  async function confirmImport(){
+  section.style.display = "block";
+}
 
-  if(previewData.length === 0){
-    alert("No data to import");
-    return;
-  }
+/* CONFIRM IMPORT */
+async function confirmImport(){
 
-  const { error } = await supabaseClient
+  await supabaseClient
     .from("students")
     .insert(previewData.map(s=>({
       admission_no: s.admission_no,
@@ -509,19 +405,11 @@ async function importExcel(){
       class_id: s.class_id
     })));
 
-  if(error){
-    alert(error.message);
-  } else {
-    alert("Import successful 👍");
+  previewData = [];
+  document.getElementById("previewSection").style.display = "none";
 
-    previewData = [];
-    document.getElementById("previewSection").style.display = "none";
-
-    loadStudents();
-  }
-  }
-  
-init();
+  loadStudents();
+}
 
 </script>
 
