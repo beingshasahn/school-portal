@@ -6,10 +6,7 @@
 <title>Teachers Management</title>
 
 <style>
-*{
-  box-sizing:border-box;
-  font-family:Arial;
-}
+*{box-sizing:border-box;font-family:Arial;}
 
 body{
   margin:0;
@@ -18,7 +15,6 @@ body{
   background:#f4f6f9;
 }
 
-/* SIDEBAR */
 .sidebar{
   width:250px;
   background:#1e3c72;
@@ -36,13 +32,11 @@ body{
   border-radius:6px;
 }
 
-/* MAIN */
 .main{
   flex:1;
   padding:20px;
 }
 
-/* HEADER */
 .header{
   background:white;
   padding:15px;
@@ -50,7 +44,6 @@ body{
   margin-bottom:15px;
 }
 
-/* FORM */
 .form{
   background:white;
   padding:15px;
@@ -75,7 +68,6 @@ button{
   cursor:pointer;
 }
 
-/* TABLE */
 table{
   width:100%;
   border-collapse:collapse;
@@ -98,40 +90,26 @@ th,td{
   border-radius:6px;
   cursor:pointer;
 }
-
-/* RESPONSIVE */
-@media(max-width:768px){
-  body{flex-direction:column;}
-  .sidebar{width:100%;}
-}
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 </head>
 
 <body>
 
-<!-- SIDEBAR -->
 <div class="sidebar">
   <h3>Admin Panel</h3>
-
   <a href="dashboard.html">Dashboard</a>
   <a href="teachers.html">Teachers</a>
   <a href="students.html">Students</a>
-  <a href="classes.html">Classes</a>
-  <a href="subjects.html">Subjects</a>
-  <a href="assignments.html">Assignments</a>
 </div>
 
-<!-- MAIN -->
 <div class="main">
 
 <div class="header">
   <h2>Teachers Management</h2>
 </div>
 
-<!-- ADD TEACHER -->
 <div class="form">
   <h3>Add New Teacher</h3>
 
@@ -144,14 +122,13 @@ th,td{
     <option value="admin">Admin</option>
   </select>
 
-  <button onclick="addTeacher()">Save Teacher</button>
+  <button onclick="addTeacher()">Create Teacher Account</button>
 </div>
 
-<!-- TABLE -->
 <table>
   <thead>
     <tr>
-      <th>Full Name</th>
+      <th>Name</th>
       <th>Email</th>
       <th>Role</th>
       <th>Action</th>
@@ -170,15 +147,10 @@ const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-async function init(){
-  loadTeachers();
-}
-
-/* ADD TEACHER */
 async function addTeacher(){
 
-  const name = document.getElementById("name").value;
-  const email = document.getElementById("email").value;
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
   const role = document.getElementById("role").value;
 
   if(!name || !email){
@@ -186,28 +158,43 @@ async function addTeacher(){
     return;
   }
 
+  // STEP 1: create auth user (IMPORTANT FIX)
+  const { data: authData, error: authError } = await supabaseClient.auth.signUp({
+    email: email,
+    password: "KOROSHO2026"
+  });
+
+  if(authError){
+    alert(authError.message);
+    return;
+  }
+
+  const userId = authData.user.id;
+
+  // STEP 2: insert profile with SAME ID
   const { error } = await supabaseClient
     .from("profiles")
     .insert([{
+      id: userId,
       full_name: name,
+      email: email,
       role: role
     }]);
 
   if(error){
     alert(error.message);
   } else {
-    alert("Teacher added");
+    alert("Teacher account created successfully");
     loadTeachers();
   }
 }
 
-/* LOAD TEACHERS */
 async function loadTeachers(){
 
   const { data } = await supabaseClient
     .from("profiles")
     .select("*")
-    .order("id", { ascending:false });
+    .order("created_at", { ascending:false });
 
   const table = document.getElementById("teachersTable");
   table.innerHTML = "";
@@ -216,7 +203,7 @@ async function loadTeachers(){
     table.innerHTML += `
       <tr>
         <td>${t.full_name}</td>
-        <td>${t.id || ""}</td>
+        <td>${t.email}</td>
         <td>${t.role}</td>
         <td>
           <button class="deleteBtn" onclick="deleteTeacher('${t.id}')">Delete</button>
@@ -226,9 +213,9 @@ async function loadTeachers(){
   });
 }
 
-/* DELETE */
 async function deleteTeacher(id){
 
+  // delete profile
   await supabaseClient
     .from("profiles")
     .delete()
@@ -237,9 +224,9 @@ async function deleteTeacher(id){
   loadTeachers();
 }
 
-init();
+loadTeachers();
 
 </script>
 
 </body>
-</html>
+                 </html>
