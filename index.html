@@ -113,7 +113,7 @@ button:hover{
 
   <div class="logo">
     KOROSHO ENGLISH MEDIUM PRE AND PRIMARY SCHOOL<br>
-    School Portal Login
+    School Portal
   </div>
 
   <div class="subtitle">Sign in to continue</div>
@@ -138,13 +138,19 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+/* 🔥 HARD DISABLE AUTO LOGIN (IMPORTANT FIX) */
+window.addEventListener("load", async () => {
+  await supabaseClient.auth.signOut();
+});
+
+/* SHOW ERROR */
 function showError(msg){
   const box = document.getElementById("errorBox");
   box.style.display = "block";
   box.innerText = msg;
 }
 
-/* LOGIN ONLY */
+/* LOGIN */
 async function login(){
 
   const email = document.getElementById("email").value.trim();
