@@ -44,31 +44,26 @@ body{
   align-items:center;
   padding:10px 15px;
   background:#fff;
-  gap:10px;
 }
 
 #teacherInfo{
-  font-weight:bold;
   font-size:14px;
-  white-space:nowrap;
+  font-weight:bold;
   overflow:hidden;
   text-overflow:ellipsis;
+  white-space:nowrap;
 }
 
-/* MODERN LOGOUT BUTTON */
+/* LOGOUT BUTTON */
 .logout{
+  width:38px;
+  height:38px;
+  border-radius:50%;
   background:#ff3b30;
   color:white;
   border:none;
-  width:40px;
-  height:40px;
-  border-radius:50%;
   cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:18px;
-  flex-shrink:0;
+  font-size:16px;
 }
 
 /* CONTAINER */
@@ -85,7 +80,7 @@ body{
   box-shadow:0 2px 10px rgba(0,0,0,0.08);
 }
 
-/* SELECT */
+/* INPUTS */
 select, input{
   width:100%;
   padding:10px;
@@ -96,21 +91,17 @@ select, input{
 
 /* BUTTON */
 button{
+  width:100%;
+  padding:10px;
   background:#1e3c72;
   color:white;
-  padding:10px;
   border:none;
   border-radius:6px;
-  cursor:pointer;
-  width:100%;
   margin-top:10px;
+  cursor:pointer;
 }
 
-/* HIDDEN SUBJECT UNTIL CLASS SELECTED */
-.hidden{
-  display:none;
-}
-
+/* TABLE */
 table{
   width:100%;
   border-collapse:collapse;
@@ -119,6 +110,11 @@ table{
 th,td{
   padding:10px;
   border-bottom:1px solid #eee;
+}
+
+/* HIDDEN */
+.hidden{
+  display:none;
 }
 </style>
 
@@ -133,7 +129,7 @@ th,td{
   <small><b>TEACHER DASHBOARD</b></small>
 </div>
 
-<!-- TOP BAR -->
+<!-- TOPBAR -->
 <div class="topbar">
   <div id="teacherInfo">Loading...</div>
   <button class="logout" onclick="logout()">⎋</button>
@@ -146,11 +142,11 @@ th,td{
   <h3>Select Class & Subject</h3>
 
   <label>Class</label>
-  <select id="class" onchange="loadStudents()">
+  <select id="class" onchange="handleClassChange()">
     <option value="">Select Class</option>
   </select>
 
-  <label class="hidden" id="subjectLabel">Subject</label>
+  <label id="subjectLabel" class="hidden">Subject</label>
   <select id="subject" class="hidden">
     <option value="">Select Subject</option>
   </select>
@@ -187,7 +183,7 @@ let teacherId = null;
 let studentsList = [];
 let assignments = [];
 
-/* PROTECT */
+/* AUTH PROTECT */
 async function protect(roleRequired){
 
   const { data: { user } } = await supabaseClient.auth.getUser();
@@ -237,10 +233,11 @@ async function loadAssignments(){
 
   assignments = data || [];
 
-  let classSelect = document.getElementById("class");
+  const classSelect = document.getElementById("class");
   classSelect.innerHTML = `<option value="">Select Class</option>`;
 
   const uniqueClasses = [...new Map(assignments.map(a => [a.class_id, a.classes])).values()];
+
   uniqueClasses.forEach(c=>{
     if(c){
       classSelect.innerHTML += `<option value="${c.id}">${c.class_name}</option>`;
@@ -248,23 +245,30 @@ async function loadAssignments(){
   });
 }
 
-/* SHOW SUBJECT ONLY AFTER CLASS SELECT */
-function showSubjectDropdown(){
+/* CLASS CHANGE HANDLER */
+function handleClassChange(){
 
-  const subjectSelect = document.getElementById("subject");
-  const subjectLabel = document.getElementById("subjectLabel");
+  const class_id = document.getElementById("class").value;
 
-  subjectSelect.classList.remove("hidden");
-  subjectLabel.classList.remove("hidden");
+  if(!class_id){
+    document.getElementById("subject").classList.add("hidden");
+    document.getElementById("subjectLabel").classList.add("hidden");
+    document.getElementById("students").innerHTML = "";
+    return;
+  }
+
+  loadSubjects(class_id);
+  loadStudents(class_id);
 }
 
-/* LOAD SUBJECTS AFTER CLASS */
+/* LOAD SUBJECTS (FIXED) */
 function loadSubjects(class_id){
 
-  let subjectSelect = document.getElementById("subject");
+  const subjectSelect = document.getElementById("subject");
+
   subjectSelect.innerHTML = `<option value="">Select Subject</option>`;
 
-  const filtered = assignments.filter(a => a.class_id == class_id);
+  const filtered = assignments.filter(a => String(a.class_id) === String(class_id));
 
   const uniqueSubjects = [...new Map(filtered.map(a => [a.subject_id, a.subjects])).values()];
 
@@ -274,17 +278,12 @@ function loadSubjects(class_id){
     }
   });
 
-  showSubjectDropdown();
+  subjectSelect.classList.remove("hidden");
+  document.getElementById("subjectLabel").classList.remove("hidden");
 }
 
 /* LOAD STUDENTS */
-async function loadStudents(){
-
-  let class_id = document.getElementById("class").value;
-
-  if(!class_id) return;
-
-  loadSubjects(class_id);
+async function loadStudents(class_id){
 
   const { data } = await supabaseClient
     .from("students")
@@ -293,7 +292,7 @@ async function loadStudents(){
 
   studentsList = data || [];
 
-  let table = document.getElementById("students");
+  const table = document.getElementById("students");
   table.innerHTML = "";
 
   studentsList.forEach(s=>{
