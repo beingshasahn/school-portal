@@ -29,12 +29,6 @@ body{
   padding:35px;
   border-radius:12px;
   box-shadow:0 10px 25px rgba(0,0,0,0.1);
-  animation:fadeIn 0.6s ease;
-}
-
-@keyframes fadeIn{
-  from{opacity:0; transform:translateY(10px);}
-  to{opacity:1; transform:translateY(0);}
 }
 
 .logo{
@@ -42,53 +36,36 @@ body{
   font-size:20px;
   font-weight:500;
   margin-bottom:5px;
-  color:#202124;
 }
 
 .subtitle{
   text-align:center;
   font-size:14px;
-  color:#5f6368;
-  margin-bottom:25px;
+  color:#666;
+  margin-bottom:20px;
 }
 
 input{
   width:100%;
-  padding:12px 14px;
-  margin-top:12px;
-  border:1px solid #dadce0;
+  padding:12px;
+  margin-top:10px;
+  border:1px solid #ccc;
   border-radius:8px;
   outline:none;
 }
 
 input:focus{
   border-color:#1a73e8;
-  box-shadow:0 0 0 2px rgba(26,115,232,0.2);
-}
-
-.password-wrapper{
-  position:relative;
-}
-
-.toggle{
-  position:absolute;
-  right:10px;
-  top:50%;
-  transform:translateY(-50%);
-  font-size:12px;
-  cursor:pointer;
-  color:#1a73e8;
 }
 
 button{
   width:100%;
   padding:12px;
-  margin-top:18px;
+  margin-top:15px;
   border:none;
   border-radius:8px;
   background:#1a73e8;
   color:white;
-  font-weight:500;
   cursor:pointer;
 }
 
@@ -98,8 +75,8 @@ button:hover{
 
 .error{
   margin-top:10px;
+  color:red;
   font-size:13px;
-  color:#d93025;
   display:none;
 }
 </style>
@@ -112,18 +89,14 @@ button:hover{
 <div class="card">
 
   <div class="logo">
-    KOROSHO ENGLISH MEDIUM PRE AND PRIMARY SCHOOL<br>
+    KOROSHO ENGLISH MEDIUM<br>
     School Portal
   </div>
 
   <div class="subtitle">Sign in to continue</div>
 
   <input id="email" type="email" placeholder="Email">
-
-  <div class="password-wrapper">
-    <input id="password" type="password" placeholder="Password">
-    <span class="toggle" onclick="togglePassword()">Show</span>
-  </div>
+  <input id="password" type="password" placeholder="Password">
 
   <div class="error" id="errorBox"></div>
 
@@ -138,19 +111,16 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-/* 🔥 HARD DISABLE AUTO LOGIN (IMPORTANT FIX) */
-window.addEventListener("load", async () => {
-  await supabaseClient.auth.signOut();
-});
+/* ❗ IMPORTANT: NO AUTO LOGIN LOGIC HERE */
+/* We DO NOT use onAuthStateChange or getSession redirect */
 
-/* SHOW ERROR */
 function showError(msg){
   const box = document.getElementById("errorBox");
   box.style.display = "block";
   box.innerText = msg;
 }
 
-/* LOGIN */
+/* LOGIN ONLY */
 async function login(){
 
   const email = document.getElementById("email").value.trim();
@@ -207,11 +177,6 @@ async function redirectByRole(){
   else if(role === "headteacher"){
     window.location.href = `${BASE}/headteacher/dashboard.html`;
   }
-}
-
-function togglePassword(){
-  const pass = document.getElementById("password");
-  pass.type = pass.type === "password" ? "text" : "password";
 }
 
 </script>
