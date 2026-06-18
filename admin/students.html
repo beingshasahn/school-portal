@@ -85,7 +85,7 @@ th,td{
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 </head>
 
 <body>
@@ -124,6 +124,41 @@ th,td{
   <select id="class"></select>
 
   <button onclick="addStudent()">Add Student</button>
+<div class="form">
+
+  <h3>Import Students (Excel)</h3>
+
+  <input type="file" id="excelFile" accept=".xlsx, .xls">
+
+  <button onclick="importExcel()">Upload & Import</button>
+<div id="previewSection" style="display:none; margin-top:15px;">
+
+  <h4>Preview Data</h4>
+
+  <table border="1" width="100%">
+    <thead>
+      <tr>
+        <th>Admission No</th>
+        <th>Prem No</th>
+        <th>Name</th>
+        <th>Gender</th>
+        <th>Class</th>
+      </tr>
+    </thead>
+    <tbody id="previewTable"></tbody>
+  </table>
+
+  <button onclick="confirmImport()" style="margin-top:10px;background:green;">
+    Confirm Import
+  </button>
+
+</div>
+  
+  <small>
+    Format columns: admission_no | prem_no | student_name | gender | class_name
+  </small>
+
+</div>
 </div>
 <div class="form">
 
@@ -150,7 +185,7 @@ th,td{
 </div>
 
 <script>
-
+let previewData = [];
 const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
 
@@ -315,7 +350,177 @@ async function deleteStudent(id){
 
   loadStudents();
 }
+async function importExcel(){
 
+  const fileInput = document.getElementById("excelFile");
+
+  if(!fileInput.files.length){
+    alert("Chagua Excel file");
+    return;
+  }
+
+  const file = fileInput.files[0];
+  const reader = new FileReader();
+
+  reader.onload = async function(e){
+
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data, {type:'array'});
+
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+
+    const rows = XLSX.utils.sheet_to_json(sheet);
+
+    // pata classes
+    const { data: classes } = await supabaseClient
+      .from("classes")
+      .select("*");
+
+    let classMap = {};
+    classes.forEach(c=>{
+      classMap[c.class_name.toLowerCase()] = c.id;
+    });
+
+    let students = [];
+
+    rows.forEach(r=>{
+
+      let classId = classMap[(r.class_name || "").toLowerCase()];
+
+      if(!classId) return;
+
+      students.push({
+        admission_no: r.admission_no,
+        prem_no: r.prem_no || null,
+        student_name: r.student_name,
+        gender: r.gender || null,
+        class_id: classId
+      });
+
+    });
+
+    const { error } = await supabaseClient
+      .from("students")
+      .insert(students);
+
+    if(error){
+      alert(error.message);
+    } else {
+      alert("Import successful 👍");
+      loadStudents();
+    }
+
+  };
+
+  reader.readAsArrayBuffer(file);
+}
+async function importExcel(){
+
+  const fileInput = document.getElementById("excelFile");
+
+  if(!fileInput.files.length){
+    alert("Chagua Excel file");
+    return;
+  }
+
+  const file = fileInput.files[0];
+  const reader = new FileReader();
+
+  reader.onload = async function(e){
+
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data, {type:'array'});
+
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+
+    const rows = XLSX.utils.sheet_to_json(sheet);
+
+    const { data: classes } = await supabaseClient
+      .from("classes")
+      .select("*");
+
+    let classMap = {};
+    classes.forEach(c=>{
+      classMap[c.class_name.toLowerCase()] = c.id;
+    });
+
+    previewData = [];
+
+    rows.forEach(r=>{
+
+      let classId = classMap[(r.class_name || "").toLowerCase()];
+
+      if(!classId) return;
+
+      previewData.push({
+        admission_no: r.admission_no,
+        prem_no: r.prem_no || "",
+        student_name: r.student_name,
+        gender: r.gender || "",
+        class_name: r.class_name,
+        class_id: classId
+      });
+
+    });
+
+    showPreview();
+
+  };
+
+  reader.readAsArrayBuffer(file);
+}
+  function showPreview(){
+
+  const previewSection = document.getElementById("previewSection");
+  const table = document.getElementById("previewTable");
+
+  table.innerHTML = "";
+
+  previewData.forEach(r=>{
+    table.innerHTML += `
+      <tr>
+        <td>${r.admission_no}</td>
+        <td>${r.prem_no}</td>
+        <td>${r.student_name}</td>
+        <td>${r.gender}</td>
+        <td>${r.class_name}</td>
+      </tr>
+    `;
+  });
+
+  previewSection.style.display = "block";
+  }
+  async function confirmImport(){
+
+  if(previewData.length === 0){
+    alert("No data to import");
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from("students")
+    .insert(previewData.map(s=>({
+      admission_no: s.admission_no,
+      prem_no: s.prem_no,
+      student_name: s.student_name,
+      gender: s.gender,
+      class_id: s.class_id
+    })));
+
+  if(error){
+    alert(error.message);
+  } else {
+    alert("Import successful 👍");
+
+    previewData = [];
+    document.getElementById("previewSection").style.display = "none";
+
+    loadStudents();
+  }
+  }
+  
 init();
 
 </script>
