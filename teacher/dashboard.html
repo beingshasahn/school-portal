@@ -49,12 +49,9 @@ body{
 #teacherInfo{
   font-size:14px;
   font-weight:bold;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
 }
 
-/* LOGOUT BUTTON */
+/* LOGOUT */
 .logout{
   width:38px;
   height:38px;
@@ -63,7 +60,6 @@ body{
   color:white;
   border:none;
   cursor:pointer;
-  font-size:16px;
 }
 
 /* CONTAINER */
@@ -122,7 +118,7 @@ th,td{
 
 <body>
 
-<!-- SCHOOL HEADER -->
+<!-- HEADER -->
 <div class="header">
   <h2>KOROSHO ENGLISH MEDIUM PRE AND PRIMARY SCHOOL</h2>
   <small>P.O. Box 03, TANDAHIMBA</small><br>
@@ -174,16 +170,18 @@ th,td{
 </div>
 
 <script>
+
+/* SUPABASE */
 const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
-
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
+/* STATE */
 let teacherId = null;
 let studentsList = [];
 let assignments = [];
 
-/* AUTH PROTECT */
+/* AUTH CHECK */
 async function protect(roleRequired){
 
   const { data: { user } } = await supabaseClient.auth.getUser();
@@ -211,8 +209,8 @@ async function protect(roleRequired){
 /* INIT */
 async function init(){
 
-  const allowed = await protect("teacher");
-  if(!allowed) return;
+  const ok = await protect("teacher");
+  if(!ok) return;
 
   const { data: userData } = await supabaseClient.auth.getUser();
   teacherId = userData.user.id;
@@ -228,7 +226,7 @@ async function loadAssignments(){
 
   const { data } = await supabaseClient
     .from("teacher_assignments")
-    .select("*, classes(class_name), subjects(subject_name)")
+    .select("class_id, subject_id, classes(id,class_name), subjects(id,subject_name)")
     .eq("teacher_id", teacherId);
 
   assignments = data || [];
@@ -236,16 +234,17 @@ async function loadAssignments(){
   const classSelect = document.getElementById("class");
   classSelect.innerHTML = `<option value="">Select Class</option>`;
 
-  const uniqueClasses = [...new Map(assignments.map(a => [a.class_id, a.classes])).values()];
+  const seenClasses = new Map();
 
-  uniqueClasses.forEach(c=>{
-    if(c){
-      classSelect.innerHTML += `<option value="${c.id}">${c.class_name}</option>`;
+  assignments.forEach(a=>{
+    if(a.classes && !seenClasses.has(a.classes.id)){
+      seenClasses.set(a.classes.id, a.classes.class_name);
+      classSelect.innerHTML += `<option value="${a.classes.id}">${a.classes.class_name}</option>`;
     }
   });
 }
 
-/* CLASS CHANGE HANDLER */
+/* CLASS CHANGE */
 function handleClassChange(){
 
   const class_id = document.getElementById("class").value;
@@ -261,20 +260,27 @@ function handleClassChange(){
   loadStudents(class_id);
 }
 
-/* LOAD SUBJECTS (FIXED) */
+/* SUBJECTS FIXED */
 function loadSubjects(class_id){
 
   const subjectSelect = document.getElementById("subject");
 
   subjectSelect.innerHTML = `<option value="">Select Subject</option>`;
 
-  const filtered = assignments.filter(a => String(a.class_id) === String(class_id));
+  const filtered = assignments.filter(a =>
+    a.classes && String(a.classes.id) === String(class_id)
+  );
 
-  const uniqueSubjects = [...new Map(filtered.map(a => [a.subject_id, a.subjects])).values()];
+  const seenSubjects = new Map();
 
-  uniqueSubjects.forEach(s=>{
-    if(s){
-      subjectSelect.innerHTML += `<option value="${s.id}">${s.subject_name}</option>`;
+  filtered.forEach(a=>{
+    if(a.subjects && !seenSubjects.has(a.subjects.id)){
+      seenSubjects.set(a.subjects.id, a.subjects.subject_name);
+      subjectSelect.innerHTML += `
+        <option value="${a.subjects.id}">
+          ${a.subjects.subject_name}
+        </option>
+      `;
     }
   });
 
@@ -282,7 +288,7 @@ function loadSubjects(class_id){
   document.getElementById("subjectLabel").classList.remove("hidden");
 }
 
-/* LOAD STUDENTS */
+/* STUDENTS */
 async function loadStudents(class_id){
 
   const { data } = await supabaseClient
@@ -326,7 +332,7 @@ async function saveMarks(){
       .from("results")
       .upsert([{
         student_id: s.id,
-        subject_id: subject_id,
+        subject_id,
         teacher_id: teacherId,
         marks: Number(mark)
       }], {
@@ -344,6 +350,7 @@ async function logout(){
 }
 
 init();
+
 </script>
 
 </body>
