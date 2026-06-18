@@ -96,31 +96,10 @@ button:hover{
   background:#1557b0;
 }
 
-.spinner{
-  width:16px;
-  height:16px;
-  border:2px solid #fff;
-  border-top:2px solid transparent;
-  border-radius:50%;
-  animation:spin 0.8s linear infinite;
-  display:none;
-}
-
-@keyframes spin{
-  to{transform:rotate(360deg);}
-}
-
 .error{
   margin-top:10px;
   font-size:13px;
   color:#d93025;
-  display:none;
-}
-
-.success{
-  margin-top:10px;
-  font-size:13px;
-  color:#188038;
   display:none;
 }
 </style>
@@ -147,11 +126,8 @@ button:hover{
   </div>
 
   <div class="error" id="errorBox"></div>
-  <div class="success" id="successBox"></div>
 
-  <button id="loginBtn" onclick="login()">
-    <span>Sign in</span>
-  </button>
+  <button onclick="login()">Sign in</button>
 
 </div>
 
@@ -162,16 +138,13 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-let redirected = false;
+function showError(msg){
+  const box = document.getElementById("errorBox");
+  box.style.display = "block";
+  box.innerText = msg;
+}
 
-/* AUTO SESSION */
-supabaseClient.auth.onAuthStateChange((event, session) => {
-  if(session && !redirected){
-    redirectByRole();
-  }
-});
-
-/* LOGIN */
+/* LOGIN ONLY */
 async function login(){
 
   const email = document.getElementById("email").value.trim();
@@ -195,16 +168,13 @@ async function login(){
   await redirectByRole();
 }
 
-/* ROLE ROUTING - FIXED FOR GITHUB PAGES */
+/* ROLE REDIRECT */
 async function redirectByRole(){
-
-  if(redirected) return;
-  redirected = true;
 
   const { data: { user } } = await supabaseClient.auth.getUser();
 
   if(!user){
-    redirected = false;
+    showError("Login failed");
     return;
   }
 
@@ -215,15 +185,12 @@ async function redirectByRole(){
     .maybeSingle();
 
   if(error || !profile){
-    redirected = false;
     showError("Profile not found");
     return;
   }
 
-  const role = profile.role;
-
-  /* IMPORTANT FIX: GitHub Pages base path */
   const BASE = "/school-portal";
+  const role = profile.role;
 
   if(role === "admin"){
     window.location.href = `${BASE}/admin/dashboard.html`;
@@ -234,26 +201,14 @@ async function redirectByRole(){
   else if(role === "headteacher"){
     window.location.href = `${BASE}/headteacher/dashboard.html`;
   }
-  else{
-    redirected = false;
-    showError("Unknown role");
-  }
 }
 
-/* PASSWORD TOGGLE */
 function togglePassword(){
   const pass = document.getElementById("password");
   pass.type = pass.type === "password" ? "text" : "password";
 }
 
-/* UI ERRORS */
-function showError(msg){
-  const box = document.getElementById("errorBox");
-  box.style.display = "block";
-  box.innerText = msg;
-}
-
 </script>
 
 </body>
-    </html>
+</html>
