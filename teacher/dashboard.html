@@ -8,15 +8,9 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-*{
-  box-sizing:border-box;
-  font-family:Arial;
-}
+*{box-sizing:border-box;font-family:Arial}
 
-body{
-  margin:0;
-  background:#f4f6f9;
-}
+body{margin:0;background:#f4f6f9}
 
 /* HEADER */
 .header{
@@ -25,16 +19,6 @@ body{
   padding:12px;
   text-align:center;
   line-height:1.4;
-}
-
-.header h2{
-  margin:0;
-  font-size:18px;
-}
-
-.header small{
-  font-size:12px;
-  opacity:0.9;
 }
 
 /* TOPBAR */
@@ -47,27 +31,21 @@ body{
 }
 
 #teacherInfo{
-  font-size:14px;
   font-weight:bold;
 }
 
 /* LOGOUT */
 .logout{
-  width:38px;
-  height:38px;
+  width:38px;height:38px;
   border-radius:50%;
   background:#ff3b30;
   color:white;
   border:none;
-  cursor:pointer;
 }
 
 /* CONTAINER */
-.container{
-  padding:15px;
-}
+.container{padding:15px}
 
-/* CARD */
 .card{
   background:white;
   padding:15px;
@@ -76,56 +54,30 @@ body{
   box-shadow:0 2px 10px rgba(0,0,0,0.08);
 }
 
-/* INPUTS */
-select, input{
+select,input{
   width:100%;
   padding:10px;
-  margin-top:5px;
-  border-radius:6px;
-  border:1px solid #ccc;
-}
-
-/* BUTTON */
-button{
-  width:100%;
-  padding:10px;
-  background:#1e3c72;
-  color:white;
-  border:none;
-  border-radius:6px;
-  margin-top:10px;
-  cursor:pointer;
+  margin-top:6px;
 }
 
 /* TABLE */
-table{
-  width:100%;
-  border-collapse:collapse;
-}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px;border-bottom:1px solid #eee}
 
-th,td{
-  padding:10px;
-  border-bottom:1px solid #eee;
-}
-
-/* HIDDEN */
-.hidden{
-  display:none;
-}
+/* HIDE */
+.hidden{display:none}
 </style>
 
 </head>
 
 <body>
 
-<!-- HEADER -->
 <div class="header">
-  <h2>KOROSHO ENGLISH MEDIUM PRE AND PRIMARY SCHOOL</h2>
-  <small>P.O. Box 03, TANDAHIMBA</small><br>
-  <small><b>TEACHER DASHBOARD</b></small>
+  <h3>KOROSHO ENGLISH MEDIUM PRE AND PRIMARY SCHOOL</h3>
+  <small>P.O BOX 03, TANDAHIMBA</small><br>
+  <b>TEACHER DASHBOARD</b>
 </div>
 
-<!-- TOPBAR -->
 <div class="topbar">
   <div id="teacherInfo">Loading...</div>
   <button class="logout" onclick="logout()">⎋</button>
@@ -143,7 +95,7 @@ th,td{
   </select>
 
   <label id="subjectLabel" class="hidden">Subject</label>
-  <select id="subject" class="hidden">
+  <select id="subject" class="hidden" onchange="handleSubjectChange()">
     <option value="">Select Subject</option>
   </select>
 </div>
@@ -163,31 +115,30 @@ th,td{
 
     <tbody id="students"></tbody>
   </table>
-
-  <button onclick="saveMarks()">Save / Update Marks</button>
 </div>
 
 </div>
 
 <script>
 
-/* SUPABASE */
 const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-/* STATE */
 let teacherId = null;
-let studentsList = [];
 let assignments = [];
+let studentsList = [];
 
-/* AUTH CHECK */
+let selectedClass = null;
+let selectedSubject = null;
+
+/* AUTH */
 async function protect(roleRequired){
 
   const { data: { user } } = await supabaseClient.auth.getUser();
 
   if(!user){
-    window.location.href = "../index.html";
+    location.href="../index.html";
     return false;
   }
 
@@ -198,8 +149,8 @@ async function protect(roleRequired){
     .single();
 
   if(!profile || profile.role !== roleRequired){
-    alert("Huna ruhusa ya kuingia hapa!");
-    window.location.href = "../index.html";
+    alert("No permission");
+    location.href="../index.html";
     return false;
   }
 
@@ -212,11 +163,11 @@ async function init(){
   const ok = await protect("teacher");
   if(!ok) return;
 
-  const { data: userData } = await supabaseClient.auth.getUser();
-  teacherId = userData.user.id;
+  const { data: user } = await supabaseClient.auth.getUser();
+  teacherId = user.user.id;
 
   document.getElementById("teacherInfo").innerText =
-    "Teacher: " + userData.user.email;
+    "Teacher: " + user.user.email;
 
   loadAssignments();
 }
@@ -234,11 +185,11 @@ async function loadAssignments(){
   const classSelect = document.getElementById("class");
   classSelect.innerHTML = `<option value="">Select Class</option>`;
 
-  const seenClasses = new Map();
+  const seen = new Map();
 
   assignments.forEach(a=>{
-    if(a.classes && !seenClasses.has(a.classes.id)){
-      seenClasses.set(a.classes.id, a.classes.class_name);
+    if(a.classes && !seen.has(a.classes.id)){
+      seen.set(a.classes.id, true);
       classSelect.innerHTML += `<option value="${a.classes.id}">${a.classes.class_name}</option>`;
     }
   });
@@ -247,48 +198,58 @@ async function loadAssignments(){
 /* CLASS CHANGE */
 function handleClassChange(){
 
-  const class_id = document.getElementById("class").value;
+  selectedClass = document.getElementById("class").value;
+  selectedSubject = null;
 
-  if(!class_id){
-    document.getElementById("subject").classList.add("hidden");
-    document.getElementById("subjectLabel").classList.add("hidden");
-    document.getElementById("students").innerHTML = "";
+  document.getElementById("students").innerHTML = "";
+
+  if(!selectedClass){
+    hideSubject();
     return;
   }
 
-  loadSubjects(class_id);
-  loadStudents(class_id);
+  loadSubjects(selectedClass);
 }
 
-/* SUBJECTS FIXED */
+/* LOAD SUBJECTS */
 function loadSubjects(class_id){
 
-  const subjectSelect = document.getElementById("subject");
+  const subject = document.getElementById("subject");
 
-  subjectSelect.innerHTML = `<option value="">Select Subject</option>`;
+  subject.innerHTML = `<option value="">Select Subject</option>`;
 
   const filtered = assignments.filter(a =>
-    a.classes && String(a.classes.id) === String(class_id)
+    String(a.classes.id) === String(class_id)
   );
 
-  const seenSubjects = new Map();
+  const seen = new Map();
 
   filtered.forEach(a=>{
-    if(a.subjects && !seenSubjects.has(a.subjects.id)){
-      seenSubjects.set(a.subjects.id, a.subjects.subject_name);
-      subjectSelect.innerHTML += `
+    if(a.subjects && !seen.has(a.subjects.id)){
+      seen.set(a.subjects.id,true);
+      subject.innerHTML += `
         <option value="${a.subjects.id}">
           ${a.subjects.subject_name}
-        </option>
-      `;
+        </option>`;
     }
   });
 
-  subjectSelect.classList.remove("hidden");
-  document.getElementById("subjectLabel").classList.remove("hidden");
+  showSubject();
 }
 
-/* STUDENTS */
+/* SUBJECT CHANGE */
+function handleSubjectChange(){
+
+  selectedSubject = document.getElementById("subject").value;
+
+  if(selectedClass && selectedSubject){
+    loadStudents(selectedClass);
+  } else {
+    document.getElementById("students").innerHTML = "";
+  }
+}
+
+/* LOAD STUDENTS */
 async function loadStudents(class_id){
 
   const { data } = await supabaseClient
@@ -306,47 +267,62 @@ async function loadStudents(class_id){
       <tr>
         <td>${s.admission_no}</td>
         <td>${s.student_name}</td>
-        <td><input type="number" id="mark_${s.id}" placeholder="0-100"></td>
+        <td>
+          <input type="number"
+            value=""
+            oninput="autoSave('${s.id}', this.value)">
+        </td>
       </tr>
     `;
   });
 }
 
-/* SAVE MARKS */
-async function saveMarks(){
+/* AUTO SAVE (UPSERT + DELETE LOGIC) */
+async function autoSave(student_id, value){
 
-  const subject_id = document.getElementById("subject").value;
+  if(!selectedClass || !selectedSubject) return;
 
-  if(!subject_id){
-    alert("Select subject first");
+  const mark = value.trim();
+
+  if(mark === "" || mark === null){
+
+    // DELETE IF EMPTY
+    await supabaseClient
+      .from("results")
+      .delete()
+      .eq("student_id", student_id)
+      .eq("subject_id", selectedSubject);
+
     return;
   }
 
-  for(let s of studentsList){
+  await supabaseClient
+    .from("results")
+    .upsert([{
+      student_id,
+      subject_id: selectedSubject,
+      teacher_id: teacherId,
+      marks: Number(mark)
+    }], {
+      onConflict: "student_id,subject_id"
+    });
+}
 
-    let mark = document.getElementById("mark_"+s.id).value;
+/* UI HELPERS */
+function showSubject(){
+  document.getElementById("subject").classList.remove("hidden");
+  document.getElementById("subjectLabel").classList.remove("hidden");
+}
 
-    if(mark === "") continue;
-
-    await supabaseClient
-      .from("results")
-      .upsert([{
-        student_id: s.id,
-        subject_id,
-        teacher_id: teacherId,
-        marks: Number(mark)
-      }], {
-        onConflict: "student_id,subject_id"
-      });
-  }
-
-  alert("Marks saved successfully 👍");
+function hideSubject(){
+  document.getElementById("subject").classList.add("hidden");
+  document.getElementById("subjectLabel").classList.add("hidden");
 }
 
 /* LOGOUT */
 async function logout(){
   await supabaseClient.auth.signOut();
-  window.location.href = "../index.html";
+  location.href="../index.html";
 }
 
 init();
