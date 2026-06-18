@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Students Management</title>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
 <style>
 *{box-sizing:border-box;font-family:Arial}
 
@@ -15,107 +18,139 @@ body{
   background:#f4f6f9;
 }
 
+/* SIDEBAR */
 .sidebar{
-  width:250px;
+  width:240px;
   background:#1e3c72;
   color:white;
-  padding:20px;
+  padding:15px;
 }
 
 .sidebar a{
   display:block;
   color:white;
   text-decoration:none;
-  padding:10px;
+  padding:8px;
   margin:6px 0;
   background:rgba(255,255,255,0.1);
   border-radius:6px;
+  font-size:14px;
 }
 
-.main{flex:1;padding:20px}
+/* MAIN */
+.main{
+  flex:1;
+  padding:15px;
+}
 
+/* HEADER */
 .header{
   background:white;
-  padding:15px;
+  padding:12px;
   border-radius:10px;
-  margin-bottom:15px;
+  margin-bottom:10px;
 }
 
+/* FORM */
 .form{
   background:white;
-  padding:15px;
+  padding:12px;
   border-radius:10px;
-  margin-bottom:15px;
+  margin-bottom:10px;
 }
 
+/* GRID INPUTS */
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+}
+
+/* INPUT STYLE */
 input, select{
   width:100%;
-  padding:10px;
-  margin:8px 0;
+  padding:8px;
   border:1px solid #ccc;
   border-radius:6px;
+  font-size:13px;
+  margin:0;
 }
 
+/* BUTTON */
 button{
   background:#1e3c72;
   color:white;
-  padding:10px;
+  padding:8px;
   border:none;
   border-radius:6px;
   cursor:pointer;
-  margin:2px;
+  font-size:13px;
+  margin-top:8px;
 }
 
-.deleteBtn{background:red}
-.editBtn{background:#f0ad4e}
-
+/* TABLE */
 table{
   width:100%;
   border-collapse:collapse;
   background:white;
+  border-radius:10px;
+  overflow:hidden;
 }
 
 th,td{
-  padding:10px;
+  padding:8px;
   border-bottom:1px solid #eee;
+  font-size:13px;
+}
+
+/* ACTION BUTTONS */
+.deleteBtn{background:red;padding:5px 8px;border:none;color:white;border-radius:5px}
+.editBtn{background:#f0ad4e;padding:5px 8px;border:none;color:white;border-radius:5px}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .sidebar{width:100%}
+  body{flex-direction:column}
+  .form-grid{grid-template-columns:1fr}
 }
 </style>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-
 </head>
 
 <body>
 
+<!-- SIDEBAR -->
 <div class="sidebar">
   <h3>Admin Panel</h3>
-  <a href="dashboard.html">Dashboard</a>
-  <a href="teachers.html">Teachers</a>
-  <a href="students.html">Students</a>
-  <a href="classes.html">Classes</a>
+  <a href="#">Dashboard</a>
+  <a href="#">Students</a>
+  <a href="#">Classes</a>
 </div>
 
+<!-- MAIN -->
 <div class="main">
 
 <div class="header">
   <h2>Students Management</h2>
 </div>
 
-<!-- FORM -->
+<!-- ADD STUDENT -->
 <div class="form">
 
-  <input type="text" id="admission_no" placeholder="Admission Number">
-  <input type="text" id="name" placeholder="Student Name">
-  <input type="number" id="prem_no" placeholder="Prem Number (Numbers only)">
+  <div class="form-grid">
 
-  <select id="gender">
-    <option value="">Select Gender</option>
-    <option value="Male">Male</option>
-    <option value="Female">Female</option>
-  </select>
+    <input type="text" id="admission_no" placeholder="Admission No">
+    <input type="text" id="name" placeholder="Student Name">
+    <input type="number" id="prem_no" placeholder="Prem No">
 
-  <select id="class"></select>
+    <select id="gender">
+      <option value="">Gender</option>
+      <option value="Male">Male</option>
+      <option value="Female">Female</option>
+    </select>
+
+    <select id="class"></select>
+
+  </div>
 
   <button onclick="addStudent()">Add / Update Student</button>
 
@@ -124,26 +159,22 @@ th,td{
 <!-- IMPORT -->
 <div class="form">
 
-  <h3>Import Students (Excel)</h3>
-
-  <!-- TEMPLATE DOWNLOAD BUTTON -->
   <button onclick="downloadTemplate()" style="background:green;">
     Download Excel Template
   </button>
 
-  <input type="file" id="excelFile" accept=".xlsx,.xls">
+  <input type="file" id="excelFile">
 
   <button onclick="importExcel()">Upload & Preview</button>
 
-  <div id="previewSection" style="display:none;margin-top:15px;">
+  <div id="previewSection" style="display:none;margin-top:10px;">
+    <h4>Preview</h4>
 
-    <h4>Preview Data</h4>
-
-    <table border="1" width="100%">
+    <table>
       <thead>
         <tr>
-          <th>Admission No</th>
-          <th>Prem No</th>
+          <th>Adm</th>
+          <th>Prem</th>
           <th>Name</th>
           <th>Gender</th>
           <th>Class</th>
@@ -152,10 +183,9 @@ th,td{
       <tbody id="previewTable"></tbody>
     </table>
 
-    <button onclick="confirmImport()" style="margin-top:10px;background:green;">
+    <button onclick="confirmImport()" style="background:green;margin-top:10px;">
       Confirm Import
     </button>
-
   </div>
 
 </div>
@@ -163,7 +193,7 @@ th,td{
 <!-- FILTER -->
 <div class="form">
   <select id="filter_class" onchange="loadStudents()">
-    <option value="">Filter by Class (All)</option>
+    <option value="">Filter by Class</option>
   </select>
 </div>
 
@@ -171,7 +201,7 @@ th,td{
 <table>
   <thead>
     <tr>
-      <th>Admission No</th>
+      <th>Adm No</th>
       <th>Prem No</th>
       <th>Name</th>
       <th>Gender</th>
@@ -179,7 +209,6 @@ th,td{
       <th>Action</th>
     </tr>
   </thead>
-
   <tbody id="table"></tbody>
 </table>
 
@@ -201,63 +230,23 @@ async function init(){
   loadStudents();
 }
 
-/* LOAD CLASSES */
+/* CLASSES */
 async function loadClasses(){
+  const { data } = await supabaseClient.from("classes").select("*");
 
-  const { data } = await supabaseClient
-    .from("classes")
-    .select("*");
+  const c1 = document.getElementById("class");
+  const c2 = document.getElementById("filter_class");
 
-  const classSelect = document.getElementById("class");
-  const filterSelect = document.getElementById("filter_class");
-
-  classSelect.innerHTML = `<option value="">Select Class</option>`;
-  filterSelect.innerHTML = `<option value="">Filter by Class (All)</option>`;
+  c1.innerHTML = `<option value="">Class</option>`;
+  c2.innerHTML = `<option value="">Filter</option>`;
 
   data.forEach(c=>{
-    classSelect.innerHTML += `<option value="${c.id}">${c.class_name}</option>`;
-    filterSelect.innerHTML += `<option value="${c.id}">${c.class_name}</option>`;
+    c1.innerHTML += `<option value="${c.id}">${c.class_name}</option>`;
+    c2.innerHTML += `<option value="${c.id}">${c.class_name}</option>`;
   });
 }
 
-/* TEMPLATE DOWNLOAD */
-function downloadTemplate(){
-
-  const data = [
-    {
-      admission_no: "1001",
-      prem_no: "1",
-      student_name: "John Doe",
-      gender: "Male",
-      class_name: "Form 1"
-    },
-    {
-      admission_no: "1002",
-      prem_no: "2",
-      student_name: "Jane Doe",
-      gender: "Female",
-      class_name: "Form 1"
-    }
-  ];
-
-  const worksheet = XLSX.utils.json_to_sheet(data);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Students Template");
-
-  XLSX.writeFile(workbook, "students_template.xlsx");
-}
-
-/* RESET */
-function resetForm(){
-  document.getElementById("admission_no").value = "";
-  document.getElementById("name").value = "";
-  document.getElementById("prem_no").value = "";
-  document.getElementById("gender").value = "";
-  document.getElementById("class").value = "";
-  editingId = null;
-}
-
-/* ADD / UPDATE */
+/* ADD */
 async function addStudent(){
 
   const admission_no = document.getElementById("admission_no").value;
@@ -272,62 +261,56 @@ async function addStudent(){
   }
 
   if(editingId){
-
-    await supabaseClient
-      .from("students")
+    await supabaseClient.from("students")
       .update({ admission_no, student_name, prem_no, gender, class_id })
       .eq("id", editingId);
-
-    resetForm();
-    loadStudents();
-    return;
+  } else {
+    await supabaseClient.from("students")
+      .insert([{ admission_no, student_name, prem_no, gender, class_id }]);
   }
 
-  await supabaseClient
-    .from("students")
-    .insert([{ admission_no, student_name, prem_no, gender, class_id }]);
-
-  resetForm();
+  reset();
   loadStudents();
 }
 
-/* LOAD STUDENTS */
+function reset(){
+  editingId = null;
+  document.getElementById("admission_no").value="";
+  document.getElementById("name").value="";
+  document.getElementById("prem_no").value="";
+  document.getElementById("gender").value="";
+  document.getElementById("class").value="";
+}
+
+/* LOAD */
 async function loadStudents(){
 
-  const filterClass = document.getElementById("filter_class").value;
+  const filter = document.getElementById("filter_class").value;
 
-  let query = supabaseClient
-    .from("students")
-    .select("*")
-    .order("id",{ascending:false});
+  let q = supabaseClient.from("students").select("*").order("id",{ascending:false});
 
-  if(filterClass){
-    query = query.eq("class_id", filterClass);
-  }
+  if(filter) q = q.eq("class_id",filter);
 
-  const { data } = await query;
+  const { data } = await q;
 
   const table = document.getElementById("table");
   table.innerHTML = "";
 
   for(let s of data){
 
-    const cls = await supabaseClient
-      .from("classes")
-      .select("*")
-      .eq("id", s.class_id)
-      .single();
+    const cls = await supabaseClient.from("classes")
+      .select("*").eq("id",s.class_id).single();
 
     table.innerHTML += `
       <tr>
         <td>${s.admission_no}</td>
-        <td>${s.prem_no || ""}</td>
+        <td>${s.prem_no||""}</td>
         <td>${s.student_name}</td>
-        <td>${s.gender || ""}</td>
-        <td>${cls.data?.class_name || ""}</td>
+        <td>${s.gender||""}</td>
+        <td>${cls.data?.class_name||""}</td>
         <td>
           <button class="editBtn" onclick='editStudent(${JSON.stringify(s)})'>Edit</button>
-          <button class="deleteBtn" onclick="deleteStudent('${s.id}')">Delete</button>
+          <button class="deleteBtn" onclick="deleteStudent('${s.id}')">Del</button>
         </td>
       </tr>
     `;
@@ -337,62 +320,54 @@ async function loadStudents(){
 /* EDIT */
 function editStudent(s){
   editingId = s.id;
-
-  document.getElementById("admission_no").value = s.admission_no;
-  document.getElementById("name").value = s.student_name;
-  document.getElementById("prem_no").value = s.prem_no || "";
-  document.getElementById("gender").value = s.gender;
-  document.getElementById("class").value = s.class_id;
+  document.getElementById("admission_no").value=s.admission_no;
+  document.getElementById("name").value=s.student_name;
+  document.getElementById("prem_no").value=s.prem_no||"";
+  document.getElementById("gender").value=s.gender;
+  document.getElementById("class").value=s.class_id;
 }
 
 /* DELETE */
 async function deleteStudent(id){
-  await supabaseClient.from("students").delete().eq("id", id);
+  await supabaseClient.from("students").delete().eq("id",id);
   loadStudents();
 }
 
-/* IMPORT EXCEL */
+/* TEMPLATE */
+function downloadTemplate(){
+  const data=[
+    {admission_no:"1001",prem_no:"1",student_name:"John",gender:"Male",class_name:"Form 1"}
+  ];
+
+  const ws=XLSX.utils.json_to_sheet(data);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,"Template");
+  XLSX.writeFile(wb,"students_template.xlsx");
+}
+
+/* IMPORT */
 async function importExcel(){
 
-  const fileInput = document.getElementById("excelFile");
+  const file=document.getElementById("excelFile").files[0];
+  const reader=new FileReader();
 
-  if(!fileInput.files.length){
-    alert("Chagua file");
-    return;
-  }
+  reader.onload=async e=>{
 
-  const file = fileInput.files[0];
-  const reader = new FileReader();
+    const wb=XLSX.read(new Uint8Array(e.target.result),{type:"array"});
+    const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
 
-  reader.onload = async function(e){
+    const {data:classes}=await supabaseClient.from("classes").select("*");
 
-    const data = new Uint8Array(e.target.result);
-    const workbook = XLSX.read(data,{type:'array'});
+    let map={};
+    classes.forEach(c=>map[c.class_name.toLowerCase()]=c.id);
 
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(sheet);
-
-    const { data: classes } = await supabaseClient.from("classes").select("*");
-
-    let classMap = {};
-    classes.forEach(c=>{
-      classMap[c.class_name.toLowerCase()] = c.id;
-    });
-
-    previewData = [];
+    previewData=[];
 
     rows.forEach(r=>{
-      let classId = classMap[(r.class_name || "").toLowerCase()];
-      if(!classId) return;
+      let id=map[(r.class_name||"").toLowerCase()];
+      if(!id) return;
 
-      previewData.push({
-        admission_no: r.admission_no,
-        prem_no: r.prem_no || "",
-        student_name: r.student_name,
-        gender: r.gender || "",
-        class_name: r.class_name,
-        class_id: classId
-      });
+      previewData.push({...r,class_id:id});
     });
 
     showPreview();
@@ -401,45 +376,31 @@ async function importExcel(){
   reader.readAsArrayBuffer(file);
 }
 
-/* SHOW PREVIEW */
+/* PREVIEW */
 function showPreview(){
+  const t=document.getElementById("previewTable");
+  const s=document.getElementById("previewSection");
 
-  const table = document.getElementById("previewTable");
-  const section = document.getElementById("previewSection");
-
-  table.innerHTML = "";
-
+  t.innerHTML="";
   previewData.forEach(r=>{
-    table.innerHTML += `
+    t.innerHTML+=`
       <tr>
         <td>${r.admission_no}</td>
         <td>${r.prem_no}</td>
         <td>${r.student_name}</td>
         <td>${r.gender}</td>
         <td>${r.class_name}</td>
-      </tr>
-    `;
+      </tr>`;
   });
 
-  section.style.display = "block";
+  s.style.display="block";
 }
 
-/* CONFIRM IMPORT */
+/* CONFIRM */
 async function confirmImport(){
-
-  await supabaseClient
-    .from("students")
-    .insert(previewData.map(s=>({
-      admission_no: s.admission_no,
-      prem_no: s.prem_no,
-      student_name: s.student_name,
-      gender: s.gender,
-      class_id: s.class_id
-    })));
-
-  previewData = [];
-  document.getElementById("previewSection").style.display = "none";
-
+  await supabaseClient.from("students").insert(previewData);
+  previewData=[];
+  document.getElementById("previewSection").style.display="none";
   loadStudents();
 }
 
