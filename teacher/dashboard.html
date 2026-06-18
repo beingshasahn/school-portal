@@ -18,17 +18,65 @@ body{
   background:#f4f6f9;
 }
 
+/* HEADER */
 .header{
   background:#1e3c72;
   color:white;
-  padding:15px;
+  padding:12px;
   text-align:center;
+  line-height:1.4;
 }
 
+.header h2{
+  margin:0;
+  font-size:18px;
+}
+
+.header small{
+  font-size:12px;
+  opacity:0.9;
+}
+
+/* TOPBAR */
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px 15px;
+  background:#fff;
+  gap:10px;
+}
+
+#teacherInfo{
+  font-weight:bold;
+  font-size:14px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* MODERN LOGOUT BUTTON */
+.logout{
+  background:#ff3b30;
+  color:white;
+  border:none;
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  flex-shrink:0;
+}
+
+/* CONTAINER */
 .container{
   padding:15px;
 }
 
+/* CARD */
 .card{
   background:white;
   padding:15px;
@@ -37,6 +85,7 @@ body{
   box-shadow:0 2px 10px rgba(0,0,0,0.08);
 }
 
+/* SELECT */
 select, input{
   width:100%;
   padding:10px;
@@ -45,6 +94,7 @@ select, input{
   border:1px solid #ccc;
 }
 
+/* BUTTON */
 button{
   background:#1e3c72;
   color:white;
@@ -56,21 +106,9 @@ button{
   margin-top:10px;
 }
 
-.topbar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:10px 15px;
-  background:#fff;
-}
-
-.logout{
-  background:red;
-  padding:8px 12px;
-  border:none;
-  color:white;
-  border-radius:6px;
-  cursor:pointer;
+/* HIDDEN SUBJECT UNTIL CLASS SELECTED */
+.hidden{
+  display:none;
 }
 
 table{
@@ -88,17 +126,22 @@ th,td{
 
 <body>
 
+<!-- SCHOOL HEADER -->
 <div class="header">
-  <h2>Teacher Dashboard</h2>
+  <h2>KOROSHO ENGLISH MEDIUM PRE AND PRIMARY SCHOOL</h2>
+  <small>P.O. Box 03, TANDAHIMBA</small><br>
+  <small><b>TEACHER DASHBOARD</b></small>
 </div>
 
+<!-- TOP BAR -->
 <div class="topbar">
   <div id="teacherInfo">Loading...</div>
-  <button class="logout" onclick="logout()">Logout</button>
+  <button class="logout" onclick="logout()">⎋</button>
 </div>
 
 <div class="container">
 
+<!-- CLASS + SUBJECT -->
 <div class="card">
   <h3>Select Class & Subject</h3>
 
@@ -107,12 +150,13 @@ th,td{
     <option value="">Select Class</option>
   </select>
 
-  <label>Subject</label>
-  <select id="subject">
+  <label class="hidden" id="subjectLabel">Subject</label>
+  <select id="subject" class="hidden">
     <option value="">Select Subject</option>
   </select>
 </div>
 
+<!-- STUDENTS -->
 <div class="card">
   <h3>Students Marks Entry</h3>
 
@@ -143,7 +187,7 @@ let teacherId = null;
 let studentsList = [];
 let assignments = [];
 
-/* PROTECT ROUTE */
+/* PROTECT */
 async function protect(roleRequired){
 
   const { data: { user } } = await supabaseClient.auth.getUser();
@@ -178,7 +222,7 @@ async function init(){
   teacherId = userData.user.id;
 
   document.getElementById("teacherInfo").innerText =
-    "Logged in as: " + userData.user.email;
+    "Teacher: " + userData.user.email;
 
   loadAssignments();
 }
@@ -194,10 +238,7 @@ async function loadAssignments(){
   assignments = data || [];
 
   let classSelect = document.getElementById("class");
-  let subjectSelect = document.getElementById("subject");
-
   classSelect.innerHTML = `<option value="">Select Class</option>`;
-  subjectSelect.innerHTML = `<option value="">Select Subject</option>`;
 
   const uniqueClasses = [...new Map(assignments.map(a => [a.class_id, a.classes])).values()];
   uniqueClasses.forEach(c=>{
@@ -205,20 +246,45 @@ async function loadAssignments(){
       classSelect.innerHTML += `<option value="${c.id}">${c.class_name}</option>`;
     }
   });
+}
 
-  const uniqueSubjects = [...new Map(assignments.map(a => [a.subject_id, a.subjects])).values()];
+/* SHOW SUBJECT ONLY AFTER CLASS SELECT */
+function showSubjectDropdown(){
+
+  const subjectSelect = document.getElementById("subject");
+  const subjectLabel = document.getElementById("subjectLabel");
+
+  subjectSelect.classList.remove("hidden");
+  subjectLabel.classList.remove("hidden");
+}
+
+/* LOAD SUBJECTS AFTER CLASS */
+function loadSubjects(class_id){
+
+  let subjectSelect = document.getElementById("subject");
+  subjectSelect.innerHTML = `<option value="">Select Subject</option>`;
+
+  const filtered = assignments.filter(a => a.class_id == class_id);
+
+  const uniqueSubjects = [...new Map(filtered.map(a => [a.subject_id, a.subjects])).values()];
+
   uniqueSubjects.forEach(s=>{
     if(s){
       subjectSelect.innerHTML += `<option value="${s.id}">${s.subject_name}</option>`;
     }
   });
+
+  showSubjectDropdown();
 }
 
 /* LOAD STUDENTS */
 async function loadStudents(){
 
-  const class_id = document.getElementById("class").value;
+  let class_id = document.getElementById("class").value;
+
   if(!class_id) return;
+
+  loadSubjects(class_id);
 
   const { data } = await supabaseClient
     .from("students")
@@ -278,7 +344,6 @@ async function logout(){
   window.location.href = "../index.html";
 }
 
-/* START */
 init();
 </script>
 
