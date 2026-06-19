@@ -75,7 +75,9 @@ td{
 
 <div class="header">NECTA REPORT SYSTEM</div>
 <div class="school">KOROSHO ENGLISH MEDIUM PRE AND PRIMARY SCHOOL</div>
-
+<div id="lockNotice" style="display:none;color:red;font-weight:bold;text-align:center;">
+  🔒 This class is PUBLISHED. Editing is locked.
+</div>
 <select id="class" onchange="onClassChange()"></select>
 
 <div id="publishBar">
@@ -141,6 +143,7 @@ let role = "admin";
 /* STATE */
 let currentClass = null;
 let isPublished = false;
+let isClassLocked = false;
 
 /* ================= LOAD CLASSES ================= */
 async function loadClasses(){
@@ -178,21 +181,21 @@ async function onClassChange(){
 /* ================= CHECK PUBLISH ================= */
 async function checkPublishStatus(){
 
-  const { data, error } = await client
-    .from("published_reports")
+  const { data } = await client
+    .from("classes")
     .select("is_published")
-    .eq("class_id", currentClass)
+    .eq("id", currentClass)
     .maybeSingle();
 
-  if(error){
-    console.log(error.message);
-    isPublished = false;
-  } else {
-    isPublished = data?.is_published ?? false;
-  }
+  isPublished = data?.is_published ?? false;
+
+  // 🔒 LOCK STATE
+  isClassLocked = isPublished;
 
   document.getElementById("publishBtn").innerText =
-    isPublished ? "PUBLISHED" : "PUBLISH";
+    isPublished ? "PUBLISHED (LOCKED)" : "PUBLISH";
+
+  applyLockState();
 }
 
 /* ================= TOGGLE PUBLISH ================= */
@@ -351,7 +354,28 @@ async function loadReport(){
       `;
     });
 }
+function applyLockState(){
 
+  const inputs = document.querySelectorAll("input, select, button");
+
+  inputs.forEach(el=>{
+    if(el.id !== "publishBtn"){
+      el.disabled = isClassLocked;
+    }
+  });
+
+  // show warning
+  let notice = document.getElementById("lockNotice");
+  if(notice){
+    notice.style.display = isClassLocked ? "block" : "none";
+  }
+
+  // optional fade effect
+  const table = document.getElementById("tbody");
+  if(table){
+    table.style.opacity = isClassLocked ? "0.6" : "1";
+  }
+}
 /* INIT */
 loadClasses();
   </script>  
