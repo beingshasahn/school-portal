@@ -138,11 +138,13 @@ const client = supabase.createClient(
 );
 
 /* ROLE */
-let role = "admin";
+function getRole(){
+  return role || "public";
+}
+
 function isPublicUser(){
-  return role !== "admin" &&
-         role !== "teacher" &&
-         role !== "headteacher";
+  const r = getRole();
+  return !(r === "admin" || r === "teacher" || r === "headteacher");
 }
 /* STATE */
 let currentClass = null;
@@ -194,6 +196,7 @@ if(isPublicUser()){
 }
 
 /* ================= CHECK PUBLISH ================= */
+async function checkPublishStatus(){
 
   const { data } = await client
     .from("published_reports")
@@ -203,11 +206,15 @@ if(isPublicUser()){
 
   isPublished = data?.is_published === true;
 
-  document.getElementById("publishBtn").innerText =
-    isPublished ? "PUBLISHED" : "PUBLISH";
+  const btn = document.getElementById("publishBtn");
+
+  if(btn){
+    btn.innerText = isPublished ? "PUBLISHED" : "PUBLISH";
+    btn.style.background = isPublished ? "green" : "#1e3c72";
+  }
 
   applyLockState();
-}
+    }
 
 /* ================= TOGGLE PUBLISH ================= */
 async function togglePublish(){
@@ -242,10 +249,11 @@ async function togglePublish(){
 
 /* ================= NECTA REPORT ================= */
 async function loadReport(){
-// 🚨 HARD BLOCK FOR PUBLIC USERS
+
+  // 🚨 BLOCK ACCESS FOR PUBLIC BEFORE DATA LOAD
   if(isPublicUser() && !isPublished){
     document.getElementById("tbody").innerHTML =
-      "<tr><td colspan='5' style='text-align:center;color:red'>RESULTS NOT PUBLISHED</td></tr>";
+      "<tr><td colspan='5' style='color:red;text-align:center'>RESULTS NOT PUBLISHED YET</td></tr>";
 
     document.getElementById("gradePerf").innerHTML = "";
     document.getElementById("subtbody").innerHTML = "";
@@ -432,19 +440,25 @@ if(final.length === 0){
 }
 function applyLockState(){
 
-  const disabled = isClassLocked;
+  const locked = isPublished;
 
-  document.querySelectorAll("input, select").forEach(el=>{
-    if(el.id !== "class"){
-      el.disabled = disabled;
+  // disable ALL editing except publish button
+  document.querySelectorAll("input, select, button").forEach(el=>{
+    if(el.id !== "publishBtn"){
+      el.disabled = locked;
     }
   });
 
+  // show lock notice
   const notice = document.getElementById("lockNotice");
   if(notice){
-    notice.style.display = disabled ? "block" : "none";
+    notice.style.display = locked ? "block" : "none";
   }
-              }
+
+  // fade table
+  document.getElementById("tbody").style.opacity = locked ? "0.6" : "1";
+    }
+  
 /* INIT */
 
 if(role !== "admin"){
