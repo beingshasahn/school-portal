@@ -29,9 +29,7 @@ select,button{
   padding:8px;
 }
 
-button{
-  cursor:pointer;
-}
+button{ cursor:pointer; }
 
 #publishBar{
   display:none;
@@ -63,6 +61,13 @@ td{
   white-space:nowrap;
 }
 
+#lockNotice{
+  display:none;
+  color:red;
+  font-weight:bold;
+  text-align:center;
+}
+
 @media print{
   select,button{display:none;}
 }
@@ -76,9 +81,7 @@ td{
 <div class="header">NECTA REPORT SYSTEM</div>
 <div class="school">KOROSHO ENGLISH MEDIUM PRE AND PRIMARY SCHOOL</div>
 
-<div id="lockNotice" style="display:none;color:red;font-weight:bold;text-align:center;">
-🔒 This class is PUBLISHED. Editing locked.
-</div>
+<div id="lockNotice">🔒 This class is PUBLISHED. Editing is locked.</div>
 
 <select id="class" onchange="onClassChange()"></select>
 
@@ -88,6 +91,7 @@ td{
 
 <button onclick="window.print()">PRINT</button>
 
+<!-- GRADE -->
 <div class="table-wrap">
 <table>
 <thead>
@@ -99,6 +103,7 @@ td{
 </table>
 </div>
 
+<!-- MAIN -->
 <div class="table-wrap">
 <table>
 <thead>
@@ -113,6 +118,7 @@ td{
 </table>
 </div>
 
+<!-- SUBJECT -->
 <div class="table-wrap">
 <table>
 <thead>
@@ -123,7 +129,7 @@ td{
 <th>SAT</th>
 <th>PASSED (A-C)</th>
 <th>AVER. MARKS</th>
-<th>COMPETENCY</th>
+<th>GPA</th>
 </tr>
 </thead>
 <tbody id="subtbody"></tbody>
@@ -136,17 +142,55 @@ const client = supabase.createClient(
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s"
 );
 
-/* ROLE SYSTEM (replace with real login later) */
-let role = "admin";
+/* ================= AUTH ================= */
+let sessionUser = null;
+let role = "public";
 
-function isPublic(){
-  return !(role === "admin" || role === "teacher" || role === "headteacher");
+/* get user + role from profiles table */
+async function loadUser(){
+  const { data: { user } } = await client.auth.getUser();
+
+  sessionUser = user;
+
+  if(!user){
+    role = "public";
+    return;
+  }
+
+  const { data } = await client
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  role = data?.role || "public";
 }
 
-/* STATE */
+/* ================= STATE ================= */
 let currentClass = null;
 let isPublished = false;
-let classLocked = false;
+let isLocked = false;
+
+/* ================= HELPERS ================= */
+function grade(m){
+  if(m>=81) return "A";
+  if(m>=61) return "B";
+  if(m>=41) return "C";
+  if(m>=21) return "D";
+  return "E";
+}
+
+function gpa(g){
+  if(g==="A") return 5;
+  if(g==="B") return 4;
+  if(g==="C") return 3;
+  if(g==="D") return 2;
+  return 1;
+}
+
+function isPublicUser(){
+  return role === "public";
+}
 
 /* ================= LOAD CLASSES ================= */
 async function loadClasses(){
@@ -160,46 +204,43 @@ async function loadClasses(){
   });
 }
 
-/* ================= CHECK PUBLISH (SECURE) ================= */
+/* ================= CLASS CHANGE ================= */
+async function onClassChange(){
+
+  currentClass = document.getElementById("class").value;
+  if(!currentClass) return;
+
+  document.getElementById("publishBar").style.display =
+    (role === "admin") ? "block" : "none";
+
+  await checkPublishStatus();
+
+  if(isPublicUser() && !isPublished){
+    document.getElementById("tbody").innerHTML =
+      "<tr><td colspan='4'>RESULTS NOT PUBLISHED YET</td></tr>";
+    return;
+  }
+
+  loadReport();
+}
+
+/* ================= PUBLISH CHECK ================= */
 async function checkPublishStatus(){
 
   const { data } = await client
     .from("published_reports")
-    .select("is_published")
+    .select("*")
     .eq("class_id", currentClass)
     .maybeSingle();
 
   isPublished = data?.is_published === true;
-  classLocked = isPublished;
+  isLocked = isPublished;
 
   document.getElementById("publishBtn").innerText =
     isPublished ? "PUBLISHED" : "PUBLISH";
 
   document.getElementById("lockNotice").style.display =
-    classLocked ? "block" : "none";
-}
-
-/* ================= CLASS CHANGE ================= */
-async function onClassChange(){
-  currentClass = document.getElementById("class").value;
-  if(!currentClass) return;
-
-  document.getElementById("publishBar").style.display =
-    role === "admin" ? "block" : "none";
-
-  await checkPublishStatus();
-
-  /* 🔥 CRITICAL SECURITY CHECK BEFORE FETCH */
-  if(isPublic() && !isPublished){
-    document.getElementById("tbody").innerHTML =
-      "<tr><td colspan='4' style='color:red;text-align:center'>RESULTS NOT PUBLISHED</td></tr>";
-
-    document.getElementById("gradePerf").innerHTML = "";
-    document.getElementById("subtbody").innerHTML = "";
-    return;
-  }
-
-  loadReport();
+    isLocked ? "block" : "none";
 }
 
 /* ================= TOGGLE PUBLISH ================= */
@@ -225,8 +266,12 @@ async function togglePublish(){
   await checkPublishStatus();
 }
 
-/* ================= NECTA LOGIC ================= */
+/* ================= NECTA REPORT ================= */
 async function loadReport(){
+
+  if(isPublicUser() && !isPublished){
+    return;
+  }
 
   const { data:students } = await client.from("students").select("*");
   const { data:subjects } = await client.from("subjects").select("*");
@@ -238,92 +283,65 @@ async function loadReport(){
 
   let subStats = {};
   subjects.forEach(s=>{
-    subStats[s.id] = {sat:0, pass:0, total:0};
+    subStats[s.id] = {sat:0,pass:0,total:0};
   });
 
-  let gradePerf = {
-    Male:{A:0,B:0,C:0,D:0,E:0},
-    Female:{A:0,B:0,C:0,D:0,E:0}
-  };
-
+  let gradePerf = {Male:{A:0,B:0,C:0,D:0,E:0},Female:{A:0,B:0,C:0,D:0,E:0}};
   let final = [];
 
   filtered.forEach(stu=>{
-    let total=0, count=0, detail=[];
+
+    let total=0,count=0,detail=[];
 
     subjects.forEach(sub=>{
       let r = results.find(x =>
-        String(x.student_id) === String(stu.id) &&
-        String(x.subject_id) === String(sub.id)
+        String(x.student_id)===String(stu.id) &&
+        String(x.subject_id)===String(sub.id)
       );
 
-      if(!r || r.marks==null) return;
+      if(!r) return;
 
       let m = Number(r.marks);
 
       subStats[sub.id].sat++;
       subStats[sub.id].total+=m;
-
       if(m>=41) subStats[sub.id].pass++;
 
       total+=m;
       count++;
 
-      detail.push(`${sub.subject_name.substring(0,4)}-${grade(m)}`);
+      detail.push(`${sub.subject_name.slice(0,4)}-${grade(m)}`);
     });
 
     if(count===0) return;
 
-    let avg = total/count;
-    let avgGrade = grade(avg);
+    let avg=total/count;
+    let avgG=grade(avg);
 
-    let sex = stu.gender==="Female"?"Female":"Male";
-    gradePerf[sex][avgGrade]++;
-
-    detail.push("AVG-"+avgGrade);
+    let sex=stu.gender==="Female"?"Female":"Male";
+    gradePerf[sex][avgG]++;
 
     final.push({
-      adm: stu.admission_no,
-      prem: stu.prem_no||"",
-      sex: stu.gender==="Female"?"F":"M",
-      name: stu.student_name,
-      detail: detail.join(" ")
+      adm:stu.admission_no,
+      prem:stu.prem_no||"",
+      sex:stu.gender==="Female"?"F":"M",
+      detail:detail.join(" ")
     });
   });
 
-  /* TABLE */
-  let tb = document.getElementById("tbody");
+  let tb=document.getElementById("tbody");
   tb.innerHTML="";
-
-  const head = document.getElementById("mainHead");
-
-  if(role==="admin"||role==="teacher"||role==="headteacher"){
-    head.innerHTML=`
-      <th>CAND NO</th>
-      <th>NAME</th>
-      <th>PREM NO</th>
-      <th>SEX</th>
-      <th>SUBJECTS</th>`;
-  } else {
-    head.innerHTML=`
-      <th>CAND NO</th>
-      <th>PREM NO</th>
-      <th>SEX</th>
-      <th>SUBJECTS</th>`;
-  }
 
   final.forEach(s=>{
     tb.innerHTML+=`
       <tr>
         <td>${s.adm}</td>
-        ${role!=="public"?`<td>${s.name}</td>`:""}
         <td>${s.prem}</td>
         <td>${s.sex}</td>
         <td>${s.detail}</td>
       </tr>`;
   });
 
-  /* GRADE */
   let gp=document.getElementById("gradePerf");
   gp.innerHTML="";
 
@@ -331,47 +349,17 @@ async function loadReport(){
     let r=gradePerf[sex];
     gp.innerHTML+=`
       <tr>
-        <td>${sex}</td><td>${r.A}</td><td>${r.B}</td><td>${r.C}</td><td>${r.D}</td><td>${r.E}</td>
-      </tr>`;
-  });
-
-  /* SUBJECT */
-  let subbody=document.getElementById("subtbody");
-  subbody.innerHTML="";
-  let i=1;
-
-  subjects.filter(s=>subStats[s.id].sat>0)
-  .forEach(sub=>{
-    let st=subStats[sub.id];
-    let avg=st.total/st.sat;
-
-    subbody.innerHTML+=`
-      <tr>
-        <td>${i++}</td>
-        <td>${sub.subject_name}</td>
-        <td>${st.sat}</td>
-        <td>${st.sat}</td>
-        <td>${st.pass}</td>
-        <td>${avg.toFixed(1)}</td>
-        <td>${gpa(grade(avg)).toFixed(2)}</td>
+        <td>${sex}</td>
+        <td>${r.A}</td><td>${r.B}</td><td>${r.C}</td><td>${r.D}</td><td>${r.E}</td>
       </tr>`;
   });
 }
 
-/* HELPERS */
-function grade(m){
-  if(m>=81) return "A";
-  if(m>=61) return "B";
-  if(m>=41) return "C";
-  if(m>=21) return "D";
-  return "E";
-}
-
-function gpa(g){
-  return g==="A"?5:g==="B"?4:g==="C"?3:g==="D"?2:1;
-}
-
-loadClasses();
+/* INIT */
+(async ()=>{
+  await loadUser();
+  loadClasses();
+})();
 </script>
 
 </body>
