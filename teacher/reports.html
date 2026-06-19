@@ -173,7 +173,7 @@ async function onClassChange(){
   await checkPublishStatus();
 
   // 🚨 PUBLIC BLOCK BEFORE LOAD
-  if(role === "public" && !isPublished){
+  if(isPublicUser() && !isPublished){
     document.getElementById("tbody").innerHTML =
       "<tr><td colspan='4'>RESULTS NOT PUBLISHED YET</td></tr>";
     return;
@@ -243,7 +243,7 @@ async function togglePublish(){
 /* ================= NECTA REPORT ================= */
 async function loadReport(){
 // 🚨 HARD BLOCK FOR PUBLIC USERS
-  if(role === "public" && !isPublished){
+  if(isPublicUser() && !isPublished){
     document.getElementById("tbody").innerHTML =
       "<tr><td colspan='5' style='text-align:center;color:red'>RESULTS NOT PUBLISHED</td></tr>";
 
