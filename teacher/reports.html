@@ -90,7 +90,7 @@ td{
 
 <button onclick="window.print()">PRINT</button>
 
-<!-- GRADE -->
+<!-- GRADE PERFORMANCE -->
 <div class="table-wrap">
 <table>
 <thead>
@@ -102,7 +102,7 @@ td{
 </table>
 </div>
 
-<!-- MAIN -->
+<!-- MAIN TABLE -->
 <div class="table-wrap">
 <table>
 <thead>
@@ -117,7 +117,7 @@ td{
 </table>
 </div>
 
-<!-- SUBJECT -->
+<!-- SUBJECT PERFORMANCE -->
 <div class="table-wrap">
 <table>
 <thead>
@@ -128,7 +128,7 @@ td{
 <th>SAT</th>
 <th>PASSED (A-C)</th>
 <th>AVER. MARKS</th>
-<th>GPA</th>
+<th>COMPETENCY (GPA)</th>
 </tr>
 </thead>
 <tbody id="subtbody"></tbody>
@@ -142,8 +142,8 @@ const client = supabase.createClient(
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s"
 );
 
-/* ================= ROLE ================= */
-let role = "admin"; // admin | teacher | headteacher | public
+/* ================= ROLE (PUBLIC LOGIC FIXED) ================= */
+let role = "admin";
 
 function isPublicUser(){
   return !(role === "admin" || role === "teacher" || role === "headteacher");
@@ -319,7 +319,7 @@ async function loadReport(){
   });
 }
 
-/* ================= LOCK UI ================= */
+/* ================= LOCK ================= */
 function applyLockState(){
 
   const locked = isPublished;
@@ -334,18 +334,10 @@ function applyLockState(){
     locked ? "block" : "none";
 }
 
-/* ================= UTIL ================= */
-function grade(m){
-  if(m>=81) return "A";
-  if(m>=61) return "B";
-  if(m>=41) return "C";
-  if(m>=21) return "D";
-  return "E";
-}
-
+/* INIT */
 loadClasses();
 
 </script>
 
 </body>
-</html>
+  </html>
