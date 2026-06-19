@@ -158,32 +158,25 @@ async function addTeacher(){
     return;
   }
 
-  // STEP 1: create auth user (IMPORTANT FIX)
-  const { data: authData, error: authError } =
-await supabaseClient.auth.signUp({
-  email: email,
-  password: "KOROSHO2026",
-  options: {
-    data: {
-      full_name: name,
-      role: role
+  const { data, error } = await supabaseClient.auth.signUp({
+    email: email,
+    password: "KOROSHO2026",
+    options: {
+      data: {
+        full_name: name,
+        role: role
+      }
     }
-  }
-});
-
-  if(authError){
-    alert(authError.message);
-    return;
-  }
-
-  const userId = authData.user.id;
+  });
 
   if(error){
     alert(error.message);
-  } else {
-    alert("Teacher account created successfully");
-    loadTeachers();
+    return;
   }
+
+  alert("Teacher account created successfully");
+
+  loadTeachers();
 }
 
 async function loadTeachers(){
