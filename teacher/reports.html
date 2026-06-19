@@ -139,7 +139,11 @@ const client = supabase.createClient(
 
 /* ROLE */
 let role = "admin";
-
+function isPublicUser(){
+  return role !== "admin" &&
+         role !== "teacher" &&
+         role !== "headteacher";
+}
 /* STATE */
 let currentClass = null;
 let isPublished = false;
@@ -174,7 +178,7 @@ async function onClassChange(){
       "<tr><td colspan='4'>RESULTS NOT PUBLISHED YET</td></tr>";
     return;
   }
-if(role === "public"){
+if(isPublicUser()){
   await checkPublishStatus();
 
   if(!isPublished){
@@ -190,8 +194,6 @@ if(role === "public"){
 }
 
 /* ================= CHECK PUBLISH ================= */
-async function checkPublishStatus(){
-async function checkPublishStatus(){
 
   const { data } = await client
     .from("published_reports")
@@ -210,12 +212,30 @@ async function checkPublishStatus(){
 /* ================= TOGGLE PUBLISH ================= */
 async function togglePublish(){
 
-  await client
-    .from("classes")
-    .update({
-      is_published: !isPublished
-    })
-    .eq("id", currentClass);
+  const { data } = await client
+    .from("published_reports")
+    .select("*")
+    .eq("class_id", currentClass)
+    .maybeSingle();
+
+  if(data){
+
+    await client
+      .from("published_reports")
+      .update({
+        is_published: !data.is_published
+      })
+      .eq("class_id", currentClass);
+
+  } else {
+
+    await client
+      .from("published_reports")
+      .insert([{
+        class_id: currentClass,
+        is_published: true
+      }]);
+  }
 
   await checkPublishStatus();
 }
@@ -412,15 +432,19 @@ if(final.length === 0){
 }
 function applyLockState(){
 
-  document.getElementById("publishBtn").disabled = false;
+  const disabled = isClassLocked;
+
+  document.querySelectorAll("input, select").forEach(el=>{
+    if(el.id !== "class"){
+      el.disabled = disabled;
+    }
+  });
 
   const notice = document.getElementById("lockNotice");
-
   if(notice){
-    notice.style.display =
-      isClassLocked ? "block" : "none";
+    notice.style.display = disabled ? "block" : "none";
   }
-}
+              }
 /* INIT */
 
 if(role !== "admin"){
