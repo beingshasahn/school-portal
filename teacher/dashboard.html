@@ -297,7 +297,10 @@ async function loadStudents(class_id){
 
 /* AUTO SAVE (UPSERT + DELETE LOGIC) */
 async function autoSave(student_id, value){
-
+if(isClassLocked){
+  alert("Results have been published. You cannot edit.");
+  return;
+}
   if(!selectedClass || !selectedSubject) return;
 
   const mark = value.trim();
