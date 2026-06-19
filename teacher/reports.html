@@ -174,32 +174,24 @@ async function onClassChange(){
       "<tr><td colspan='4'>RESULTS NOT PUBLISHED YET</td></tr>";
     return;
   }
+if(role === "public"){
+  await checkPublishStatus();
 
+  if(!isPublished){
+    document.getElementById("publishBar").style.display = "none";
+
+    document.getElementById("tbody").innerHTML =
+      "<tr><td colspan='5' style='text-align:center;color:red'>RESULTS NOT YET PUBLISHED</td></tr>";
+
+    return;
+  }
+}
   loadReport();
 }
 
 /* ================= CHECK PUBLISH ================= */
 async function checkPublishStatus(){
-
-  const { data } = await client
-    .from("classes")
-    .select("is_published")
-    .eq("id", currentClass)
-    .maybeSingle();
-
-  isPublished = data?.is_published ?? false;
-
-  // 🔒 LOCK STATE
-  isClassLocked = isPublished;
-
-  document.getElementById("publishBtn").innerText =
-    isPublished ? "PUBLISHED (LOCKED)" : "PUBLISH";
-
-  applyLockState();
-}
-
-/* ================= TOGGLE PUBLISH ================= */
-async function togglePublish(){
+async function checkPublishStatus(){
 
   const { data } = await client
     .from("published_reports")
@@ -207,23 +199,38 @@ async function togglePublish(){
     .eq("class_id", currentClass)
     .maybeSingle();
 
-  if(data){
-    await client
-      .from("published_reports")
-      .update({ is_published: !data.is_published })
-      .eq("class_id", currentClass);
-  } else {
-    await client
-      .from("published_reports")
-      .insert([{ class_id: currentClass, is_published: true }]);
-  }
+  isPublished = data?.is_published === true;
+
+  document.getElementById("publishBtn").innerText =
+    isPublished ? "PUBLISHED" : "PUBLISH";
+
+  applyLockState();
+}
+
+/* ================= TOGGLE PUBLISH ================= */
+async function togglePublish(){
+
+  await client
+    .from("classes")
+    .update({
+      is_published: !isPublished
+    })
+    .eq("id", currentClass);
 
   await checkPublishStatus();
 }
 
 /* ================= NECTA REPORT ================= */
 async function loadReport(){
+// 🚨 HARD BLOCK FOR PUBLIC USERS
+  if(role === "public" && !isPublished){
+    document.getElementById("tbody").innerHTML =
+      "<tr><td colspan='5' style='text-align:center;color:red'>RESULTS NOT PUBLISHED</td></tr>";
 
+    document.getElementById("gradePerf").innerHTML = "";
+    document.getElementById("subtbody").innerHTML = "";
+    return;
+  }
   const { data:students } = await client.from("students").select("*");
   const { data:subjects } = await client.from("subjects").select("*");
   const { data:results } = await client.from("results").select("*");
@@ -283,32 +290,81 @@ async function loadReport(){
     detail.push("AVG-" + avgGrade);
 
     final.push({
-      adm: stu.admission_no,
-      prem: stu.prem_no || "",
-      sex: stu.gender === "Female" ? "F" : "M",
-      detail: detail.join(" ")
-    });
+  adm: stu.admission_no,
+  name: stu.student_name,
+  prem: stu.prem_no || "",
+  sex: stu.gender === "Female" ? "F" : "M",
+  detail: detail.join(" ")
+});
   });
 
   /* ================= RENDER TABLE ================= */
   let tb = document.getElementById("tbody");
-  tb.innerHTML = "";
+tb.innerHTML = "";
 
-  if(final.length === 0){
-    tb.innerHTML = "<tr><td colspan='4'>NO DATA</td></tr>";
-    return;
-  }
+/* ROLE HEADERS */
+const head = document.getElementById("mainHead");
+
+if(
+  role === "admin" ||
+  role === "teacher" ||
+  role === "headteacher"
+){
+
+  head.innerHTML = `
+    <th>CAND NO</th>
+    <th>NAME</th>
+    <th>PREM NO</th>
+    <th>SEX</th>
+    <th>SUBJECTS</th>
+  `;
+
+}else{
+
+  head.innerHTML = `
+    <th>CAND NO</th>
+    <th>PREM NO</th>
+    <th>SEX</th>
+    <th>SUBJECTS</th>
+  `;
+
+}
+
+if(final.length === 0){
+  tb.innerHTML = "<tr><td colspan='4'>NO DATA</td></tr>";
+  return;
+                                              }
 
   final.forEach((s,i)=>{
+
+  if(
+    role === "admin" ||
+    role === "teacher" ||
+    role === "headteacher"
+  ){
+
+    tb.innerHTML += `
+      <tr>
+        <td>${s.adm}</td>
+        <td>${s.name}</td>
+        <td>${s.prem}</td>
+        <td>${s.sex}</td>
+        <td>${s.detail}</td>
+      </tr>`;
+
+  } else {
+
     tb.innerHTML += `
       <tr>
         <td>${s.adm}</td>
         <td>${s.prem}</td>
         <td>${s.sex}</td>
         <td>${s.detail}</td>
-      </tr>
-    `;
-  });
+      </tr>`;
+
+  }
+
+});
 
   /* ================= GRADE PERF ================= */
   let gp = document.getElementById("gradePerf");
@@ -356,28 +412,23 @@ async function loadReport(){
 }
 function applyLockState(){
 
-  const inputs = document.querySelectorAll("input, select, button");
+  document.getElementById("publishBtn").disabled = false;
 
-  inputs.forEach(el=>{
-    if(el.id !== "publishBtn"){
-      el.disabled = isClassLocked;
-    }
-  });
+  const notice = document.getElementById("lockNotice");
 
-  // show warning
-  let notice = document.getElementById("lockNotice");
   if(notice){
-    notice.style.display = isClassLocked ? "block" : "none";
-  }
-
-  // optional fade effect
-  const table = document.getElementById("tbody");
-  if(table){
-    table.style.opacity = isClassLocked ? "0.6" : "1";
+    notice.style.display =
+      isClassLocked ? "block" : "none";
   }
 }
 /* INIT */
+
+if(role !== "admin"){
+  document.getElementById("publishBar").style.display = "none";
+}
+
 loadClasses();
+    
   </script>  
 
 </body>
