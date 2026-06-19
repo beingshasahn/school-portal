@@ -453,7 +453,10 @@ function editStudent(student){
 
 /* DELETE */
 async function deleteStudent(id){
-
+if(isClassLocked){
+  alert("Class is published. You cannot delete.");
+  return;
+}
   if(!confirm("Delete this student?")){
     return;
   }
