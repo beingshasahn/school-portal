@@ -159,10 +159,17 @@ async function addTeacher(){
   }
 
   // STEP 1: create auth user (IMPORTANT FIX)
-  const { data: authData, error: authError } = await supabaseClient.auth.signUp({
-    email: email,
-    password: "KOROSHO2026"
-  });
+  const { data: authData, error: authError } =
+await supabaseClient.auth.signUp({
+  email: email,
+  password: "KOROSHO2026",
+  options: {
+    data: {
+      full_name: name,
+      role: role
+    }
+  }
+});
 
   if(authError){
     alert(authError.message);
@@ -170,16 +177,6 @@ async function addTeacher(){
   }
 
   const userId = authData.user.id;
-
-  // STEP 2: insert profile with SAME ID
-  const { error } = await supabaseClient
-    .from("profiles")
-    .insert([{
-      id: userId,
-      full_name: name,
-      email: email,
-      role: role
-    }]);
 
   if(error){
     alert(error.message);
