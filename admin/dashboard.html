@@ -232,22 +232,33 @@ async function protect(){
     return;
   }
 
-  const { data: profile } = await supabaseClient
+  // SAFE PROFILE FETCH (no crash, no false logout)
+  const { data: profile, error } = await supabaseClient
     .from("profiles")
     .select("role, full_name")
     .eq("id", user.id)
     .maybeSingle();
 
-  if(!profile || profile.role !== "admin"){
-    await supabaseClient.auth.signOut();
-    window.location.href = "../index.html";
+  console.log("USER:", user);
+  console.log("PROFILE:", profile);
+  console.log("ERROR:", error);
+
+  // ❌ HATU-LOGOUT AUTOMATICALLY HAPA TENA
+  if(error){
+    document.getElementById("welcome").innerText =
+      "Error loading profile";
+    return;
+  }
+
+  if(profile?.role !== "admin"){
+    document.getElementById("welcome").innerText =
+      "Access denied (not admin)";
     return;
   }
 
   document.getElementById("welcome").innerText =
     "Welcome, " + (profile.full_name || user.email);
 }
-
 /* LOAD TEACHERS SAFE */
 async function loadTeachers(){
 
