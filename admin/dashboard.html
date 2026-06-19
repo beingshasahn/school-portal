@@ -28,11 +28,6 @@ body{
   padding:20px;
 }
 
-.sidebar h2{
-  font-size:18px;
-  margin-bottom:15px;
-}
-
 .sidebar a{
   display:block;
   color:white;
@@ -43,37 +38,17 @@ body{
   border-radius:6px;
 }
 
-.sidebar a:hover{
-  background:rgba(255,255,255,0.2);
-}
-
 /* MAIN */
 .main{
   flex:1;
   padding:20px;
 }
 
-/* HEADER */
 .header{
   background:white;
   padding:15px;
   border-radius:10px;
   margin-bottom:15px;
-}
-
-.header h2{
-  margin:0;
-}
-
-.small{
-  color:gray;
-  font-size:13px;
-}
-
-/* WELCOME */
-.welcome{
-  margin:10px 0 20px 0;
-  font-weight:bold;
 }
 
 /* CARDS */
@@ -88,12 +63,6 @@ body{
   background:white;
   padding:15px;
   border-radius:10px;
-  box-shadow:0 2px 10px rgba(0,0,0,0.08);
-}
-
-.card h3{
-  margin:0;
-  font-size:22px;
 }
 
 /* TABLE */
@@ -108,7 +77,6 @@ table{
 th,td{
   padding:10px;
   border-bottom:1px solid #eee;
-  text-align:left;
 }
 
 th{
@@ -116,68 +84,71 @@ th{
   color:white;
 }
 
-/* RESPONSIVE */
-@media(max-width:768px){
-  body{
-    flex-direction:column;
-  }
-  .sidebar{
-    width:100%;
-  }
-}
-
-/* TOP BAR */
-.topbar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-.logout{
+/* BUTTON */
+.deleteBtn{
   background:red;
   color:white;
   border:none;
-  padding:8px 12px;
+  padding:6px 10px;
   border-radius:6px;
   cursor:pointer;
 }
-</style>
 
+/* MODAL */
+#deleteModal{
+  display:none;
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:rgba(0,0,0,0.5);
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+}
+
+.modal-box{
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  width:320px;
+  text-align:center;
+  box-shadow:0 10px 30px rgba(0,0,0,0.3);
+}
+
+.modal-box h3{
+  margin:0;
+}
+
+.modal-btn{
+  padding:8px 12px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  margin:5px;
+}
+
+</style>
 </head>
 
 <body>
 
 <!-- SIDEBAR -->
 <div class="sidebar">
-  <h2>Admin Panel</h2>
-
+  <h3>Admin Panel</h3>
   <a href="dashboard.html">Dashboard</a>
   <a href="teachers.html">Teachers</a>
   <a href="students.html">Students</a>
-  <a href="classes.html">Classes</a>
-  <a href="subjects.html">Subjects</a>
-  <a href="assignments.html">Assignments</a>
-
-  <a href="#" onclick="logout()">Logout</a>
 </div>
 
 <!-- MAIN -->
 <div class="main">
 
-<div class="topbar">
-  <div class="header">
-    <h2>KOROSHO ENGLISH MEDIUM PRE & PRIMARY SCHOOL</h2>
-    <div class="small">P.O. Box 03, TANDAHIMBA</div>
-  </div>
-
-  <button class="logout" onclick="logout()">Logout</button>
+<div class="header">
+  <h2>KOROSHO SCHOOL ADMIN</h2>
 </div>
-
-<div class="welcome" id="welcome">Loading...</div>
 
 <!-- STATS -->
 <div class="cards">
-
   <div class="card">
     <h3 id="teachers">0</h3>
     <p>Teachers</p>
@@ -197,10 +168,8 @@ th{
     <h3 id="subjects">0</h3>
     <p>Subjects</p>
   </div>
-
 </div>
 
-<!-- TEACHERS WORKLOAD TABLE -->
 <h3>Teachers Overview</h3>
 
 <table>
@@ -211,6 +180,7 @@ th{
       <th>Classes</th>
       <th>Subjects</th>
       <th>Students</th>
+      <th>Action</th>
     </tr>
   </thead>
 
@@ -219,16 +189,42 @@ th{
 
 </div>
 
+<!-- MODAL -->
+<div id="deleteModal">
+  <div class="modal-box">
+    <h3>Delete Teacher?</h3>
+
+    <p style="margin:10px 0;font-weight:bold;">
+      <span id="deleteTeacherName">---</span>
+    </p>
+
+    <p style="color:gray;font-size:13px;">
+      This action cannot be undone.
+    </p>
+
+    <button id="confirmDeleteBtn" class="modal-btn" style="background:red;color:white;">
+      Yes Delete
+    </button>
+
+    <button onclick="closeModal()" class="modal-btn" style="background:#ccc;">
+      Cancel
+    </button>
+  </div>
+</div>
+
 <script>
 
 const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
+const supabaseKey = "YOUR_SUPABASE_KEY";
 
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-/* SESSION + ROLE PROTECTION */
-async function protect(){
+/* VARIABLES */
+let selectedTeacherId = null;
+let selectedTeacherName = "";
 
+/* PROTECT */
+async function protect(){
   const { data: { user } } = await supabaseClient.auth.getUser();
 
   if(!user){
@@ -246,9 +242,6 @@ async function protect(){
     window.location.href = "../index.html";
     return;
   }
-
-  document.getElementById("welcome").innerText =
-    "Welcome, " + (profile.full_name || user.email) + " (Admin)";
 }
 
 /* LOAD STATS */
@@ -277,7 +270,7 @@ async function loadStats(){
   document.getElementById("subjects").innerText = subjects.count || 0;
 }
 
-/* LOAD TEACHERS WORKLOAD (OPTION A) */
+/* LOAD TEACHERS */
 async function loadTeachers(){
 
   const { data: teachers } = await supabaseClient
@@ -309,14 +302,57 @@ async function loadTeachers(){
     tbody.innerHTML += `
       <tr>
         <td>${index+1}</td>
-        <td>${t.full_name || t.email || "N/A"}</td>
+        <td>${t.full_name || t.email}</td>
         <td>${classNames.join(", ")}</td>
         <td>${subjectNames.join(", ")}</td>
         <td>${studentCount}</td>
+        <td>
+          <button class="deleteBtn" onclick="openDeleteModal('${t.id}','${t.full_name || t.email}')">
+            Delete
+          </button>
+        </td>
       </tr>
     `;
   });
 }
+
+/* OPEN MODAL */
+function openDeleteModal(id,name){
+  selectedTeacherId = id;
+  selectedTeacherName = name;
+
+  document.getElementById("deleteTeacherName").innerText = name;
+  document.getElementById("deleteModal").style.display = "flex";
+}
+
+/* CLOSE MODAL */
+function closeModal(){
+  document.getElementById("deleteModal").style.display = "none";
+  selectedTeacherId = null;
+  selectedTeacherName = "";
+}
+
+/* CONFIRM DELETE */
+document.getElementById("confirmDeleteBtn").addEventListener("click", async function(){
+
+  if(!selectedTeacherId) return;
+
+  const { error } = await supabaseClient
+    .from("profiles")
+    .delete()
+    .eq("id", selectedTeacherId)
+    .eq("role","teacher");
+
+  if(error){
+    alert(error.message);
+  } else {
+    alert("You have successfully deleted this teacher");
+    loadTeachers();
+    loadStats();
+  }
+
+  closeModal();
+});
 
 /* LOGOUT */
 async function logout(){
