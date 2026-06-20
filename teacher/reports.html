@@ -12,7 +12,6 @@ body{
   background:#c7e3ee;
 }
 
-/* HEADER */
 .header{
   text-align:center;
   padding:10px;
@@ -31,9 +30,7 @@ select,button{
   padding:8px;
 }
 
-button{cursor:pointer;}
-
-/* TABLE WRAP */
+/* ================= TABLE WRAP ================= */
 .table-wrap{
   margin:12px;
   background:#fff7cc;
@@ -42,37 +39,36 @@ button{cursor:pointer;}
   border-radius:6px;
 }
 
-/* TITLES */
-.table-title{
-  text-align:center;
-  font-weight:bold;
-  padding:8px;
-  background:#f2d16b;
-  border-bottom:1px solid #999;
-  text-transform:uppercase;
-}
-
-/* TABLE */
+/* ================= TABLE CORE FIX ================= */
 table{
   width:100%;
   border-collapse:collapse;
   font-size:12px;
+
+  /* 🔥 KEY FIX */
+  table-layout: auto;
 }
 
+/* HEADERS */
 th{
   background:#e6e6e6;
   border:1px solid #999;
   padding:6px;
+
+  /* keep text clean */
+  white-space:nowrap;
 }
 
+/* CELLS */
 td{
   border:1px solid #999;
   padding:5px;
+
+  /* 🔥 IMPORTANT: allows auto-fit behavior */
   white-space:nowrap;
-  text-align:center;
 }
 
-/* PRINT */
+/* ================= PRINT ================= */
 @media print{
   select,button{display:none;}
 }
@@ -92,50 +88,47 @@ td{
 
 <!-- ================= TABLE 1 ================= -->
 <div class="table-wrap">
-  <div class="table-title">GRADE PERFORMANCE</div>
-  <table>
-    <thead>
-      <tr>
-        <th>SEX</th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th>
-      </tr>
-    </thead>
-    <tbody id="gradePerf"></tbody>
-  </table>
+<table>
+<thead>
+<tr>
+<th>SEX</th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th>
+</tr>
+</thead>
+<tbody id="gradePerf"></tbody>
+</table>
 </div>
 
-<!-- ================= TABLE 2 ================= -->
+<!-- ================= TABLE 2 (NO TITLE AS REQUESTED) ================= -->
 <div class="table-wrap">
-  <div class="table-title">STUDENT PERFORMANCE</div>
-  <table>
-    <thead>
-      <tr>
-        <th>CAND NO</th>
-        <th>PREM NO</th>
-        <th>SEX</th>
-        <th>SUBJECTS</th>
-      </tr>
-    </thead>
-    <tbody id="tbody"></tbody>
-  </table>
+<table>
+<thead>
+<tr>
+<th>CAND NO</th>
+<th>PREM NO</th>
+<th>SEX</th>
+<th>SUBJECTS</th>
+</tr>
+</thead>
+<tbody id="tbody"></tbody>
+</table>
 </div>
 
 <!-- ================= TABLE 3 ================= -->
 <div class="table-wrap">
-  <div class="table-title">SUBJECTS PERFORMANCE COMPETENCY</div>
-  <table>
-    <thead>
-      <tr>
-        <th>NO</th>
-        <th>SUBJECT</th>
-        <th>REGISTERED</th>
-        <th>SAT</th>
-        <th>PASSED</th>
-        <th>AVERAGE</th>
-        <th>GPA</th>
-      </tr>
-    </thead>
-    <tbody id="subtbody"></tbody>
-  </table>
+<table>
+<thead>
+<tr>
+<th>NO</th>
+<th>SUBJECT</th>
+<th>REGISTERED</th>
+<th>SAT</th>
+<th>PASSED</th>
+<th>AVERAGE</th>
+<th>GPA</th>
+</tr>
+</thead>
+<tbody id="subtbody"></tbody>
+</table>
 </div>
 
 <script>
@@ -147,7 +140,7 @@ const client = supabase.createClient(
 
 let currentClass = null;
 
-/* CLASS */
+/* ================= CLASS ================= */
 function getClassFromURL(){
   return new URLSearchParams(window.location.search).get("class");
 }
@@ -179,7 +172,7 @@ async function onClassChange(){
   loadReport();
 }
 
-/* GRADE */
+/* ================= GRADE ================= */
 function grade(m){
   if(m>=81) return "A";
   if(m>=61) return "B";
@@ -192,7 +185,7 @@ function gpa(g){
   return {A:5,B:4,C:3,D:2,E:1}[g] || 1;
 }
 
-/* REPORT */
+/* ================= REPORT ================= */
 async function loadReport(){
 
   if(!currentClass) return;
@@ -258,7 +251,7 @@ async function loadReport(){
     });
   });
 
-  /* TABLE 2 */
+  /* ================= TABLE 2 ================= */
   let tb=document.getElementById("tbody");
   tb.innerHTML="";
 
@@ -272,7 +265,7 @@ async function loadReport(){
       </tr>`;
   });
 
-  /* TABLE 1 */
+  /* ================= TABLE 1 ================= */
   let gp=document.getElementById("gradePerf");
   gp.innerHTML="";
 
@@ -289,7 +282,7 @@ async function loadReport(){
       </tr>`;
   });
 
-  /* TABLE 3 */
+  /* ================= TABLE 3 ================= */
   let subbody=document.getElementById("subtbody");
   subbody.innerHTML="";
 
