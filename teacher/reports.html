@@ -312,6 +312,13 @@ async function loadReport(){
 
   filtered.forEach(stu=>{
 
+  // 🔒 EXTRA SAFETY FOR PUBLIC VIEW
+  let studentName = stu.student_name;
+
+  if(isPublic()){
+    studentName = "—";
+  }
+
     let total=0,count=0,detail=[];
 
     subjects.forEach(sub=>{
@@ -340,10 +347,14 @@ async function loadReport(){
     let g = grade(avg);
 
     gradePerf[stu.gender||"Male"][g]++;
+let studentName = stu.student_name;
 
+if(isPublic()){
+  studentName = "—";
+    }
     final.push({
   adm: stu.admission_no,
-  name: stu.student_name,
+  name: studentName,
   prem: stu.prem_no,
   sex: stu.gender === "Female" ? "F" : "M",
   detail: detail.join(" ")
