@@ -43,7 +43,7 @@ button{cursor:pointer;}
   text-align:center;
 }
 
-/* ================= TABLE PRO FIX (CONTENT FIT MODE) ================= */
+/* ================= PRO TABLE UPGRADE ================= */
 .table-wrap{
   margin:10px;
   background:#fff;
@@ -51,41 +51,45 @@ button{cursor:pointer;}
   overflow-x:auto;
 }
 
-/* KEY CHANGE: auto layout for true content fit */
 table{
-  width:max-content;      /* shrink to content */
-  min-width:100%;         /* but not smaller than screen */
+  width:100%;
   border-collapse:collapse;
   font-size:11px;
+  table-layout:fixed; /* IMPORTANT */
 }
 
+/* HEADER */
 th{
   background:#e6e6e6;
   border:1px solid #999;
-  padding:2px 4px;        /* tight like NECTA */
+  padding:4px;
   white-space:nowrap;
   text-align:center;
 }
 
+/* CELLS (COMPACT PRO STYLE) */
 td{
   border:1px solid #ccc;
-  padding:2px 4px;        /* REMOVE BIG SPACING */
+  padding:3px 4px;
   white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
   text-align:center;
+  transition:0.2s;
 }
 
-/* ONLY SUBJECTS COLUMN CAN WRAP */
+/* ONLY SUBJECT COLUMN WRAPS */
 #tbody td:nth-child(4){
   white-space:normal;
   text-align:left;
 }
 
-/* hover subtle pro effect */
+/* HOVER LIKE PRO SYSTEM */
 tr:hover td{
-  background:#f4f9ff;
+  background:#f3f8ff;
 }
 
-/* PRINT CLEAN */
+/* PRINT */
 @media print{
   select,button{display:none;}
 }
@@ -126,7 +130,7 @@ tr:hover td{
 <div class="table-wrap">
 <table>
 <thead>
-<tr>
+<tr id="mainHead">
 <th>CAND NO</th>
 <th>PREM NO</th>
 <th>SEX</th>
@@ -173,7 +177,7 @@ function isPublic(){
 let currentClass = null;
 let isPublished = false;
 
-/* ================= YOUR ORIGINAL AUTO WIDTH (KEPT) ================= */
+/* ================= AUTO COLUMN WIDTH (YOUR ORIGINAL - KEPT) ================= */
 function autoFitTable(tableId){
 
   const table = document.getElementById(tableId);
@@ -198,23 +202,22 @@ function autoFitTable(tableId){
 
   rows.forEach(row=>{
     [...row.children].forEach((cell, i)=>{
-      let width = maxWidths[i] * 6 + 15;
+      let width = maxWidths[i] * 7 + 20;
 
-      if(width < 40) width = 40;
-      if(width > 300) width = 300;
+      if(width < 50) width = 50;
+      if(width > 220) width = 220;
 
       cell.style.width = width + "px";
     });
   });
 }
 
-/* ================= URL CLASS ================= */
+/* ================= EVERYTHING ELSE (UNCHANGED) ================= */
 function getClassFromURL(){
   const p = new URLSearchParams(window.location.search);
   return p.get("class");
 }
 
-/* ================= LOAD CLASSES ================= */
 async function loadClasses(){
   const { data } = await client.from("classes").select("*");
 
@@ -226,7 +229,6 @@ async function loadClasses(){
   });
 }
 
-/* ================= INIT ================= */
 async function initFromLink(){
 
   const urlClass = getClassFromURL();
@@ -243,7 +245,6 @@ async function initFromLink(){
   }
 }
 
-/* ================= CLASS CHANGE ================= */
 async function onClassChange(){
 
   if(document.getElementById("class").disabled) return;
@@ -265,7 +266,6 @@ async function onClassChange(){
   loadReport();
 }
 
-/* ================= PUBLISH CHECK ================= */
 async function checkPublishStatus(){
 
   const { data } = await client
@@ -283,7 +283,6 @@ async function checkPublishStatus(){
     isPublished ? "block":"none";
 }
 
-/* ================= TOGGLE PUBLISH ================= */
 async function togglePublish(){
 
   const { data } = await client
@@ -304,14 +303,12 @@ async function togglePublish(){
   await checkPublishStatus();
 }
 
-/* ================= COPY LINK ================= */
 function copyLink(){
   const link = window.location.origin + window.location.pathname + "?class=" + currentClass;
   navigator.clipboard.writeText(link);
   alert("Link copied:\n" + link);
 }
 
-/* ================= GRADE ================= */
 function grade(m){
   if(m>=81) return "A";
   if(m>=61) return "B";
@@ -324,7 +321,7 @@ function gpa(g){
   return {A:5,B:4,C:3,D:2,E:1}[g] || 1;
 }
 
-/* ================= REPORT ================= */
+/* ================= REPORT (UNCHANGED) ================= */
 async function loadReport(){
 
   if(!currentClass) return;
