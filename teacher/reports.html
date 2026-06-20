@@ -43,7 +43,7 @@ button{cursor:pointer;}
   text-align:center;
 }
 
-/* ================= PRO TABLE UPGRADE ================= */
+/* ================= TABLE PRO FIX (CONTENT FIT MODE) ================= */
 .table-wrap{
   margin:10px;
   background:#fff;
@@ -51,45 +51,41 @@ button{cursor:pointer;}
   overflow-x:auto;
 }
 
+/* KEY CHANGE: auto layout for true content fit */
 table{
-  width:100%;
+  width:max-content;      /* shrink to content */
+  min-width:100%;         /* but not smaller than screen */
   border-collapse:collapse;
   font-size:11px;
-  table-layout:fixed; /* IMPORTANT */
 }
 
-/* HEADER */
 th{
   background:#e6e6e6;
   border:1px solid #999;
-  padding:4px;
+  padding:2px 4px;        /* tight like NECTA */
   white-space:nowrap;
   text-align:center;
 }
 
-/* CELLS (COMPACT PRO STYLE) */
 td{
   border:1px solid #ccc;
-  padding:3px 4px;
+  padding:2px 4px;        /* REMOVE BIG SPACING */
   white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
   text-align:center;
-  transition:0.2s;
 }
 
-/* ONLY SUBJECT COLUMN WRAPS */
+/* ONLY SUBJECTS COLUMN CAN WRAP */
 #tbody td:nth-child(4){
   white-space:normal;
   text-align:left;
 }
 
-/* HOVER LIKE PRO SYSTEM */
+/* hover subtle pro effect */
 tr:hover td{
-  background:#f3f8ff;
+  background:#f4f9ff;
 }
 
-/* PRINT */
+/* PRINT CLEAN */
 @media print{
   select,button{display:none;}
 }
@@ -130,7 +126,7 @@ tr:hover td{
 <div class="table-wrap">
 <table>
 <thead>
-<tr id="mainHead">
+<tr>
 <th>CAND NO</th>
 <th>PREM NO</th>
 <th>SEX</th>
@@ -177,7 +173,7 @@ function isPublic(){
 let currentClass = null;
 let isPublished = false;
 
-/* ================= AUTO COLUMN WIDTH (YOUR ORIGINAL - KEPT) ================= */
+/* ================= YOUR ORIGINAL AUTO WIDTH (KEPT) ================= */
 function autoFitTable(tableId){
 
   const table = document.getElementById(tableId);
@@ -202,22 +198,23 @@ function autoFitTable(tableId){
 
   rows.forEach(row=>{
     [...row.children].forEach((cell, i)=>{
-      let width = maxWidths[i] * 7 + 20;
+      let width = maxWidths[i] * 6 + 15;
 
-      if(width < 50) width = 50;
-      if(width > 220) width = 220;
+      if(width < 40) width = 40;
+      if(width > 300) width = 300;
 
       cell.style.width = width + "px";
     });
   });
 }
 
-/* ================= EVERYTHING ELSE (UNCHANGED) ================= */
+/* ================= URL CLASS ================= */
 function getClassFromURL(){
   const p = new URLSearchParams(window.location.search);
   return p.get("class");
 }
 
+/* ================= LOAD CLASSES ================= */
 async function loadClasses(){
   const { data } = await client.from("classes").select("*");
 
@@ -229,6 +226,7 @@ async function loadClasses(){
   });
 }
 
+/* ================= INIT ================= */
 async function initFromLink(){
 
   const urlClass = getClassFromURL();
@@ -245,6 +243,7 @@ async function initFromLink(){
   }
 }
 
+/* ================= CLASS CHANGE ================= */
 async function onClassChange(){
 
   if(document.getElementById("class").disabled) return;
@@ -266,6 +265,7 @@ async function onClassChange(){
   loadReport();
 }
 
+/* ================= PUBLISH CHECK ================= */
 async function checkPublishStatus(){
 
   const { data } = await client
@@ -283,6 +283,7 @@ async function checkPublishStatus(){
     isPublished ? "block":"none";
 }
 
+/* ================= TOGGLE PUBLISH ================= */
 async function togglePublish(){
 
   const { data } = await client
@@ -303,12 +304,14 @@ async function togglePublish(){
   await checkPublishStatus();
 }
 
+/* ================= COPY LINK ================= */
 function copyLink(){
   const link = window.location.origin + window.location.pathname + "?class=" + currentClass;
   navigator.clipboard.writeText(link);
   alert("Link copied:\n" + link);
 }
 
+/* ================= GRADE ================= */
 function grade(m){
   if(m>=81) return "A";
   if(m>=61) return "B";
@@ -321,7 +324,7 @@ function gpa(g){
   return {A:5,B:4,C:3,D:2,E:1}[g] || 1;
 }
 
-/* ================= REPORT (UNCHANGED) ================= */
+/* ================= REPORT ================= */
 async function loadReport(){
 
   if(!currentClass) return;
@@ -432,4 +435,4 @@ initFromLink();
 </script>
 
 </body>
-  </html>
+</html>
