@@ -108,13 +108,7 @@ td{
 <div class="table-wrap">
 <table>
 <thead>
-<tr id="mainHead">
-<th>CAND NO</th>
-<th id="nameHeader">NAME</th>
-<th>PREM NO</th>
-<th>SEX</th>
-<th>SUBJECTS</th>
-</tr>
+<tr id="mainHead"></tr>
 </thead>
 <tbody id="tbody"></tbody>
 </table>
@@ -155,10 +149,9 @@ function isPublic(){
 let currentClass = null;
 let isPublished = false;
 
-/* ================= URL CLASS ================= */
+/* ================= CLASS ================= */
 function getClassFromURL(){
-  const p = new URLSearchParams(window.location.search);
-  return p.get("class");
+  return new URLSearchParams(window.location.search).get("class");
 }
 
 /* ================= LOAD CLASSES ================= */
@@ -174,17 +167,14 @@ async function loadClasses(){
 }
 
 /* ================= INIT ================= */
-async function initFromLink(){
-
+async function init(){
   const urlClass = getClassFromURL();
-
   await loadClasses();
 
   if(urlClass){
     currentClass = urlClass;
     document.getElementById("class").value = urlClass;
     document.getElementById("class").disabled = true;
-    document.getElementById("publishBar").style.display = "none";
     await checkPublishStatus();
     await loadReport();
   }
@@ -192,20 +182,16 @@ async function initFromLink(){
 
 /* ================= CLASS CHANGE ================= */
 async function onClassChange(){
-
   if(document.getElementById("class").disabled) return;
 
   currentClass = document.getElementById("class").value;
   if(!currentClass) return;
 
-  document.getElementById("publishBar").style.display =
-    role==="admin" ? "block":"none";
-
   await checkPublishStatus();
   loadReport();
 }
 
-/* ================= PUBLISH CHECK ================= */
+/* ================= PUBLISH ================= */
 async function checkPublishStatus(){
 
   const { data } = await client
@@ -218,14 +204,10 @@ async function checkPublishStatus(){
 
   document.getElementById("publishBtn").innerText =
     isPublished ? "UNPUBLISH" : "PUBLISH";
-
-  document.getElementById("lockNotice").style.display =
-    isPublished ? "block":"none";
 }
 
-/* ================= TOGGLE PUBLISH ================= */
+/* ================= TOGGLE ================= */
 async function togglePublish(){
-
   const { data } = await client
     .from("published_reports")
     .select("*")
@@ -248,7 +230,7 @@ async function togglePublish(){
 function copyLink(){
   const link = window.location.origin + window.location.pathname + "?class=" + currentClass;
   navigator.clipboard.writeText(link);
-  alert("Link copied:\n" + link);
+  alert("Link copied");
 }
 
 /* ================= GRADE ================= */
@@ -269,34 +251,27 @@ async function loadReport(){
 
   if(!currentClass) return;
 
-  const { data:students } = await client.from("students").select("*");
+  // 🔥 IMPORTANT FIX: NO NAME FETCH FOR PUBLIC
+  let students;
+
+  if(isPublic()){
+    const res = await client
+      .from("students")
+      .select("id,class_id,admission_no,prem_no,gender");
+    students = res.data;
+  } else {
+    const res = await client
+      .from("students")
+      .select("*");
+    students = res.data;
+  }
+
   const { data:subjects } = await client.from("subjects").select("*");
   const { data:results } = await client.from("results").select("*");
 
-  let filtered = students
-    .filter(s => String(s.class_id) === String(currentClass))
-    .sort((a, b) => {
-
-      const g1 = (a.gender || "Male").toLowerCase();
-      const g2 = (b.gender || "Male").toLowerCase();
-
-      if (g1 !== g2) return g1 === "male" ? -1 : 1;
-
-      const n1 = (a.student_name || "").toLowerCase();
-      const n2 = (b.student_name || "").toLowerCase();
-
-      return n1.localeCompare(n2);
-    });
-
-  let subStats = {};
-  subjects.forEach(s=>{
-    subStats[s.id] = {sat:0, pass:0, total:0};
-  });
-
-  let gradePerf = {
-    Male:{A:0,B:0,C:0,D:0,E:0},
-    Female:{A:0,B:0,C:0,D:0,E:0}
-  };
+  let filtered = students.filter(s =>
+    String(s.class_id) === String(currentClass)
+  );
 
   let final = [];
 
@@ -314,10 +289,6 @@ async function loadReport(){
 
       let m = Number(r.marks);
 
-      subStats[sub.id].sat++;
-      subStats[sub.id].total += m;
-      if(m>=41) subStats[sub.id].pass++;
-
       total += m;
       count++;
 
@@ -325,11 +296,6 @@ async function loadReport(){
     });
 
     if(count===0) return;
-
-    let avg = total/count;
-    let g = grade(avg);
-
-    gradePerf[stu.gender||"Male"][g]++;
 
     final.push({
       adm: stu.admission_no,
@@ -340,73 +306,54 @@ async function loadReport(){
     });
   });
 
-  if(isPublic() && !isPublished){
-    document.getElementById("tbody").innerHTML =
-      "<tr><td>NOT PUBLISHED</td></tr>";
-    return;
+  // ================= HEADER =================
+  let header = document.getElementById("mainHead");
+
+  if(!isPublic()){
+    header.innerHTML = `
+      <th>CAND NO</th>
+      <th>NAME</th>
+      <th>PREM NO</th>
+      <th>SEX</th>
+      <th>SUBJECTS</th>
+    `;
+  } else {
+    header.innerHTML = `
+      <th>CAND NO</th>
+      <th>PREM NO</th>
+      <th>SEX</th>
+      <th>SUBJECTS</th>
+    `;
   }
 
-  /* HIDE NAME COLUMN HEADER FOR PUBLIC */
-  if(isPublic()){
-    document.getElementById("nameHeader").style.display = "none";
-  }
-
-  let tb=document.getElementById("tbody");
-  tb.innerHTML="";
+  // ================= TABLE =================
+  let tb = document.getElementById("tbody");
+  tb.innerHTML = "";
 
   final.forEach(r=>{
-    tb.innerHTML += `
-      <tr>
-        <td>${r.adm}</td>
-        ${!isPublic() ? `<td>${r.name}</td>` : ``}
-        <td>${r.prem}</td>
-        <td>${r.sex}</td>
-        <td>${r.detail}</td>
-      </tr>`;
-  });
 
-  let gp=document.getElementById("gradePerf");
-  gp.innerHTML="";
-
-  ["Female","Male"].forEach(s=>{
-    let r=gradePerf[s];
-    gp.innerHTML+=`
-      <tr>
-        <td>${s}</td>
-        <td>${r.A}</td>
-        <td>${r.B}</td>
-        <td>${r.C}</td>
-        <td>${r.D}</td>
-        <td>${r.E}</td>
-      </tr>`;
-  });
-
-  let subbody=document.getElementById("subtbody");
-  subbody.innerHTML="";
-
-  let i=1;
-
-  subjects.forEach(sub=>{
-    let st=subStats[sub.id];
-    if(st.sat===0) return;
-
-    let avg=st.total/st.sat;
-
-    subbody.innerHTML+=`
-      <tr>
-        <td>${i++}</td>
-        <td>${sub.subject_name}</td>
-        <td>${st.sat}</td>
-        <td>${st.sat}</td>
-        <td>${st.pass}</td>
-        <td>${avg.toFixed(1)}</td>
-        <td>${gpa(grade(avg))}</td>
-      </tr>`;
+    if(!isPublic()){
+      tb.innerHTML += `
+        <tr>
+          <td>${r.adm}</td>
+          <td>${r.name}</td>
+          <td>${r.prem}</td>
+          <td>${r.sex}</td>
+          <td>${r.detail}</td>
+        </tr>`;
+    } else {
+      tb.innerHTML += `
+        <tr>
+          <td>${r.adm}</td>
+          <td>${r.prem}</td>
+          <td>${r.sex}</td>
+          <td>${r.detail}</td>
+        </tr>`;
+    }
   });
 }
 
-/* ================= START ================= */
-initFromLink();
+init();
 </script>
 
 </body>
