@@ -6,34 +6,77 @@
 <title>NECTA PRO MAX REPORT</title>
 
 <style>
+
+/* ================= BASE ================= */
 body{
   font-family:Arial;
   margin:0;
-  background:#c7e3ee;
+  background:#b9dce8; /* NECTA light blue */
 }
 
+/* ================= HEADER ================= */
 .header{
   text-align:center;
-  padding:10px;
+  padding:8px;
   font-weight:bold;
   text-transform:uppercase;
 }
 
 .school{
   text-align:center;
-  font-size:13px;
+  font-size:12px;
+  margin-bottom:8px;
 }
 
+/* ================= CONTROLS ================= */
 select,button{
-  margin:10px;
-  padding:8px;
+  margin:6px;
+  padding:6px;
+  font-size:12px;
 }
 
 button{cursor:pointer;}
 
-#publishBar{
-  display:none;
+/* ================= TABLE WRAP ================= */
+.table-wrap{
+  margin:8px;
+  background:#fff7cc;
+  border:1px solid #999;
+  overflow-x:auto;
+}
+
+/* ================= TABLE CORE (NECTA STYLE) ================= */
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:10px;          /* 🔥 compact */
+  table-layout:fixed;      /* 🔥 IMPORTANT FIX */
+}
+
+th{
+  background:#e6e6e6;
+  border:1px solid #999;
+  padding:2px;
+  font-size:10px;
+  white-space:nowrap;
   text-align:center;
+}
+
+td{
+  border:1px solid #999;
+  padding:2px;
+  font-size:10px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  text-align:center;
+  line-height:1.2;
+}
+
+/* ================= PRINT ================= */
+@media print{
+  select,button{display:none;}
+  body{background:white;}
 }
 
 .lock{
@@ -43,37 +86,6 @@ button{cursor:pointer;}
   text-align:center;
 }
 
-.table-wrap{
-  margin:10px;
-  background:#fff7cc;
-  border:1px solid #999;
-  overflow-x:auto;
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:12px;
-  table-layout:auto;
-}
-
-th{
-  background:#e6e6e6;
-  border:1px solid #999;
-  padding:5px;
-  white-space:nowrap;
-}
-
-td{
-  border:1px solid #999;
-  padding:4px;
-  white-space:nowrap;
-  transition: all 0.2s ease-in-out;
-}
-
-@media print{
-  select,button{display:none;}
-}
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -90,12 +102,12 @@ td{
 
 <div id="publishBar">
   <button id="publishBtn" onclick="togglePublish()">PUBLISH</button>
-  <button onclick="copyLink()">COPY VIEW LINK</button>
+  <button onclick="copyLink()">COPY LINK</button>
 </div>
 
 <button onclick="window.print()">PRINT</button>
 
-<!-- TABLE 1 -->
+<!-- ================= TABLE 1 ================= -->
 <div class="table-wrap">
 <table>
 <thead>
@@ -107,11 +119,11 @@ td{
 </table>
 </div>
 
-<!-- TABLE 2 -->
+<!-- ================= TABLE 2 ================= -->
 <div class="table-wrap">
 <table>
 <thead>
-<tr id="mainHead">
+<tr>
 <th>CAND NO</th>
 <th>PREM NO</th>
 <th>SEX</th>
@@ -122,7 +134,7 @@ td{
 </table>
 </div>
 
-<!-- TABLE 3 -->
+<!-- ================= TABLE 3 ================= -->
 <div class="table-wrap">
 <table>
 <thead>
@@ -142,6 +154,7 @@ td{
 
 <script>
 
+/* ================= SUPABASE ================= */
 const client = supabase.createClient(
 "https://bslofdobcvxkjphbjyzb.supabase.co",
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s"
@@ -149,151 +162,87 @@ const client = supabase.createClient(
 
 /* ================= ROLE ================= */
 let role = "admin";
-
 function isPublic(){
   return !["admin","teacher","headteacher"].includes(role);
 }
 
 /* ================= STATE ================= */
-let currentClass = null;
-let isPublished = false;
-
-/* ================= AUTO COLUMN WIDTH OPTIMIZER ================= */
-function autoFitTable(tableId){
-
-  const table = document.getElementById(tableId);
-  if(!table) return;
-
-  const rows = table.querySelectorAll("tr");
-  if(rows.length === 0) return;
-
-  const colCount = rows[0].children.length;
-  const maxWidths = new Array(colCount).fill(0);
-
-  rows.forEach(row=>{
-    [...row.children].forEach((cell, i)=>{
-      const text = cell.innerText || "";
-      const len = text.length;
-
-      if(len > maxWidths[i]){
-        maxWidths[i] = len;
-      }
-    });
-  });
-
-  rows.forEach(row=>{
-    [...row.children].forEach((cell, i)=>{
-      let width = maxWidths[i] * 8 + 30;
-
-      if(width < 60) width = 60;
-      if(width > 450) width = 450;
-
-      cell.style.minWidth = width + "px";
-    });
-  });
-}
-
-/* ================= URL CLASS ================= */
-function getClassFromURL(){
-  const p = new URLSearchParams(window.location.search);
-  return p.get("class");
-}
+let currentClass=null;
+let isPublished=false;
 
 /* ================= LOAD CLASSES ================= */
 async function loadClasses(){
   const { data } = await client.from("classes").select("*");
 
-  const el = document.getElementById("class");
-  el.innerHTML = `<option value="">Select Class</option>`;
+  const el=document.getElementById("class");
+  el.innerHTML=`<option value="">Select Class</option>`;
 
   data.forEach(c=>{
-    el.innerHTML += `<option value="${c.id}">${c.class_name}</option>`;
+    el.innerHTML+=`<option value="${c.id}">${c.class_name}</option>`;
   });
 }
 
 /* ================= INIT ================= */
-async function initFromLink(){
-
-  const urlClass = getClassFromURL();
-
+async function init(){
   await loadClasses();
 
-  if(urlClass){
-    currentClass = urlClass;
-    document.getElementById("class").value = urlClass;
-    document.getElementById("class").disabled = true;
-    document.getElementById("publishBar").style.display = "none";
-    await checkPublishStatus();
-    await loadReport();
+  const url=new URLSearchParams(window.location.search).get("class");
+  if(url){
+    currentClass=url;
+    document.getElementById("class").value=url;
+    loadReport();
   }
 }
 
 /* ================= CLASS CHANGE ================= */
 async function onClassChange(){
-
-  if(document.getElementById("class").disabled) return;
-
-  currentClass = document.getElementById("class").value;
-  if(!currentClass) return;
-
-  document.getElementById("publishBar").style.display =
-    role==="admin" ? "block":"none";
-
-  await checkPublishStatus();
-
-  if(isPublic() && !isPublished){
-    document.getElementById("tbody").innerHTML =
-      "<tr><td colspan='4'>RESULTS NOT PUBLISHED</td></tr>";
-    return;
-  }
-
+  currentClass=document.getElementById("class").value;
   loadReport();
 }
 
-/* ================= PUBLISH CHECK ================= */
+/* ================= PUBLISH ================= */
 async function checkPublishStatus(){
 
   const { data } = await client
-    .from("published_reports")
-    .select("*")
-    .eq("class_id", currentClass)
-    .maybeSingle();
+  .from("published_reports")
+  .select("*")
+  .eq("class_id", currentClass)
+  .maybeSingle();
 
-  isPublished = data?.is_published || false;
+  isPublished=data?.is_published||false;
 
-  document.getElementById("publishBtn").innerText =
-    isPublished ? "UNPUBLISH" : "PUBLISH";
+  document.getElementById("publishBtn").innerText=
+  isPublished?"UNPUBLISH":"PUBLISH";
 
-  document.getElementById("lockNotice").style.display =
-    isPublished ? "block":"none";
+  document.getElementById("lockNotice").style.display=
+  isPublished?"block":"none";
 }
 
-/* ================= TOGGLE PUBLISH ================= */
 async function togglePublish(){
 
   const { data } = await client
-    .from("published_reports")
-    .select("*")
-    .eq("class_id", currentClass)
-    .maybeSingle();
+  .from("published_reports")
+  .select("*")
+  .eq("class_id", currentClass)
+  .maybeSingle();
 
   if(data){
     await client.from("published_reports")
-      .update({ is_published: !data.is_published })
-      .eq("class_id", currentClass);
-  } else {
+    .update({is_published:!data.is_published})
+    .eq("class_id",currentClass);
+  }else{
     await client.from("published_reports")
-      .insert([{ class_id: currentClass, is_published: true }]);
+    .insert([{class_id:currentClass,is_published:true}]);
   }
 
-  await checkPublishStatus();
+  checkPublishStatus();
 }
 
-/* ================= COPY LINK ================= */
+/* ================= COPY ================= */
 function copyLink(){
-  const link = window.location.origin + window.location.pathname + "?class=" + currentClass;
+  const link=window.location.origin+window.location.pathname+"?class="+currentClass;
   navigator.clipboard.writeText(link);
-  alert("Link copied:\n" + link);
+  alert("Link copied");
 }
 
 /* ================= GRADE ================= */
@@ -304,9 +253,8 @@ function grade(m){
   if(m>=21) return "D";
   return "E";
 }
-
 function gpa(g){
-  return {A:5,B:4,C:3,D:2,E:1}[g] || 1;
+  return {A:5,B:4,C:3,D:2,E:1}[g]||1;
 }
 
 /* ================= REPORT ================= */
@@ -318,21 +266,20 @@ async function loadReport(){
   const { data:subjects } = await client.from("subjects").select("*");
   const { data:results } = await client.from("results").select("*");
 
-  let filtered = students
-    .filter(s => String(s.class_id) === String(currentClass))
-    .sort((a,b)=>{
+  let filtered=students
+  .filter(s=>String(s.class_id)===String(currentClass))
+  .sort((a,b)=>{
 
-      const g1 = (a.gender||"Male").toLowerCase();
-      const g2 = (b.gender||"Male").toLowerCase();
+    let g1=(a.gender||"Male").toLowerCase();
+    let g2=(b.gender||"Male").toLowerCase();
 
-      if(g1!==g2) return g1==="male" ? -1 : 1;
+    if(g1!==g2) return g1==="male"?-1:1;
 
-      return (a.admission_no||"").localeCompare(b.admission_no||"");
-    });
+    return (a.admission_no||"").localeCompare(b.admission_no||"");
+  });
 
-  let final = [];
-
-  let gradePerf = {
+  let final=[];
+  let gradePerf={
     Male:{A:0,B:0,C:0,D:0,E:0},
     Female:{A:0,B:0,C:0,D:0,E:0}
   };
@@ -342,47 +289,32 @@ async function loadReport(){
     let total=0,count=0,detail=[];
 
     subjects.forEach(sub=>{
-      let r = results.find(x =>
-        String(x.student_id)===String(stu.id) &&
+      let r=results.find(x=>
+        String(x.student_id)===String(stu.id)&&
         String(x.subject_id)===String(sub.id)
       );
 
       if(!r) return;
 
-      let m = Number(r.marks);
-
-      total += m;
+      let m=Number(r.marks);
+      total+=m;
       count++;
-
       detail.push(sub.subject_name.slice(0,4)+"-"+grade(m));
     });
 
     if(count===0) return;
 
-    let avg = total/count;
-    let g = grade(avg);
+    let avg=total/count;
+    let g=grade(avg);
 
     gradePerf[stu.gender||"Male"][g]++;
 
     final.push({
-      adm: stu.admission_no,
-      prem: stu.prem_no,
-      sex: stu.gender==="Female"?"F":"M",
-      detail: detail.join(" ")
+      adm:stu.admission_no,
+      prem:stu.prem_no,
+      sex:stu.gender==="Female"?"F":"M",
+      detail:detail.join(" ")
     });
-  });
-
-  /* TABLE 2 */
-  let tb=document.getElementById("tbody");
-  tb.innerHTML="";
-  final.forEach(r=>{
-    tb.innerHTML+=`
-      <tr>
-        <td>${r.adm}</td>
-        <td>${r.prem}</td>
-        <td>${r.sex}</td>
-        <td>${r.detail}</td>
-      </tr>`;
   });
 
   /* TABLE 1 */
@@ -401,17 +333,29 @@ async function loadReport(){
       </tr>`;
   });
 
-  /* TABLE 3 */
-  let subbody=document.getElementById("subtbody");
-  subbody.innerHTML="";
+  /* TABLE 2 */
+  let tb=document.getElementById("tbody");
+  tb.innerHTML="";
+  final.forEach(r=>{
+    tb.innerHTML+=`
+      <tr>
+        <td>${r.adm}</td>
+        <td>${r.prem}</td>
+        <td>${r.sex}</td>
+        <td>${r.detail}</td>
+      </tr>`;
+  });
 
+  /* TABLE 3 */
+  let sub=document.getElementById("subtbody");
+  sub.innerHTML="";
   let i=1;
 
-  subjects.forEach(sub=>{
+  subjects.forEach(subj=>{
     let st={sat:0,pass:0,total:0};
 
     results.forEach(r=>{
-      if(r.subject_id===sub.id){
+      if(r.subject_id===subj.id){
         st.sat++;
         st.total+=Number(r.marks);
         if(r.marks>=41) st.pass++;
@@ -422,10 +366,10 @@ async function loadReport(){
 
     let avg=st.total/st.sat;
 
-    subbody.innerHTML+=`
+    sub.innerHTML+=`
       <tr>
         <td>${i++}</td>
-        <td>${sub.subject_name}</td>
+        <td>${subj.subject_name}</td>
         <td>${st.sat}</td>
         <td>${st.sat}</td>
         <td>${st.pass}</td>
@@ -434,16 +378,10 @@ async function loadReport(){
       </tr>`;
   });
 
-  // ✅ APPLY AUTO WIDTH AFTER RENDER
-  setTimeout(()=>{
-    autoFitTable("gradePerf");
-    autoFitTable("tbody");
-    autoFitTable("subtbody");
-  }, 50);
+  checkPublishStatus();
 }
 
-/* ================= START ================= */
-initFromLink();
+init();
 
 </script>
 
