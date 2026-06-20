@@ -5,19 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NECTA PRO MAX REPORT</title>
 
-<style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-/* ================= BASE ================= */
+<style>
 body{
   font-family:Arial;
   margin:0;
-  background:#b9dce8; /* NECTA light blue */
+  background:#c7e3ee;
+  font-size:12px;
 }
 
-/* ================= HEADER ================= */
+/* HEADER */
 .header{
   text-align:center;
-  padding:8px;
+  padding:6px;
   font-weight:bold;
   text-transform:uppercase;
 }
@@ -25,70 +28,50 @@ body{
 .school{
   text-align:center;
   font-size:12px;
-  margin-bottom:8px;
+  margin-bottom:5px;
 }
 
-/* ================= CONTROLS ================= */
+/* CONTROLS */
 select,button{
-  margin:6px;
-  padding:6px;
+  margin:5px;
+  padding:5px;
   font-size:12px;
 }
 
-button{cursor:pointer;}
-
-/* ================= TABLE WRAP ================= */
+/* TABLE WRAP */
 .table-wrap{
-  margin:8px;
+  margin:6px;
   background:#fff7cc;
   border:1px solid #999;
   overflow-x:auto;
 }
 
-/* ================= TABLE CORE (NECTA STYLE) ================= */
+/* TABLE COMPACT STYLE */
 table{
   width:100%;
   border-collapse:collapse;
-  font-size:10px;          /* 🔥 compact */
-  table-layout:fixed;      /* 🔥 IMPORTANT FIX */
+  table-layout:auto;
+  font-size:11px;
 }
 
 th{
   background:#e6e6e6;
   border:1px solid #999;
-  padding:2px;
-  font-size:10px;
+  padding:3px;
   white-space:nowrap;
-  text-align:center;
 }
 
 td{
   border:1px solid #999;
-  padding:2px;
-  font-size:10px;
+  padding:2px 4px;
   white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  text-align:center;
-  line-height:1.2;
 }
 
-/* ================= PRINT ================= */
+/* PRINT */
 @media print{
   select,button{display:none;}
-  body{background:white;}
 }
-
-.lock{
-  display:none;
-  color:red;
-  font-weight:bold;
-  text-align:center;
-}
-
 </style>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
@@ -96,20 +79,17 @@ td{
 <div class="header">NECTA REPORT SYSTEM</div>
 <div class="school">KOROSHO ENGLISH MEDIUM PRE AND PRIMARY SCHOOL</div>
 
-<div id="lockNotice" class="lock">🔒 CLASS PUBLISHED - VIEW ONLY</div>
-
-<select id="class" onchange="onClassChange()"></select>
-
 <div id="publishBar">
-  <button id="publishBtn" onclick="togglePublish()">PUBLISH</button>
+  <button onclick="togglePublish()">PUBLISH</button>
   <button onclick="copyLink()">COPY LINK</button>
+  <button onclick="exportPDF()">EXPORT PDF</button>
 </div>
 
 <button onclick="window.print()">PRINT</button>
 
-<!-- ================= TABLE 1 ================= -->
+<!-- GRADE PERFORMANCE -->
 <div class="table-wrap">
-<table>
+<table id="gradeTable">
 <thead>
 <tr>
 <th>SEX</th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th>
@@ -119,12 +99,13 @@ td{
 </table>
 </div>
 
-<!-- ================= TABLE 2 ================= -->
+<!-- MAIN TABLE -->
 <div class="table-wrap">
-<table>
+<table id="mainTable">
 <thead>
 <tr>
 <th>CAND NO</th>
+<th>NAME</th>
 <th>PREM NO</th>
 <th>SEX</th>
 <th>SUBJECTS</th>
@@ -134,9 +115,9 @@ td{
 </table>
 </div>
 
-<!-- ================= TABLE 3 ================= -->
+<!-- SUBJECT PERFORMANCE -->
 <div class="table-wrap">
-<table>
+<table id="subTable">
 <thead>
 <tr>
 <th>NO</th>
@@ -153,99 +134,39 @@ td{
 </div>
 
 <script>
-
-/* ================= SUPABASE ================= */
 const client = supabase.createClient(
 "https://bslofdobcvxkjphbjyzb.supabase.co",
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s"
 );
 
-/* ================= ROLE ================= */
 let role = "admin";
+let currentClass = null;
+let isPublished = false;
+
 function isPublic(){
   return !["admin","teacher","headteacher"].includes(role);
 }
 
-/* ================= STATE ================= */
-let currentClass=null;
-let isPublished=false;
+/* ---------------- AUTO COLUMN FIT ---------------- */
+function autoFitTable(tableId){
+  const table = document.getElementById(tableId);
+  const cols = table.querySelectorAll("th");
 
-/* ================= LOAD CLASSES ================= */
-async function loadClasses(){
-  const { data } = await client.from("classes").select("*");
+  cols.forEach((th, i)=>{
+    let max = th.innerText.length;
 
-  const el=document.getElementById("class");
-  el.innerHTML=`<option value="">Select Class</option>`;
+    table.querySelectorAll("tr").forEach(tr=>{
+      const cell = tr.children[i];
+      if(cell){
+        max = Math.max(max, cell.innerText.length);
+      }
+    });
 
-  data.forEach(c=>{
-    el.innerHTML+=`<option value="${c.id}">${c.class_name}</option>`;
+    th.style.minWidth = (max * 7) + "px";
   });
 }
 
-/* ================= INIT ================= */
-async function init(){
-  await loadClasses();
-
-  const url=new URLSearchParams(window.location.search).get("class");
-  if(url){
-    currentClass=url;
-    document.getElementById("class").value=url;
-    loadReport();
-  }
-}
-
-/* ================= CLASS CHANGE ================= */
-async function onClassChange(){
-  currentClass=document.getElementById("class").value;
-  loadReport();
-}
-
-/* ================= PUBLISH ================= */
-async function checkPublishStatus(){
-
-  const { data } = await client
-  .from("published_reports")
-  .select("*")
-  .eq("class_id", currentClass)
-  .maybeSingle();
-
-  isPublished=data?.is_published||false;
-
-  document.getElementById("publishBtn").innerText=
-  isPublished?"UNPUBLISH":"PUBLISH";
-
-  document.getElementById("lockNotice").style.display=
-  isPublished?"block":"none";
-}
-
-async function togglePublish(){
-
-  const { data } = await client
-  .from("published_reports")
-  .select("*")
-  .eq("class_id", currentClass)
-  .maybeSingle();
-
-  if(data){
-    await client.from("published_reports")
-    .update({is_published:!data.is_published})
-    .eq("class_id",currentClass);
-  }else{
-    await client.from("published_reports")
-    .insert([{class_id:currentClass,is_published:true}]);
-  }
-
-  checkPublishStatus();
-}
-
-/* ================= COPY ================= */
-function copyLink(){
-  const link=window.location.origin+window.location.pathname+"?class="+currentClass;
-  navigator.clipboard.writeText(link);
-  alert("Link copied");
-}
-
-/* ================= GRADE ================= */
+/* ---------------- GRADE ---------------- */
 function grade(m){
   if(m>=81) return "A";
   if(m>=61) return "B";
@@ -253,137 +174,103 @@ function grade(m){
   if(m>=21) return "D";
   return "E";
 }
+
 function gpa(g){
-  return {A:5,B:4,C:3,D:2,E:1}[g]||1;
+  return {A:5,B:4,C:3,D:2,E:1}[g] || 1;
 }
 
-/* ================= REPORT ================= */
+/* ---------------- LOAD REPORT ---------------- */
 async function loadReport(){
-
-  if(!currentClass) return;
 
   const { data:students } = await client.from("students").select("*");
   const { data:subjects } = await client.from("subjects").select("*");
   const { data:results } = await client.from("results").select("*");
 
-  let filtered=students
-  .filter(s=>String(s.class_id)===String(currentClass))
-  .sort((a,b)=>{
+  let filtered = students
+    .filter(s => String(s.class_id) === String(currentClass))
+    .sort((a,b)=>{
+      const g1 = (a.gender||"Male");
+      const g2 = (b.gender||"Male");
+      if(g1!==g2) return g1==="Male"?-1:1;
+      return (a.student_name||"").localeCompare(b.student_name||"");
+    });
 
-    let g1=(a.gender||"Male").toLowerCase();
-    let g2=(b.gender||"Male").toLowerCase();
+  let final = [];
+  let subStats = {};
 
-    if(g1!==g2) return g1==="male"?-1:1;
-
-    return (a.admission_no||"").localeCompare(b.admission_no||"");
+  subjects.forEach(s=>{
+    subStats[s.id]={sat:0,pass:0,total:0};
   });
-
-  let final=[];
-  let gradePerf={
-    Male:{A:0,B:0,C:0,D:0,E:0},
-    Female:{A:0,B:0,C:0,D:0,E:0}
-  };
 
   filtered.forEach(stu=>{
 
     let total=0,count=0,detail=[];
 
     subjects.forEach(sub=>{
-      let r=results.find(x=>
-        String(x.student_id)===String(stu.id)&&
-        String(x.subject_id)===String(sub.id)
+      let r = results.find(x =>
+        x.student_id==stu.id && x.subject_id==sub.id
       );
 
       if(!r) return;
 
-      let m=Number(r.marks);
+      let m = Number(r.marks);
+
+      subStats[sub.id].sat++;
+      subStats[sub.id].total+=m;
+      if(m>=41) subStats[sub.id].pass++;
+
       total+=m;
       count++;
-      detail.push(sub.subject_name.slice(0,4)+"-"+grade(m));
+
+      detail.push(sub.subject_name+"-"+grade(m));
     });
 
     if(count===0) return;
 
-    let avg=total/count;
-    let g=grade(avg);
-
-    gradePerf[stu.gender||"Male"][g]++;
-
     final.push({
       adm:stu.admission_no,
+      name:stu.student_name,
       prem:stu.prem_no,
       sex:stu.gender==="Female"?"F":"M",
       detail:detail.join(" ")
     });
   });
 
-  /* TABLE 1 */
-  let gp=document.getElementById("gradePerf");
-  gp.innerHTML="";
-  ["Female","Male"].forEach(s=>{
-    let r=gradePerf[s];
-    gp.innerHTML+=`
-      <tr>
-        <td>${s}</td>
-        <td>${r.A}</td>
-        <td>${r.B}</td>
-        <td>${r.C}</td>
-        <td>${r.D}</td>
-        <td>${r.E}</td>
-      </tr>`;
-  });
-
-  /* TABLE 2 */
   let tb=document.getElementById("tbody");
   tb.innerHTML="";
+
   final.forEach(r=>{
     tb.innerHTML+=`
-      <tr>
-        <td>${r.adm}</td>
-        <td>${r.prem}</td>
-        <td>${r.sex}</td>
-        <td>${r.detail}</td>
-      </tr>`;
+    <tr>
+      <td>${r.adm}</td>
+      <td>${r.name}</td>
+      <td>${r.prem}</td>
+      <td>${r.sex}</td>
+      <td>${r.detail}</td>
+    </tr>`;
   });
 
-  /* TABLE 3 */
-  let sub=document.getElementById("subtbody");
-  sub.innerHTML="";
-  let i=1;
-
-  subjects.forEach(subj=>{
-    let st={sat:0,pass:0,total:0};
-
-    results.forEach(r=>{
-      if(r.subject_id===subj.id){
-        st.sat++;
-        st.total+=Number(r.marks);
-        if(r.marks>=41) st.pass++;
-      }
-    });
-
-    if(st.sat===0) return;
-
-    let avg=st.total/st.sat;
-
-    sub.innerHTML+=`
-      <tr>
-        <td>${i++}</td>
-        <td>${subj.subject_name}</td>
-        <td>${st.sat}</td>
-        <td>${st.sat}</td>
-        <td>${st.pass}</td>
-        <td>${avg.toFixed(1)}</td>
-        <td>${gpa(grade(avg))}</td>
-      </tr>`;
-  });
-
-  checkPublishStatus();
+  let gp=document.getElementById("gradePerf");
+  gp.innerHTML="";
 }
 
-init();
+/* ---------------- PDF EXPORT (NECTA STYLE) ---------------- */
+async function exportPDF(){
+  const el = document.body;
 
+  const canvas = await html2canvas(el,{scale:2});
+  const img = canvas.toDataURL("image/png");
+
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF("p","mm","a4");
+
+  const w = pdf.internal.pageSize.getWidth();
+  const h = (canvas.height * w)/canvas.width;
+
+  pdf.addImage(img,"PNG",0,0,w,h);
+  pdf.save("NECTA_REPORT.pdf");
+}
 </script>
 
 </body>
-</html>
+  </html>
