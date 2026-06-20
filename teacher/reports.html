@@ -22,7 +22,6 @@ body{
 .school{
   text-align:center;
   font-size:13px;
-  margin-bottom:10px;
 }
 
 select,button{
@@ -30,45 +29,48 @@ select,button{
   padding:8px;
 }
 
-/* ================= TABLE WRAP ================= */
+button{cursor:pointer;}
+
+#publishBar{
+  display:none;
+  text-align:center;
+}
+
+.lock{
+  display:none;
+  color:red;
+  font-weight:bold;
+  text-align:center;
+}
+
 .table-wrap{
-  margin:12px;
+  margin:10px;
   background:#fff7cc;
   border:1px solid #999;
   overflow-x:auto;
-  border-radius:6px;
 }
 
-/* ================= TABLE CORE FIX ================= */
 table{
   width:100%;
   border-collapse:collapse;
   font-size:12px;
-
-  /* 🔥 KEY FIX */
-  table-layout: auto;
+  table-layout:auto;
 }
 
-/* HEADERS */
 th{
   background:#e6e6e6;
   border:1px solid #999;
-  padding:6px;
-
-  /* keep text clean */
+  padding:5px;
   white-space:nowrap;
 }
 
-/* CELLS */
 td{
   border:1px solid #999;
-  padding:5px;
-
-  /* 🔥 IMPORTANT: allows auto-fit behavior */
+  padding:4px;
   white-space:nowrap;
+  transition: all 0.2s ease-in-out;
 }
 
-/* ================= PRINT ================= */
 @media print{
   select,button{display:none;}
 }
@@ -82,11 +84,18 @@ td{
 <div class="header">NECTA REPORT SYSTEM</div>
 <div class="school">KOROSHO ENGLISH MEDIUM PRE AND PRIMARY SCHOOL</div>
 
+<div id="lockNotice" class="lock">🔒 CLASS PUBLISHED - VIEW ONLY</div>
+
 <select id="class" onchange="onClassChange()"></select>
+
+<div id="publishBar">
+  <button id="publishBtn" onclick="togglePublish()">PUBLISH</button>
+  <button onclick="copyLink()">COPY VIEW LINK</button>
+</div>
 
 <button onclick="window.print()">PRINT</button>
 
-<!-- ================= TABLE 1 ================= -->
+<!-- TABLE 1 -->
 <div class="table-wrap">
 <table>
 <thead>
@@ -98,11 +107,11 @@ td{
 </table>
 </div>
 
-<!-- ================= TABLE 2 (NO TITLE AS REQUESTED) ================= -->
+<!-- TABLE 2 -->
 <div class="table-wrap">
 <table>
 <thead>
-<tr>
+<tr id="mainHead">
 <th>CAND NO</th>
 <th>PREM NO</th>
 <th>SEX</th>
@@ -113,7 +122,7 @@ td{
 </table>
 </div>
 
-<!-- ================= TABLE 3 ================= -->
+<!-- TABLE 3 -->
 <div class="table-wrap">
 <table>
 <thead>
@@ -138,13 +147,59 @@ const client = supabase.createClient(
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s"
 );
 
-let currentClass = null;
+/* ================= ROLE ================= */
+let role = "admin";
 
-/* ================= CLASS ================= */
-function getClassFromURL(){
-  return new URLSearchParams(window.location.search).get("class");
+function isPublic(){
+  return !["admin","teacher","headteacher"].includes(role);
 }
 
+/* ================= STATE ================= */
+let currentClass = null;
+let isPublished = false;
+
+/* ================= AUTO COLUMN WIDTH OPTIMIZER ================= */
+function autoFitTable(tableId){
+
+  const table = document.getElementById(tableId);
+  if(!table) return;
+
+  const rows = table.querySelectorAll("tr");
+  if(rows.length === 0) return;
+
+  const colCount = rows[0].children.length;
+  const maxWidths = new Array(colCount).fill(0);
+
+  rows.forEach(row=>{
+    [...row.children].forEach((cell, i)=>{
+      const text = cell.innerText || "";
+      const len = text.length;
+
+      if(len > maxWidths[i]){
+        maxWidths[i] = len;
+      }
+    });
+  });
+
+  rows.forEach(row=>{
+    [...row.children].forEach((cell, i)=>{
+      let width = maxWidths[i] * 8 + 30;
+
+      if(width < 60) width = 60;
+      if(width > 450) width = 450;
+
+      cell.style.minWidth = width + "px";
+    });
+  });
+}
+
+/* ================= URL CLASS ================= */
+function getClassFromURL(){
+  const p = new URLSearchParams(window.location.search);
+  return p.get("class");
+}
+
+/* ================= LOAD CLASSES ================= */
 async function loadClasses(){
   const { data } = await client.from("classes").select("*");
 
@@ -156,20 +211,89 @@ async function loadClasses(){
   });
 }
 
-async function init(){
-  await loadClasses();
+/* ================= INIT ================= */
+async function initFromLink(){
 
   const urlClass = getClassFromURL();
+
+  await loadClasses();
+
   if(urlClass){
     currentClass = urlClass;
     document.getElementById("class").value = urlClass;
-    loadReport();
+    document.getElementById("class").disabled = true;
+    document.getElementById("publishBar").style.display = "none";
+    await checkPublishStatus();
+    await loadReport();
   }
 }
 
+/* ================= CLASS CHANGE ================= */
 async function onClassChange(){
+
+  if(document.getElementById("class").disabled) return;
+
   currentClass = document.getElementById("class").value;
+  if(!currentClass) return;
+
+  document.getElementById("publishBar").style.display =
+    role==="admin" ? "block":"none";
+
+  await checkPublishStatus();
+
+  if(isPublic() && !isPublished){
+    document.getElementById("tbody").innerHTML =
+      "<tr><td colspan='4'>RESULTS NOT PUBLISHED</td></tr>";
+    return;
+  }
+
   loadReport();
+}
+
+/* ================= PUBLISH CHECK ================= */
+async function checkPublishStatus(){
+
+  const { data } = await client
+    .from("published_reports")
+    .select("*")
+    .eq("class_id", currentClass)
+    .maybeSingle();
+
+  isPublished = data?.is_published || false;
+
+  document.getElementById("publishBtn").innerText =
+    isPublished ? "UNPUBLISH" : "PUBLISH";
+
+  document.getElementById("lockNotice").style.display =
+    isPublished ? "block":"none";
+}
+
+/* ================= TOGGLE PUBLISH ================= */
+async function togglePublish(){
+
+  const { data } = await client
+    .from("published_reports")
+    .select("*")
+    .eq("class_id", currentClass)
+    .maybeSingle();
+
+  if(data){
+    await client.from("published_reports")
+      .update({ is_published: !data.is_published })
+      .eq("class_id", currentClass);
+  } else {
+    await client.from("published_reports")
+      .insert([{ class_id: currentClass, is_published: true }]);
+  }
+
+  await checkPublishStatus();
+}
+
+/* ================= COPY LINK ================= */
+function copyLink(){
+  const link = window.location.origin + window.location.pathname + "?class=" + currentClass;
+  navigator.clipboard.writeText(link);
+  alert("Link copied:\n" + link);
 }
 
 /* ================= GRADE ================= */
@@ -190,10 +314,7 @@ async function loadReport(){
 
   if(!currentClass) return;
 
-  const { data:students } = await client
-    .from("students")
-    .select("id,class_id,admission_no,prem_no,gender");
-
+  const { data:students } = await client.from("students").select("*");
   const { data:subjects } = await client.from("subjects").select("*");
   const { data:results } = await client.from("results").select("*");
 
@@ -246,15 +367,14 @@ async function loadReport(){
     final.push({
       adm: stu.admission_no,
       prem: stu.prem_no,
-      sex: stu.gender==="Female" ? "F" : "M",
+      sex: stu.gender==="Female"?"F":"M",
       detail: detail.join(" ")
     });
   });
 
-  /* ================= TABLE 2 ================= */
+  /* TABLE 2 */
   let tb=document.getElementById("tbody");
   tb.innerHTML="";
-
   final.forEach(r=>{
     tb.innerHTML+=`
       <tr>
@@ -265,10 +385,9 @@ async function loadReport(){
       </tr>`;
   });
 
-  /* ================= TABLE 1 ================= */
+  /* TABLE 1 */
   let gp=document.getElementById("gradePerf");
   gp.innerHTML="";
-
   ["Female","Male"].forEach(s=>{
     let r=gradePerf[s];
     gp.innerHTML+=`
@@ -282,7 +401,7 @@ async function loadReport(){
       </tr>`;
   });
 
-  /* ================= TABLE 3 ================= */
+  /* TABLE 3 */
   let subbody=document.getElementById("subtbody");
   subbody.innerHTML="";
 
@@ -314,9 +433,17 @@ async function loadReport(){
         <td>${gpa(grade(avg))}</td>
       </tr>`;
   });
+
+  // ✅ APPLY AUTO WIDTH AFTER RENDER
+  setTimeout(()=>{
+    autoFitTable("gradePerf");
+    autoFitTable("tbody");
+    autoFitTable("subtbody");
+  }, 50);
 }
 
-init();
+/* ================= START ================= */
+initFromLink();
 
 </script>
 
