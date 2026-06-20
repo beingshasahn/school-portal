@@ -92,7 +92,7 @@ td{
 
 <button onclick="window.print()">PRINT</button>
 
-<!-- TABLES -->
+<!-- TABLE 1 -->
 <div class="table-wrap">
 <table>
 <thead>
@@ -104,12 +104,13 @@ td{
 </table>
 </div>
 
+<!-- TABLE 2 -->
 <div class="table-wrap">
 <table>
 <thead>
 <tr id="mainHead">
 <th>CAND NO</th>
-<th>NAME</th>
+<th id="nameHeader">NAME</th>
 <th>PREM NO</th>
 <th>SEX</th>
 <th>SUBJECTS</th>
@@ -119,6 +120,7 @@ td{
 </table>
 </div>
 
+<!-- TABLE 3 -->
 <div class="table-wrap">
 <table>
 <thead>
@@ -200,13 +202,6 @@ async function onClassChange(){
     role==="admin" ? "block":"none";
 
   await checkPublishStatus();
-
-  if(isPublic() && !isPublished){
-    document.getElementById("tbody").innerHTML =
-      "<tr><td colspan='4'>RESULTS NOT PUBLISHED</td></tr>";
-    return;
-  }
-
   loadReport();
 }
 
@@ -351,6 +346,11 @@ async function loadReport(){
     return;
   }
 
+  /* HIDE NAME COLUMN HEADER FOR PUBLIC */
+  if(isPublic()){
+    document.getElementById("nameHeader").style.display = "none";
+  }
+
   let tb=document.getElementById("tbody");
   tb.innerHTML="";
 
@@ -358,7 +358,7 @@ async function loadReport(){
     tb.innerHTML += `
       <tr>
         <td>${r.adm}</td>
-        <td>${r.name}</td>
+        ${!isPublic() ? `<td>${r.name}</td>` : ``}
         <td>${r.prem}</td>
         <td>${r.sex}</td>
         <td>${r.detail}</td>
@@ -410,4 +410,4 @@ initFromLink();
 </script>
 
 </body>
-</html>
+  </html>
