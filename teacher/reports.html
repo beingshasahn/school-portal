@@ -186,26 +186,42 @@ function autoFitTable(tableId){
   if(rows.length === 0) return;
 
   const colCount = rows[0].children.length;
+
+  // canvas for real text measurement (Excel-style)
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  ctx.font = "11px Arial";
+
   const maxWidths = new Array(colCount).fill(0);
 
+  // STEP 1: measure real pixel width of each cell
   rows.forEach(row=>{
     [...row.children].forEach((cell,i)=>{
       const text = (cell.innerText || "").trim();
 
-      if(text.length > maxWidths[i]){
-        maxWidths[i] = text.length;
+      const metrics = ctx.measureText(text);
+      const width = metrics.width;
+
+      if(width > maxWidths[i]){
+        maxWidths[i] = width;
       }
     });
   });
 
+  // STEP 2: apply smart constraints (NECTA PRO STYLE)
   rows.forEach(row=>{
     [...row.children].forEach((cell,i)=>{
 
-      let width = (maxWidths[i] * 7) + 8;
+      let width = maxWidths[i] + 16; // padding buffer
 
-      /* Compact NECTA style */
-      if(width < 25) width = 25;
-      if(width > 180) width = 180;
+      // SMART RULES PER COLUMN TYPE
+      if(i === 0) width = Math.max(width, 120); // CAND NO
+      if(i === 1) width = Math.max(width, 90);  // PREM NO
+      if(i === 2) width = Math.max(width, 40);  // SEX
+
+      // global limits (Excel feel)
+      if(width < 35) width = 35;
+      if(width > 260) width = 260;
 
       cell.style.width = width + "px";
       cell.style.minWidth = width + "px";
