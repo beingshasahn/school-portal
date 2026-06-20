@@ -186,27 +186,33 @@ function autoFitTable(tableId){
   if(rows.length === 0) return;
 
   const colCount = rows[0].children.length;
-
-  // canvas for real text measurement (Excel-style)
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d");
-  ctx.font = "11px Arial";
-
   const maxWidths = new Array(colCount).fill(0);
 
-  // STEP 1: measure real pixel width of each cell
   rows.forEach(row=>{
     [...row.children].forEach((cell,i)=>{
       const text = (cell.innerText || "").trim();
 
-      const metrics = ctx.measureText(text);
-      const width = metrics.width;
-
-      if(width > maxWidths[i]){
-        maxWidths[i] = width;
+      if(text.length > maxWidths[i]){
+        maxWidths[i] = text.length;
       }
     });
   });
+
+  rows.forEach(row=>{
+    [...row.children].forEach((cell,i)=>{
+
+      let width = (maxWidths[i] * 7) + 8;
+
+      /* Compact NECTA style */
+      if(width < 25) width = 25;
+      if(width > 180) width = 180;
+
+      cell.style.width = width + "px";
+      cell.style.minWidth = width + "px";
+      cell.style.maxWidth = width + "px";
+    });
+  });
+}
 
   // STEP 2: apply smart constraints (NECTA PRO STYLE)
   rows.forEach(row=>{
