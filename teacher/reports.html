@@ -52,11 +52,11 @@ button{cursor:pointer;}
 }
 
 table{
-  width:100%;
+  width:auto;
   border-collapse:collapse;
   font-size:11px;
-  table-layout:fixed; /* IMPORTANT */
-}
+  table-layout:auto;
+  }
 
 /* HEADER */
 th{
@@ -70,7 +70,7 @@ th{
 /* CELLS (COMPACT PRO STYLE) */
 td{
   border:1px solid #ccc;
-  padding:3px 4px;
+  padding:1px 3px;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
@@ -190,24 +190,27 @@ function autoFitTable(tableId){
   const maxWidths = new Array(colCount).fill(0);
 
   rows.forEach(row=>{
-    [...row.children].forEach((cell, i)=>{
-      const text = cell.innerText || "";
-      const len = text.length;
+    [...row.children].forEach((cell,i)=>{
+      const text = (cell.innerText || "").trim();
 
-      if(len > maxWidths[i]){
-        maxWidths[i] = len;
+      if(text.length > maxWidths[i]){
+        maxWidths[i] = text.length;
       }
     });
   });
 
   rows.forEach(row=>{
-    [...row.children].forEach((cell, i)=>{
-      let width = maxWidths[i] * 7 + 20;
+    [...row.children].forEach((cell,i)=>{
 
-      if(width < 50) width = 50;
-      if(width > 220) width = 220;
+      let width = (maxWidths[i] * 7) + 8;
+
+      /* Compact NECTA style */
+      if(width < 25) width = 25;
+      if(width > 180) width = 180;
 
       cell.style.width = width + "px";
+      cell.style.minWidth = width + "px";
+      cell.style.maxWidth = width + "px";
     });
   });
 }
