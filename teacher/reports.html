@@ -149,9 +149,6 @@ function isPublic(){
   return !["admin","teacher","headteacher"].includes(role);
 }
 
-  function canSeeNames(){
-  return ["admin","teacher","headteacher"].includes(role);
-  }
 /* ================= STATE ================= */
 let currentClass = null;
 let isPublished = false;
@@ -174,7 +171,7 @@ async function loadClasses(){
   });
 }
 
-/* ================= INIT FROM LINK ================= */
+/* ================= INIT ================= */
 async function initFromLink(){
 
   const urlClass = getClassFromURL();
@@ -282,21 +279,19 @@ async function loadReport(){
   const { data:results } = await client.from("results").select("*");
 
   let filtered = students
-  .filter(s => String(s.class_id) === String(currentClass))
-  .sort((a, b) => {
+    .filter(s => String(s.class_id) === String(currentClass))
+    .sort((a, b) => {
 
-    const g1 = (a.gender || "Male").toLowerCase();
-    const g2 = (b.gender || "Male").toLowerCase();
+      const g1 = (a.gender || "Male").toLowerCase();
+      const g2 = (b.gender || "Male").toLowerCase();
 
-    if (g1 !== g2) {
-      return g1 === "male" ? -1 : 1;
-    }
+      if (g1 !== g2) return g1 === "male" ? -1 : 1;
 
-    const n1 = (a.name || a.full_name || "").toLowerCase();
-    const n2 = (b.name || b.full_name || "").toLowerCase();
+      const n1 = (a.student_name || "").toLowerCase();
+      const n2 = (b.student_name || "").toLowerCase();
 
-    return n1.localeCompare(n2);
-  });
+      return n1.localeCompare(n2);
+    });
 
   let subStats = {};
   subjects.forEach(s=>{
@@ -311,13 +306,6 @@ async function loadReport(){
   let final = [];
 
   filtered.forEach(stu=>{
-
-  // 🔒 EXTRA SAFETY FOR PUBLIC VIEW
-  let studentName = stu.student_name;
-
-  if(isPublic()){
-    studentName = "—";
-  }
 
     let total=0,count=0,detail=[];
 
@@ -347,18 +335,14 @@ async function loadReport(){
     let g = grade(avg);
 
     gradePerf[stu.gender||"Male"][g]++;
-let studentName = stu.student_name;
 
-if(isPublic()){
-  studentName = "—";
-    }
     final.push({
-  adm: stu.admission_no,
-  name: stu.student_name,
-  prem: stu.prem_no,
-  sex: stu.gender === "Female" ? "F" : "M",
-  detail: detail.join(" ")
-});
+      adm: stu.admission_no,
+      name: stu.student_name,
+      prem: stu.prem_no,
+      sex: stu.gender === "Female" ? "F" : "M",
+      detail: detail.join(" ")
+    });
   });
 
   if(isPublic() && !isPublished){
@@ -374,11 +358,9 @@ if(isPublic()){
     tb.innerHTML += `
       <tr>
         <td>${r.adm}</td>
-<td>
-  ${canSeeNames() ? r.name : "—"}
-</td>
-<td>${r.prem}</td>
-<td>${r.sex}</td>
+        <td>${r.name}</td>
+        <td>${r.prem}</td>
+        <td>${r.sex}</td>
         <td>${r.detail}</td>
       </tr>`;
   });
