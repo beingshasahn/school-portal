@@ -73,7 +73,7 @@ td{
 
 <button onclick="window.print()">PRINT</button>
 
-<!-- GRADE SUMMARY -->
+<!-- GRADE TABLE -->
 <div class="table-wrap">
 <table>
 <thead>
@@ -89,7 +89,7 @@ td{
 <div class="table-wrap">
 <table>
 <thead>
-<tr id="mainHead">
+<tr>
 <th>CAND NO</th>
 <th>PREM NO</th>
 <th>SEX</th>
@@ -100,7 +100,7 @@ td{
 </table>
 </div>
 
-<!-- SUBJECT SUMMARY -->
+<!-- SUBJECT TABLE -->
 <div class="table-wrap">
 <table>
 <thead>
@@ -125,7 +125,6 @@ const client = supabase.createClient(
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s"
 );
 
-/* ================= STATE ================= */
 let currentClass = null;
 
 /* ================= CLASS ================= */
@@ -133,7 +132,6 @@ function getClassFromURL(){
   return new URLSearchParams(window.location.search).get("class");
 }
 
-/* ================= LOAD CLASSES ================= */
 async function loadClasses(){
   const { data } = await client.from("classes").select("*");
 
@@ -145,7 +143,6 @@ async function loadClasses(){
   });
 }
 
-/* ================= INIT ================= */
 async function init(){
   await loadClasses();
 
@@ -157,10 +154,8 @@ async function init(){
   }
 }
 
-/* ================= CLASS CHANGE ================= */
 async function onClassChange(){
   currentClass = document.getElementById("class").value;
-  if(!currentClass) return;
   loadReport();
 }
 
@@ -182,13 +177,30 @@ async function loadReport(){
 
   if(!currentClass) return;
 
-  const { data:students } = await client.from("students").select("id,class_id,admission_no,prem_no,gender");
+  const { data:students } = await client
+    .from("students")
+    .select("id,class_id,admission_no,prem_no,gender");
+
   const { data:subjects } = await client.from("subjects").select("*");
   const { data:results } = await client.from("results").select("*");
 
-  let filtered = students.filter(s =>
-    String(s.class_id) === String(currentClass)
-  );
+  /* ================= SORTING ================= */
+  let filtered = students
+    .filter(s => String(s.class_id) === String(currentClass))
+    .sort((a, b) => {
+
+      const g1 = (a.gender || "Male").toLowerCase();
+      const g2 = (b.gender || "Male").toLowerCase();
+
+      if (g1 !== g2) {
+        return g1 === "male" ? -1 : 1;
+      }
+
+      const n1 = (a.admission_no || "").toLowerCase();
+      const n2 = (b.admission_no || "").toLowerCase();
+
+      return n1.localeCompare(n2);
+    });
 
   let final = [];
 
@@ -227,7 +239,7 @@ async function loadReport(){
     final.push({
       adm: stu.admission_no,
       prem: stu.prem_no,
-      sex: stu.gender==="Female" ? "F" : "M",
+      sex: stu.gender === "Female" ? "F" : "M",
       detail: detail.join(" ")
     });
   });
