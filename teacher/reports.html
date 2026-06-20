@@ -81,17 +81,18 @@ td{
 <div class="header">NECTA REPORT SYSTEM</div>
 <div class="school">KOROSHO ENGLISH MEDIUM PRE AND PRIMARY SCHOOL</div>
 
-<div id="lockNotice" class="lock">🔒 CLASS PUBLISHED - LOCKED</div>
+<div id="lockNotice" class="lock">🔒 CLASS PUBLISHED - VIEW ONLY</div>
 
 <select id="class" onchange="onClassChange()"></select>
 
 <div id="publishBar">
   <button id="publishBtn" onclick="togglePublish()">PUBLISH</button>
+  <button onclick="copyLink()">COPY VIEW LINK</button>
 </div>
 
 <button onclick="window.print()">PRINT</button>
 
-<!-- ================= TABLES ================= -->
+<!-- TABLES -->
 <div class="table-wrap">
 <table>
 <thead>
@@ -135,13 +136,12 @@ td{
 </div>
 
 <script>
-/* ================= SUPABASE ================= */
 const client = supabase.createClient(
 "https://bslofdobcvxkjphbjyzb.supabase.co",
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s"
 );
 
-/* ================= ROLE SYSTEM ================= */
+/* ================= ROLE ================= */
 let role = "admin";
 
 function isPublic(){
@@ -151,6 +151,12 @@ function isPublic(){
 /* ================= STATE ================= */
 let currentClass = null;
 let isPublished = false;
+
+/* ================= URL CLASS ================= */
+function getClassFromURL(){
+  const p = new URLSearchParams(window.location.search);
+  return p.get("class");
+}
 
 /* ================= LOAD CLASSES ================= */
 async function loadClasses(){
@@ -164,8 +170,28 @@ async function loadClasses(){
   });
 }
 
+/* ================= INIT FROM LINK ================= */
+async function initFromLink(){
+
+  const urlClass = getClassFromURL();
+
+  await loadClasses();
+
+  if(urlClass){
+    currentClass = urlClass;
+    document.getElementById("class").value = urlClass;
+    document.getElementById("class").disabled = true;
+    document.getElementById("publishBar").style.display = "none";
+    await checkPublishStatus();
+    await loadReport();
+  }
+}
+
 /* ================= CLASS CHANGE ================= */
 async function onClassChange(){
+
+  if(document.getElementById("class").disabled) return;
+
   currentClass = document.getElementById("class").value;
   if(!currentClass) return;
 
@@ -183,7 +209,7 @@ async function onClassChange(){
   loadReport();
 }
 
-/* ================= PUBLISH STATUS ================= */
+/* ================= PUBLISH CHECK ================= */
 async function checkPublishStatus(){
 
   const { data } = await client
@@ -222,7 +248,14 @@ async function togglePublish(){
   await checkPublishStatus();
 }
 
-/* ================= GRADE FUNCTIONS ================= */
+/* ================= COPY LINK ================= */
+function copyLink(){
+  const link = window.location.origin + window.location.pathname + "?class=" + currentClass;
+  navigator.clipboard.writeText(link);
+  alert("Link copied:\n" + link);
+}
+
+/* ================= GRADE ================= */
 function grade(m){
   if(m>=81) return "A";
   if(m>=61) return "B";
@@ -232,15 +265,10 @@ function grade(m){
 }
 
 function gpa(g){
-  if(g==="A") return 5;
-  if(g==="B") return 4;
-  if(g==="C") return 3;
-  if(g==="D") return 2;
-  return 1;
+  return {A:5,B:4,C:3,D:2,E:1}[g] || 1;
 }
 
-
-/* ================= LOAD REPORT (NECTA FULL CORE) ================= */
+/* ================= REPORT ================= */
 async function loadReport(){
 
   if(!currentClass) return;
@@ -249,14 +277,11 @@ async function loadReport(){
   const { data:subjects } = await client.from("subjects").select("*");
   const { data:results } = await client.from("results").select("*");
 
-  let filteredStudents = students.filter(s =>
-    String(s.class_id) === String(currentClass)
-  );
+  let filtered = students.filter(s => String(s.class_id) === String(currentClass));
 
-  /* ================= INIT ================= */
   let subStats = {};
-  subjects.forEach(sub=>{
-    subStats[sub.id] = {sat:0, pass:0, total:0};
+  subjects.forEach(s=>{
+    subStats[s.id] = {sat:0, pass:0, total:0};
   });
 
   let gradePerf = {
@@ -266,144 +291,92 @@ async function loadReport(){
 
   let final = [];
 
-  /* ================= STUDENT LOOP ================= */
-  filteredStudents.forEach(stu=>{
+  filtered.forEach(stu=>{
 
-    let total = 0;
-    let count = 0;
-    let detail = [];
+    let total=0,count=0,detail=[];
 
     subjects.forEach(sub=>{
-
       let r = results.find(x =>
-        String(x.student_id) === String(stu.id) &&
-        String(x.subject_id) === String(sub.id)
+        String(x.student_id)===String(stu.id) &&
+        String(x.subject_id)===String(sub.id)
       );
 
-      if(!r || r.marks == null) return;
+      if(!r) return;
 
       let m = Number(r.marks);
 
       subStats[sub.id].sat++;
       subStats[sub.id].total += m;
-
-      if(m >= 41) subStats[sub.id].pass++;
+      if(m>=41) subStats[sub.id].pass++;
 
       total += m;
       count++;
 
-      detail.push(`${sub.subject_name.slice(0,4)}-${grade(m)}`);
+      detail.push(sub.subject_name.slice(0,4)+"-"+grade(m));
     });
 
-    if(count === 0) return;
+    if(count===0) return;
 
-    let avg = total / count;
-    let avgGrade = grade(avg);
+    let avg = total/count;
+    let g = grade(avg);
 
-    let sex = stu.gender === "Female" ? "Female" : "Male";
-    gradePerf[sex][avgGrade]++;
-
-    detail.push("AVG-" + avgGrade);
+    gradePerf[stu.gender||"Male"][g]++;
 
     final.push({
       adm: stu.admission_no,
-      name: stu.student_name,
-      prem: stu.prem_no || "",
-      sex: stu.gender === "Female" ? "F" : "M",
+      prem: stu.prem_no,
+      sex: stu.gender==="Female"?"F":"M",
       detail: detail.join(" ")
     });
   });
 
-  /* ================= PUBLIC CHECK ================= */
   if(isPublic() && !isPublished){
     document.getElementById("tbody").innerHTML =
-      "<tr><td colspan='4' style='color:red;text-align:center'>RESULTS NOT PUBLISHED</td></tr>";
-
-    document.getElementById("gradePerf").innerHTML = "";
-    document.getElementById("subtbody").innerHTML = "";
+      "<tr><td>NOT PUBLISHED</td></tr>";
     return;
   }
 
-  /* ================= MAIN TABLE ================= */
-  let tb = document.getElementById("tbody");
-  tb.innerHTML = "";
-
-  const head = document.getElementById("mainHead");
-
-  if(!isPublic()){
-    head.innerHTML = `
-      <th>CAND NO</th>
-      <th>NAME</th>
-      <th>PREM NO</th>
-      <th>SEX</th>
-      <th>SUBJECTS</th>
-    `;
-  } else {
-    head.innerHTML = `
-      <th>CAND NO</th>
-      <th>PREM NO</th>
-      <th>SEX</th>
-      <th>SUBJECTS</th>
-    `;
-  }
+  let tb=document.getElementById("tbody");
+  tb.innerHTML="";
 
   final.forEach(r=>{
-
-    if(!isPublic()){
-      tb.innerHTML += `
-        <tr>
-          <td>${r.adm}</td>
-          <td>${r.name}</td>
-          <td>${r.prem}</td>
-          <td>${r.sex}</td>
-          <td>${r.detail}</td>
-        </tr>
-      `;
-    } else {
-      tb.innerHTML += `
-        <tr>
-          <td>${r.adm}</td>
-          <td>${r.prem}</td>
-          <td>${r.sex}</td>
-          <td>${r.detail}</td>
-        </tr>
-      `;
-    }
+    tb.innerHTML += `
+      <tr>
+        <td>${r.adm}</td>
+        <td>${r.prem}</td>
+        <td>${r.sex}</td>
+        <td>${r.detail}</td>
+      </tr>`;
   });
 
-  /* ================= GRADE PERFORMANCE ================= */
-  let gp = document.getElementById("gradePerf");
-  gp.innerHTML = "";
+  let gp=document.getElementById("gradePerf");
+  gp.innerHTML="";
 
-  ["Female","Male"].forEach(sex=>{
-    let r = gradePerf[sex];
-    gp.innerHTML += `
+  ["Female","Male"].forEach(s=>{
+    let r=gradePerf[s];
+    gp.innerHTML+=`
       <tr>
-        <td>${sex}</td>
+        <td>${s}</td>
         <td>${r.A}</td>
         <td>${r.B}</td>
         <td>${r.C}</td>
         <td>${r.D}</td>
         <td>${r.E}</td>
-      </tr>
-    `;
+      </tr>`;
   });
 
-  /* ================= SUBJECT PERFORMANCE ================= */
-  let subbody = document.getElementById("subtbody");
-  subbody.innerHTML = "";
+  let subbody=document.getElementById("subtbody");
+  subbody.innerHTML="";
 
-  let i = 1;
+  let i=1;
 
   subjects.forEach(sub=>{
+    let st=subStats[sub.id];
+    if(st.sat===0) return;
 
-    let st = subStats[sub.id];
+    let avg=st.total/st.sat;
 
-    if(st.sat === 0) return;
-
-    let avg = st.total / st.sat;
-
-    subbody.innerHTML += `
+    subbody.innerHTML+=`
       <tr>
         <td>${i++}</td>
         <td>${sub.subject_name}</td>
@@ -411,15 +384,14 @@ async function loadReport(){
         <td>${st.sat}</td>
         <td>${st.pass}</td>
         <td>${avg.toFixed(1)}</td>
-        <td>${gpa(grade(avg)).toFixed(2)}</td>
-      </tr>
-    `;
+        <td>${gpa(grade(avg))}</td>
+      </tr>`;
   });
 }
 
-/* ================= LOAD ================= */
-loadClasses();
+/* ================= START ================= */
+initFromLink();
 </script>
 
 </body>
-  </html>
+</html>
