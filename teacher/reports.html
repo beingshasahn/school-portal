@@ -149,6 +149,9 @@ function isPublic(){
   return !["admin","teacher","headteacher"].includes(role);
 }
 
+  function canSeeNames(){
+  return ["admin","teacher","headteacher"].includes(role);
+  }
 /* ================= STATE ================= */
 let currentClass = null;
 let isPublished = false;
@@ -340,9 +343,9 @@ async function loadReport(){
 
     final.push({
   adm: stu.admission_no,
-  name: stu.name || stu.student_name || "",
+  name: stu.student_name,
   prem: stu.prem_no,
-  sex: stu.gender==="Female"?"F":"M",
+  sex: stu.gender === "Female" ? "F" : "M",
   detail: detail.join(" ")
 });
   });
@@ -360,9 +363,11 @@ async function loadReport(){
     tb.innerHTML += `
       <tr>
         <td>${r.adm}</td>
-        <td>${r.name}</td>
-        <td>${r.prem}</td>
-        <td>${r.sex}</td>
+<td>
+  ${canSeeNames() ? r.name : "—"}
+</td>
+<td>${r.prem}</td>
+<td>${r.sex}</td>
         <td>${r.detail}</td>
       </tr>`;
   });
