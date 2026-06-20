@@ -12,6 +12,7 @@ body{
   background:#c7e3ee;
 }
 
+/* HEADER */
 .header{
   text-align:center;
   padding:10px;
@@ -22,6 +23,7 @@ body{
 .school{
   text-align:center;
   font-size:13px;
+  margin-bottom:10px;
 }
 
 select,button{
@@ -31,13 +33,26 @@ select,button{
 
 button{cursor:pointer;}
 
+/* TABLE WRAP */
 .table-wrap{
-  margin:10px;
+  margin:12px;
   background:#fff7cc;
   border:1px solid #999;
   overflow-x:auto;
+  border-radius:6px;
 }
 
+/* TITLES */
+.table-title{
+  text-align:center;
+  font-weight:bold;
+  padding:8px;
+  background:#f2d16b;
+  border-bottom:1px solid #999;
+  text-transform:uppercase;
+}
+
+/* TABLE */
 table{
   width:100%;
   border-collapse:collapse;
@@ -47,15 +62,17 @@ table{
 th{
   background:#e6e6e6;
   border:1px solid #999;
-  padding:5px;
+  padding:6px;
 }
 
 td{
   border:1px solid #999;
-  padding:4px;
+  padding:5px;
   white-space:nowrap;
+  text-align:center;
 }
 
+/* PRINT */
 @media print{
   select,button{display:none;}
 }
@@ -73,49 +90,52 @@ td{
 
 <button onclick="window.print()">PRINT</button>
 
-<!-- GRADE TABLE -->
+<!-- ================= TABLE 1 ================= -->
 <div class="table-wrap">
-<table>
-<thead>
-<tr>
-<th>SEX</th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th>
-</tr>
-</thead>
-<tbody id="gradePerf"></tbody>
-</table>
+  <div class="table-title">GRADE PERFORMANCE</div>
+  <table>
+    <thead>
+      <tr>
+        <th>SEX</th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th>
+      </tr>
+    </thead>
+    <tbody id="gradePerf"></tbody>
+  </table>
 </div>
 
-<!-- MAIN TABLE (NO NAME COLUMN) -->
+<!-- ================= TABLE 2 ================= -->
 <div class="table-wrap">
-<table>
-<thead>
-<tr>
-<th>CAND NO</th>
-<th>PREM NO</th>
-<th>SEX</th>
-<th>SUBJECTS</th>
-</tr>
-</thead>
-<tbody id="tbody"></tbody>
-</table>
+  <div class="table-title">STUDENT PERFORMANCE</div>
+  <table>
+    <thead>
+      <tr>
+        <th>CAND NO</th>
+        <th>PREM NO</th>
+        <th>SEX</th>
+        <th>SUBJECTS</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
 </div>
 
-<!-- SUBJECT TABLE -->
+<!-- ================= TABLE 3 ================= -->
 <div class="table-wrap">
-<table>
-<thead>
-<tr>
-<th>NO</th>
-<th>SUBJECT</th>
-<th>REGISTERED</th>
-<th>SAT</th>
-<th>PASSED</th>
-<th>AVERAGE</th>
-<th>GPA</th>
-</tr>
-</thead>
-<tbody id="subtbody"></tbody>
-</table>
+  <div class="table-title">SUBJECTS PERFORMANCE COMPETENCY</div>
+  <table>
+    <thead>
+      <tr>
+        <th>NO</th>
+        <th>SUBJECT</th>
+        <th>REGISTERED</th>
+        <th>SAT</th>
+        <th>PASSED</th>
+        <th>AVERAGE</th>
+        <th>GPA</th>
+      </tr>
+    </thead>
+    <tbody id="subtbody"></tbody>
+  </table>
 </div>
 
 <script>
@@ -127,7 +147,7 @@ const client = supabase.createClient(
 
 let currentClass = null;
 
-/* ================= CLASS ================= */
+/* CLASS */
 function getClassFromURL(){
   return new URLSearchParams(window.location.search).get("class");
 }
@@ -159,7 +179,7 @@ async function onClassChange(){
   loadReport();
 }
 
-/* ================= GRADE ================= */
+/* GRADE */
 function grade(m){
   if(m>=81) return "A";
   if(m>=61) return "B";
@@ -172,7 +192,7 @@ function gpa(g){
   return {A:5,B:4,C:3,D:2,E:1}[g] || 1;
 }
 
-/* ================= REPORT ================= */
+/* REPORT */
 async function loadReport(){
 
   if(!currentClass) return;
@@ -184,22 +204,16 @@ async function loadReport(){
   const { data:subjects } = await client.from("subjects").select("*");
   const { data:results } = await client.from("results").select("*");
 
-  /* ================= SORTING ================= */
   let filtered = students
     .filter(s => String(s.class_id) === String(currentClass))
-    .sort((a, b) => {
+    .sort((a,b)=>{
 
-      const g1 = (a.gender || "Male").toLowerCase();
-      const g2 = (b.gender || "Male").toLowerCase();
+      const g1 = (a.gender||"Male").toLowerCase();
+      const g2 = (b.gender||"Male").toLowerCase();
 
-      if (g1 !== g2) {
-        return g1 === "male" ? -1 : 1;
-      }
+      if(g1!==g2) return g1==="male" ? -1 : 1;
 
-      const n1 = (a.admission_no || "").toLowerCase();
-      const n2 = (b.admission_no || "").toLowerCase();
-
-      return n1.localeCompare(n2);
+      return (a.admission_no||"").localeCompare(b.admission_no||"");
     });
 
   let final = [];
@@ -239,17 +253,17 @@ async function loadReport(){
     final.push({
       adm: stu.admission_no,
       prem: stu.prem_no,
-      sex: stu.gender === "Female" ? "F" : "M",
+      sex: stu.gender==="Female" ? "F" : "M",
       detail: detail.join(" ")
     });
   });
 
-  /* ================= MAIN TABLE ================= */
-  let tb = document.getElementById("tbody");
-  tb.innerHTML = "";
+  /* TABLE 2 */
+  let tb=document.getElementById("tbody");
+  tb.innerHTML="";
 
   final.forEach(r=>{
-    tb.innerHTML += `
+    tb.innerHTML+=`
       <tr>
         <td>${r.adm}</td>
         <td>${r.prem}</td>
@@ -258,7 +272,7 @@ async function loadReport(){
       </tr>`;
   });
 
-  /* ================= GRADE TABLE ================= */
+  /* TABLE 1 */
   let gp=document.getElementById("gradePerf");
   gp.innerHTML="";
 
@@ -275,7 +289,7 @@ async function loadReport(){
       </tr>`;
   });
 
-  /* ================= SUBJECT TABLE ================= */
+  /* TABLE 3 */
   let subbody=document.getElementById("subtbody");
   subbody.innerHTML="";
 
@@ -287,14 +301,14 @@ async function loadReport(){
     results.forEach(r=>{
       if(r.subject_id===sub.id){
         st.sat++;
-        st.total += Number(r.marks);
+        st.total+=Number(r.marks);
         if(r.marks>=41) st.pass++;
       }
     });
 
     if(st.sat===0) return;
 
-    let avg = st.total/st.sat;
+    let avg=st.total/st.sat;
 
     subbody.innerHTML+=`
       <tr>
