@@ -161,9 +161,19 @@ th,td{padding:10px;border-bottom:1px solid #eee}
 
   <label>Confirm New Password</label>
   <input type="password" id="confirmPassword">
- <label>
-  <input type="checkbox" onclick="togglePassword()"> Show Password
- </label>
+ <div style="margin-top:10px;">
+  <button type="button" onclick="togglePassword()" id="eyeBtn"
+    style="
+      background:#eee;
+      border:none;
+      padding:8px 12px;
+      border-radius:6px;
+      cursor:pointer;
+      font-size:16px;
+    ">
+    👁️ Show Password
+  </button>
+ </div>
   <br><br>
 
   <button onclick="changePassword()"
@@ -607,7 +617,7 @@ async function changePassword(){
   }
   }
 
-  function togglePassword(){
+function togglePassword(){
 
   const fields = [
     "currentPassword",
@@ -615,15 +625,19 @@ async function changePassword(){
     "confirmPassword"
   ];
 
-  fields.forEach(id => {
-    const input = document.getElementById(id);
+  const btn = document.getElementById("eyeBtn");
 
-    if(input.type === "password"){
-      input.type = "text";
-    } else {
-      input.type = "password";
-    }
+  let isHidden = document.getElementById("currentPassword").type === "password";
+
+  fields.forEach(id => {
+    document.getElementById(id).type = isHidden ? "text" : "password";
   });
+
+  if(isHidden){
+    btn.innerHTML = "🙈 Hide Password";
+  } else {
+    btn.innerHTML = "👁️ Show Password";
+  }
   }
 init();
 
