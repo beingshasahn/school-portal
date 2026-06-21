@@ -372,14 +372,15 @@ async function loadReport(){
       total += m;
       count++;
 
-      detail.push(formatSubject(sub.subject_name) + "-" + grade(m));
+      const subName = formatSubject(sub.subject_name);
+detail.push(subName + "-" + grade(m));
     });
 
     if(count===0) return;
 
     let avg = total/count;
     let g = grade(avg);
-   detail.push("AVERAGE-" + avg.toFixed(1) + "-" + g);
+   detail.push("AVERAGE - " + g);
     gradePerf[stu.gender||"Male"][g]++;
 
     final.push({
