@@ -78,7 +78,7 @@ body{margin:0;background:#f4f6f9}
 table{width:100%;border-collapse:collapse}
 th,td{padding:8px;border-bottom:1px solid #eee}
 
-/* ATTENDANCE BUTTONS */
+/* BUTTONS */
 .present{background:#28a745;color:white;border:none;padding:6px;border-radius:6px}
 .absent{background:#dc3545;color:white;border:none;padding:6px;border-radius:6px}
 
@@ -149,18 +149,13 @@ th,td{padding:8px;border-bottom:1px solid #eee}
     </table>
   </div>
 
-  <!-- PERFORMANCE -->
-  <div class="card">
-    <h3>Quick Performance</h3>
-    <div id="performance">Loading...</div>
-  </div>
-
 </div>
 
-  <script>
+<script>
 
 const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
+
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
 let teacherId = null;
@@ -186,13 +181,11 @@ async function init(){
   await loadClassTeacher();
 }
 
-/* FIXED WEEK FUNCTION */
+/* WEEK START */
 function getWeekStart(){
-
   const d = new Date();
   const day = d.getDay();
-
-  const diff = day === 0 ? -6 : 1 - day; // Monday start
+  const diff = day === 0 ? -6 : 1 - day;
 
   const monday = new Date(d);
   monday.setDate(d.getDate() + diff);
@@ -216,7 +209,7 @@ async function loadTOD(){
       "YOU ARE A T.O.D THIS WEEK";
   }else{
     document.getElementById("todText").innerText =
-      "T.O.D Running This Week";
+      "School Running Normally";
   }
 }
 
@@ -241,8 +234,8 @@ async function loadClassTeacher(){
   document.getElementById("className").innerText =
     data.classes.class_name;
 
-  await loadStudents();
-  await loadStats();
+  loadStudents();
+  loadStats();
 }
 
 /* STUDENTS */
@@ -286,7 +279,7 @@ async function mark(studentId,status){
       onConflict: "student_id,class_id,date"
     });
 
-  await loadStats();
+  loadStats();
 }
 
 /* STATS */
@@ -313,7 +306,7 @@ async function logout(){
 
 init();
 
-  </script>
+</script>
 
 </body>
 </html>
