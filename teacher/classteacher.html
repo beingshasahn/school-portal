@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Class Teacher Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{box-sizing:border-box;font-family:Arial}
+
+body{margin:0;background:#f4f6f9}
+
+/* HEADER */
+.header{
+  background:#1e3c72;
+  color:white;
+  padding:12px;
+  text-align:center;
+}
+
+/* T.O.D SCROLL */
+.tod-wrapper{
+  overflow:hidden;
+  white-space:nowrap;
+  width:100%;
+  background:#000;
+}
+
+.tod-scroll{
+  display:inline-block;
+  white-space:nowrap;
+  animation:scrollLeft 12s linear infinite;
+  color:#00ff6a;
+  font-weight:bold;
+  padding:6px;
+}
+
+@keyframes scrollLeft{
+  0%{transform:translateX(100%)}
+  100%{transform:translateX(-100%)}
+}
+
+/* TOP BAR */
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  padding:10px;
+  background:#fff;
+}
+
+.btn{
+  padding:8px 12px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  background:#1e3c72;
+  color:white;
+}
+
+/* GRID */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:10px;
+  padding:10px;
+}
+
+.card{
+  background:white;
+  padding:12px;
+  border-radius:10px;
+  box-shadow:0 2px 10px rgba(0,0,0,0.08);
+}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse}
+th,td{padding:8px;border-bottom:1px solid #eee}
+
+/* ATTENDANCE BUTTONS */
+.present{background:#28a745;color:white;border:none;padding:6px;border-radius:6px}
+.absent{background:#dc3545;color:white;border:none;padding:6px;border-radius:6px}
+
+.hidden{display:none}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <h3>CLASS TEACHER DASHBOARD</h3>
+</div>
+
+<div class="tod-wrapper">
+  <div id="todText" class="tod-scroll">Loading T.O.D...</div>
+</div>
+
+<div class="topbar">
+  <div id="teacherInfo">Loading...</div>
+  <button class="btn" onclick="logout()">Logout</button>
+</div>
+
+<!-- NOT ASSIGNED -->
+<div id="notAssigned" class="card hidden">
+  ❌ You are not assigned as a Class Teacher
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+
+  <!-- STATS -->
+  <div class="grid">
+
+    <div class="card">
+      <h4>Class</h4>
+      <div id="className">-</div>
+    </div>
+
+    <div class="card">
+      <h4>Total Students</h4>
+      <div id="totalStudents">0</div>
+    </div>
+
+    <div class="card">
+      <h4>Present Today</h4>
+      <div id="presentCount">0</div>
+    </div>
+
+    <div class="card">
+      <h4>Absent Today</h4>
+      <div id="absentCount">0</div>
+    </div>
+
+  </div>
+
+  <!-- ATTENDANCE -->
+  <div class="card">
+    <h3>Mark Attendance</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Adm No</th>
+          <th>Name</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="students"></tbody>
+    </table>
+  </div>
+
+  <!-- PERFORMANCE -->
+  <div class="card">
+    <h3>Quick Performance</h3>
+    <div id="performance">Loading...</div>
+  </div>
+
+</div>
+
+<script>
+
+const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+let teacherId = null;
+let classId = null;
+let today = new Date().toISOString().split("T")[0];
+
+/* INIT */
+async function init(){
+
+  const { data:{ user } } = await supabaseClient.auth.getUser();
+  if(!user) location.href="../index.html";
+
+  teacherId = user.id;
+
+  document.getElementById("teacherInfo").innerText =
+    "Teacher: " + user.email;
+
+  await loadTOD();
+  await loadClassTeacher();
+}
+
+/* T.O.D */
+async function loadTOD(){
+
+  const d = new Date();
+  const start = new Date(d.setDate(d.getDate() - d.getDay() + 1))
+    .toISOString().split("T")[0];
+
+  const { data } = await supabaseClient
+    .from("tod_rotation")
+    .select("teacher_id")
+    .eq("week_start", start)
+    .maybeSingle();
+
+  if(data?.teacher_id === teacherId){
+    document.getElementById("todText").innerText =
+      "YOU ARE A T.O.D THIS WEEK";
+  }else{
+    document.getElementById("todText").innerText =
+      "School Running Normally";
+  }
+}
+
+/* CLASS TEACHER CHECK */
+async function loadClassTeacher(){
+
+  const { data } = await supabaseClient
+    .from("teacher_assignments")
+    .select("class_id, classes(id,class_name)")
+    .eq("teacher_id", teacherId)
+    .eq("is_class_teacher", true)
+    .maybeSingle();
+
+  if(!data){
+    document.getElementById("notAssigned").classList.remove("hidden");
+    document.getElementById("dashboard").style.display = "none";
+    return;
+  }
+
+  classId = data.class_id;
+
+  document.getElementById("className").innerText =
+    data.classes.class_name;
+
+  loadStudents();
+  loadStats();
+}
+
+/* STUDENTS */
+async function loadStudents(){
+
+  const { data } = await supabaseClient
+    .from("students")
+    .select("*")
+    .eq("class_id", classId);
+
+  const tbody = document.getElementById("students");
+  tbody.innerHTML = "";
+
+  (data || []).forEach(s=>{
+    tbody.innerHTML += `
+      <tr>
+        <td>${s.admission_no}</td>
+        <td>${s.student_name}</td>
+        <td>
+          <button class="present" onclick="mark('${s.id}','P')">P</button>
+          <button class="absent" onclick="mark('${s.id}','A')">A</button>
+        </td>
+      </tr>
+    `;
+  });
+
+  document.getElementById("totalStudents").innerText = data.length;
+}
+
+/* ATTENDANCE */
+async function mark(studentId,status){
+
+  await supabaseClient
+    .from("attendance")
+    .upsert([{
+      student_id: studentId,
+      class_id: classId,
+      date: today,
+      status: status
+    }],{
+      onConflict: "student_id,date"
+    });
+
+  loadStats();
+}
+
+/* STATS */
+async function loadStats(){
+
+  const { data } = await supabaseClient
+    .from("attendance")
+    .select("*")
+    .eq("class_id", classId)
+    .eq("date", today);
+
+  const present = (data || []).filter(x=>x.status==="P").length;
+  const absent = (data || []).filter(x=>x.status==="A").length;
+
+  document.getElementById("presentCount").innerText = present;
+  document.getElementById("absentCount").innerText = absent;
+}
+
+/* LOGOUT */
+async function logout(){
+  await supabaseClient.auth.signOut();
+  location.href="../index.html";
+}
+
+init();
+
+</script>
+
+</body>
+</html>
