@@ -250,8 +250,19 @@ async function init(){
 
   teacherId = user.id;
 
-  document.getElementById("teacherInfo").innerText =
-    "Teacher: " + user.email;
+  const name = profile?.full_name || "Teacher";
+
+const hour = new Date().getHours();
+
+let greeting = "Good morning";
+if(hour >= 12 && hour < 17){
+  greeting = "Good afternoon";
+}else if(hour >= 17){
+  greeting = "Good evening";
+}
+
+document.getElementById("teacherInfo").innerText =
+  `🌅 ${greeting}, Mr/Ms ${name}`;
 
   await loadTOD();
   await loadClassTeacher();
