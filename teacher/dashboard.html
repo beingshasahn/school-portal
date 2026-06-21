@@ -90,6 +90,29 @@ select,input{
   margin-top:6px;
 }
 
+  .tod-wrapper{
+  overflow:hidden;
+  white-space:nowrap;
+  width:100%;
+  padding:4px 0;
+}
+
+.tod-scroll{
+  display:inline-block;
+  white-space:nowrap;
+  animation: scrollLeft 12s linear infinite;
+  font-size:14px;
+  color:#333;
+}
+
+@keyframes scrollLeft{
+  0%{
+    transform: translateX(100%);
+  }
+  100%{
+    transform: translateX(-100%);
+  }
+}
 /* TABLE */
 table{width:100%;border-collapse:collapse}
 th,td{padding:10px;border-bottom:1px solid #eee}
@@ -108,7 +131,9 @@ th,td{padding:10px;border-bottom:1px solid #eee}
   <b>TEACHER DASHBOARD</b>
 </div>
 
-<div id="todText" class="tod-text">Loading T.O.D...</div>
+<div class="tod-wrapper">
+  <div id="todText" class="tod-scroll">Loading T.O.D...</div>
+</div>
 
 <div class="topbar">
   <div id="teacherInfo">Loading...</div>
