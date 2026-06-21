@@ -185,6 +185,52 @@ let selectedSubject = null;
 let selectedClassForTeacher = null;
 let isClassLocked = false;
 
+  function getWeekRange(date = new Date()){
+
+  const day = date.getDay();
+  const diffToMonday = (day === 0 ? -6 : 1) - day;
+
+  const monday = new Date(date);
+  monday.setDate(date.getDate() + diffToMonday);
+
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+
+  return {
+    start: monday.toISOString().split("T")[0],
+    end: sunday.toISOString().split("T")[0]
+  };
+  }
+  async function ensureWeeklyTOD(){
+
+  const { start, end } = getWeekRange();
+
+  const { data: existing } = await supabaseClient
+    .from("tod_rotation")
+    .select("*")
+    .eq("week_start", start)
+    .maybeSingle();
+
+  if(existing) return;
+
+  const { data: teachers } = await supabaseClient
+    .from("profiles")
+    .select("id")
+    .eq("role", "teacher");
+
+  if(!teachers || teachers.length === 0) return;
+
+  const random = teachers[Math.floor(Math.random() * teachers.length)];
+
+  await supabaseClient
+    .from("tod_rotation")
+    .insert([{
+      teacher_id: random.id,
+      week_start: start,
+      week_end: end,
+      is_active: true
+    }]);
+    }
 /* AUTH */
 async function protect(roleRequired){
 
@@ -230,22 +276,29 @@ async function init(){
 /* T.O.D */
 async function loadTOD(){
 
-  const { data } = await supabaseClient
-    .from("school_settings")
-    .select("tod_name")
-    .maybeSingle();
+  const { start } = getWeekRange();
 
-  let name = data?.tod_name || "No T.O.D";
+  const { data } = await supabaseClient
+    .from("tod_rotation")
+    .select("teacher_id, profiles(name,email)")
+    .eq("week_start", start)
+    .maybeSingle();
 
   const { data: user } = await supabaseClient.auth.getUser();
 
-  if(name === user.user.email){
-    name = "🔥 YOU ARE A T.O.D";
-  } else {
-    name = "T.O.D: " + name;
+  if(!data){
+    document.getElementById("todText").innerText =
+      "No T.O.D assigned this week";
+    return;
   }
 
-  document.getElementById("todText").innerText = name;
+  let label = "T.O.D: " + (data.profiles?.name || "Unknown");
+
+  if(data.teacher_id === user.user.id){
+    label = "🔥 YOU ARE A T.O.D THIS WEEK";
+  }
+
+  document.getElementById("todText").innerText = label;
 }
 
 /* CLASS TEACHER CHECK */
