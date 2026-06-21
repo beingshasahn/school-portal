@@ -391,40 +391,78 @@ function loadSubjects(class_id){
 }
 
 /* STUDENTS */
+
 async function loadStudents(class_id){
 
-  const { data } = await supabaseClient
+  if(!selectedSubject) return;
+
+  const { data: students } = await supabaseClient
     .from("students")
     .select("*")
-    .eq("class_id", class_id);
+    .eq("class_id", class_id)
+    .order("admission_no");
+
+  const { data: marksData } = await supabaseClient
+    .from("results")
+    .select("student_id, marks")
+    .eq("subject_id", selectedSubject);
+
+  const marksMap = {};
+
+  (marksData || []).forEach(r=>{
+    marksMap[r.student_id] = r.marks;
+  });
 
   const tbody = document.getElementById("students");
   tbody.innerHTML = "";
 
-  (data || []).forEach(s=>{
+  (students || []).forEach(s=>{
+
     tbody.innerHTML += `
       <tr>
         <td>${s.admission_no}</td>
         <td>${s.student_name}</td>
         <td>
-          <input type="number"
+          <input
+            type="number"
+            min="0"
+            max="100"
+            value="${marksMap[s.id] ?? ''}"
             oninput="autoSave('${s.id}',this.value)">
         </td>
-      </tr>`;
+      </tr>
+    `;
   });
 }
 
 /* SAVE MARKS */
-async function autoSave(id,val){
+async function autoSave(studentId,value){
 
-  if(val === "" || !selectedSubject) return;
+  if(!selectedSubject) return;
 
-  await supabaseClient.from("results").upsert([{
-    student_id:id,
-    subject_id:selectedSubject,
-    teacher_id:teacherId,
-    marks:Number(val)
-  }], { onConflict:"student_id,subject_id" });
+  const mark = value.trim();
+
+  if(mark === ""){
+
+    await supabaseClient
+      .from("results")
+      .delete()
+      .eq("student_id", studentId)
+      .eq("subject_id", selectedSubject);
+
+    return;
+  }
+
+  await supabaseClient
+    .from("results")
+    .upsert([{
+      student_id: studentId,
+      subject_id: selectedSubject,
+      teacher_id: teacherId,
+      marks: Number(mark)
+    }],{
+      onConflict:"student_id,subject_id"
+    });
 }
 
 /* UI */
