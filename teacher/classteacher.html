@@ -46,8 +46,16 @@ body{margin:0;background:#f4f6f9}
 .topbar{
   display:flex;
   justify-content:space-between;
+  align-items:center;
   padding:10px;
   background:#fff;
+}
+
+/* LEFT BUTTON GROUP */
+.left-actions{
+  display:flex;
+  gap:8px;
+  align-items:center;
 }
 
 .btn{
@@ -97,8 +105,16 @@ th,td{padding:8px;border-bottom:1px solid #eee}
 </div>
 
 <div class="topbar">
-  <div id="teacherInfo">Loading...</div>
+
+  <!-- LEFT: BACK BUTTON + INFO -->
+  <div class="left-actions">
+    <button class="btn" onclick="location.href='dashboard.html'">⬅ Back</button>
+    <div id="teacherInfo">Loading...</div>
+  </div>
+
+  <!-- RIGHT: LOGOUT -->
   <button class="btn" onclick="logout()">Logout</button>
+
 </div>
 
 <!-- NOT ASSIGNED -->
@@ -109,7 +125,6 @@ th,td{padding:8px;border-bottom:1px solid #eee}
 <!-- DASHBOARD -->
 <div id="dashboard">
 
-  <!-- STATS -->
   <div class="grid">
 
     <div class="card">
@@ -134,7 +149,6 @@ th,td{padding:8px;border-bottom:1px solid #eee}
 
   </div>
 
-  <!-- ATTENDANCE -->
   <div class="card">
     <h3>Mark Attendance</h3>
     <table>
@@ -181,7 +195,6 @@ async function init(){
   await loadClassTeacher();
 }
 
-/* WEEK START */
 function getWeekStart(){
   const d = new Date();
   const day = d.getDay();
@@ -193,7 +206,6 @@ function getWeekStart(){
   return monday.toISOString().split("T")[0];
 }
 
-/* T.O.D */
 async function loadTOD(){
 
   const start = getWeekStart();
@@ -213,7 +225,6 @@ async function loadTOD(){
   }
 }
 
-/* CLASS TEACHER CHECK */
 async function loadClassTeacher(){
 
   const { data } = await supabaseClient
@@ -238,7 +249,6 @@ async function loadClassTeacher(){
   loadStats();
 }
 
-/* STUDENTS */
 async function loadStudents(){
 
   const { data } = await supabaseClient
@@ -265,7 +275,6 @@ async function loadStudents(){
   document.getElementById("totalStudents").innerText = data?.length || 0;
 }
 
-/* ATTENDANCE */
 async function mark(studentId,status){
 
   await supabaseClient
@@ -282,7 +291,6 @@ async function mark(studentId,status){
   loadStats();
 }
 
-/* STATS */
 async function loadStats(){
 
   const { data } = await supabaseClient
@@ -298,7 +306,6 @@ async function loadStats(){
   document.getElementById("absentCount").innerText = absent;
 }
 
-/* LOGOUT */
 async function logout(){
   await supabaseClient.auth.signOut();
   location.href="../index.html";
