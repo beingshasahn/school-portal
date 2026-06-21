@@ -84,7 +84,10 @@ td{
   white-space:nowrap;
   text-align:left;
 }
-
+#tbody td:nth-child(1),
+#tbody td:nth-child(2){
+  white-space:nowrap;
+}
 /* HOVER LIKE PRO SYSTEM */
 tr:hover td{
   background:#f3f8ff;
@@ -207,7 +210,7 @@ function autoFitTable(tableId){
       let width = (maxWidths[i] * 7) + 8;
 
       /* Compact NECTA style */
-      if(width < 25) width = 25;
+      if(width < 60) width = 60;
       if(i !== 3 && width > 180) width = 180;
 
       cell.style.width = width + "px";
