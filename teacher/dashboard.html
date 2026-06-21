@@ -18,28 +18,41 @@ body{margin:0;background:#f4f6f9}
   color:white;
   padding:12px;
   text-align:center;
-  line-height:1.4;
 }
 
-/* T.O.D BAR */
-.tod-bar{
-  background:#000;
-  color:#fff;
-  padding:6px;
+/* T.O.D */
+.tod-wrapper{
+  overflow:hidden;
+  white-space:nowrap;
+  width:100%;
+  padding:4px 0;
+}
+
+.tod-scroll{
+  display:inline-block;
+  white-space:nowrap;
+  animation: scrollLeft 12s linear infinite;
+  font-size:14px;
+  color:green;
   font-weight:bold;
+}
+
+@keyframes scrollLeft{
+  0%{transform:translateX(100%)}
+  100%{transform:translateX(-100%)}
 }
 
 /* TOPBAR */
-.tod-bar{
-  background:#000;
-  color:#fff;
-  padding:6px;
-  font-weight:bold;
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px 15px;
+  background:#fff;
 }
 
 #teacherInfo{font-weight:bold}
 
-/* LOGOUT */
 .logout{
   width:38px;height:38px;
   border-radius:50%;
@@ -47,13 +60,6 @@ body{margin:0;background:#f4f6f9}
   color:white;
   border:none;
 }
-  .tod-text{
-  text-align:center;
-  padding:4px;
-  font-size:14px;
-  font-weight:normal;
-  color:#333;
-  }
 
 /* MENU */
 .menu{
@@ -71,6 +77,7 @@ body{margin:0;background:#f4f6f9}
   border-radius:8px;
   background:#1e3c72;
   color:white;
+  cursor:pointer;
 }
 
 /* CONTAINER */
@@ -90,35 +97,10 @@ select,input{
   margin-top:6px;
 }
 
-  .tod-wrapper{
-  overflow:hidden;
-  white-space:nowrap;
-  width:100%;
-  padding:4px 0;
-}
-
-.tod-scroll{
-  display:inline-block;
-  white-space:nowrap;
-  animation: scrollLeft 12s linear infinite;
-  font-size:14px;
-  color:green;
-  font-weight:bold;
-}
-
-@keyframes scrollLeft{
-  0%{
-    transform: translateX(100%);
-  }
-  100%{
-    transform: translateX(-100%);
-  }
-}
 /* TABLE */
 table{width:100%;border-collapse:collapse}
 th,td{padding:10px;border-bottom:1px solid #eee}
 
-/* HIDE */
 .hidden{display:none}
 </style>
 
@@ -158,13 +140,11 @@ th,td{padding:10px;border-bottom:1px solid #eee}
 <!-- RESULTS -->
 <div id="resultsSection" class="card hidden">
   <h3>Results View</h3>
-  <p>Use subject & class system below</p>
 </div>
 
 <!-- CHAT -->
 <div id="chatSection" class="card hidden">
   <h3>Chat Room</h3>
-  <p>Coming soon...</p>
 </div>
 
 <!-- CLASS + SUBJECT -->
@@ -185,7 +165,6 @@ th,td{padding:10px;border-bottom:1px solid #eee}
 <!-- STUDENTS -->
 <div class="card">
   <h3>Students Marks Entry</h3>
-
   <table>
     <thead>
       <tr>
@@ -208,111 +187,53 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
 let teacherId = null;
 let assignments = [];
-let studentsList = [];
-
 let selectedClass = null;
 let selectedSubject = null;
-let selectedClassForTeacher = null;
-let isClassLocked = false;
 
-  function getWeekRange(date = new Date()){
-
-  const day = date.getDay();
-  const diffToMonday = (day === 0 ? -6 : 1) - day;
-
-  const monday = new Date(date);
-  monday.setDate(date.getDate() + diffToMonday);
-
+/* WEEK */
+function getWeekRange(){
+  const d = new Date();
+  const day = d.getDay();
+  const diff = (day === 0 ? -6 : 1) - day;
+  const monday = new Date(d.setDate(d.getDate()+diff));
   const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
+  sunday.setDate(monday.getDate()+6);
 
   return {
     start: monday.toISOString().split("T")[0],
     end: sunday.toISOString().split("T")[0]
   };
-  }
-  async function ensureWeeklyTOD(){
+}
 
-  const { start, end } = getWeekRange();
+/* T.O.D */
+async function ensureWeeklyTOD(){
 
-  const { data: existing } = await supabaseClient
+  const { start } = getWeekRange();
+
+  const { data: exists } = await supabaseClient
     .from("tod_rotation")
     .select("id")
     .eq("week_start", start)
     .maybeSingle();
 
-  if(existing) return;
+  if(exists) return;
 
   const { data: teachers } = await supabaseClient
     .from("profiles")
     .select("id")
     .eq("role","teacher");
 
-  if(!teachers || teachers.length === 0) return;
+  if(!teachers?.length) return;
 
-  const countWeeks =
-    Math.floor(
-      (new Date(start) - new Date("2026-01-05"))
-      / (1000*60*60*24*7)
-    );
+  const index = Math.floor(Math.random()*teachers.length);
 
-  const index =
-    Math.abs(countWeeks) % teachers.length;
-
-  const selectedTeacher = teachers[index];
-
-  await supabaseClient
-    .from("tod_rotation")
-    .insert([{
-      teacher_id: selectedTeacher.id,
-      week_start: start,
-      week_end: end
-    }]);
-  }
-/* AUTH */
-async function protect(roleRequired){
-
-  const { data: { user } } = await supabaseClient.auth.getUser();
-
-  if(!user){
-    location.href="../index.html";
-    return false;
-  }
-
-  const { data: profile } = await supabaseClient
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  if(!profile || profile.role !== roleRequired){
-    alert("No permission");
-    location.href="../index.html";
-    return false;
-  }
-
-  return true;
+  await supabaseClient.from("tod_rotation").insert([{
+    teacher_id: teachers[index].id,
+    week_start: start,
+    week_end: getWeekRange().end
+  }]);
 }
 
-/* INIT */
-async function init(){
-
-  const ok = await protect("teacher");
-  if(!ok) return;
-
-  const { data: user } = await supabaseClient.auth.getUser();
-  teacherId = user.user.id;
-
-  document.getElementById("teacherInfo").innerText =
-    "Teacher: " + user.user.email;
-
-  loadAssignments();
-
-  await ensureWeeklyTOD();  // 🔥 NEW
-  await loadTOD();          // 🔥 NEW
-}
-
-/* T.O.D */
 async function loadTOD(){
 
   const { start } = getWeekRange();
@@ -324,47 +245,37 @@ async function loadTOD(){
     .maybeSingle();
 
   if(!row){
-    document.getElementById("todText").innerText =
-      "T.O.D: Not assigned this week";
+    document.getElementById("todText").innerText = "T.O.D: Not assigned";
     return;
   }
 
-  const { data: teacher } = await supabaseClient
+  const { data: t } = await supabaseClient
     .from("profiles")
     .select("full_name")
     .eq("id", row.teacher_id)
     .maybeSingle();
 
-  const { data:{ user } } =
-    await supabaseClient.auth.getUser();
+  const { data:{ user } } = await supabaseClient.auth.getUser();
 
-  if(row.teacher_id === user.id){
-    document.getElementById("todText").innerText =
-      "YOU ARE A T.O.D THIS WEEK";
-  }else{
-    document.getElementById("todText").innerText =
-      "T.O.D: " + (teacher?.full_name || "Unknown");
-  }
+  document.getElementById("todText").innerText =
+    row.teacher_id === user.id
+      ? "YOU ARE A T.O.D THIS WEEK"
+      : "T.O.D: " + (t?.full_name || "Unknown");
 }
-/* CLASS TEACHER CHECK */
-async function checkClassTeacher(){
 
-  const { data } = await supabaseClient
-    .from("teacher_assignments")
-    .select("classes(id,class_name)")
-    .eq("teacher_id", teacherId)
-    .eq("is_class_teacher", true)
-    .maybeSingle();
+/* INIT */
+async function init(){
 
-  if(!data){
-    document.getElementById("myClassData").innerText =
-      "❌ You are not assigned to any class yet.";
-    return;
-  }
+  const { data:{ user } } = await supabaseClient.auth.getUser();
+  teacherId = user.id;
 
-  selectedClassForTeacher = data.classes.id;
+  document.getElementById("teacherInfo").innerText =
+    "Teacher: " + user.email;
 
-  showSection("classTeacher");
+  await loadAssignments();
+
+  await ensureWeeklyTOD();
+  await loadTOD();
 }
 
 /* LOAD ASSIGNMENTS */
@@ -377,51 +288,43 @@ async function loadAssignments(){
 
   assignments = data || [];
 
-  const classSelect = document.getElementById("class");
-  classSelect.innerHTML = `<option value="">Select Class</option>`;
+  const sel = document.getElementById("class");
+  sel.innerHTML = `<option value="">Select Class</option>`;
 
   const seen = new Set();
 
   assignments.forEach(a=>{
     if(a.classes && !seen.has(a.classes.id)){
       seen.add(a.classes.id);
-      classSelect.innerHTML += `<option value="${a.classes.id}">${a.classes.class_name}</option>`;
+      sel.innerHTML += `<option value="${a.classes.id}">${a.classes.class_name}</option>`;
     }
   });
 }
 
-/* CLASS CHANGE */
+/* CLASS */
 function handleClassChange(){
-
-  selectedClass = document.getElementById("class").value;
+  selectedClass = class.value;
   selectedSubject = null;
   document.getElementById("students").innerHTML = "";
-
-  if(!selectedClass){
-    hideSubject();
-    return;
-  }
-
   loadSubjects(selectedClass);
 }
 
-/* SUBJECTS */
+/* SUBJECT */
+function handleSubjectChange(){
+  selectedSubject = subject.value;
+  loadStudents(selectedClass);
+}
+
+/* LOAD SUBJECTS */
 function loadSubjects(class_id){
 
-  const subject = document.getElementById("subject");
-  subject.innerHTML = `<option value="">Select Subject</option>`;
+  const sub = document.getElementById("subject");
+  sub.innerHTML = `<option value="">Select Subject</option>`;
 
-  const filtered = assignments.filter(a =>
-    String(a.classes.id) === String(class_id)
-  );
-
-  const seen = new Set();
-
-  filtered.forEach(a=>{
-    if(a.subjects && !seen.has(a.subjects.id)){
-      seen.add(a.subjects.id);
-      subject.innerHTML += `<option value="${a.subjects.id}">${a.subjects.subject_name}</option>`;
-    }
+  assignments.filter(a=>a.class_id==class_id).forEach(a=>{
+    sub.innerHTML += `<option value="${a.subjects.id}">
+      ${a.subjects.subject_name}
+    </option>`;
   });
 
   showSubject();
@@ -435,89 +338,46 @@ async function loadStudents(class_id){
     .select("*")
     .eq("class_id", class_id);
 
-  studentsList = students || [];
-
-  const { data: existingResults } = await supabaseClient
-    .from("results")
-    .select("student_id, marks")
-    .eq("subject_id", selectedSubject);
-
-  const map = {};
-  (existingResults || []).forEach(r=>{
-    map[r.student_id] = r.marks;
-  });
-
   const tbody = document.getElementById("students");
   tbody.innerHTML = "";
 
-  studentsList.forEach(s=>{
+  students.forEach(s=>{
     tbody.innerHTML += `
       <tr>
         <td>${s.admission_no}</td>
         <td>${s.student_name}</td>
-        <td>
-          <input type="number"
-            value="${map[s.id] ?? ''}"
-            oninput="autoSave('${s.id}', this.value)">
-        </td>
-      </tr>
-    `;
+        <td><input type="number" oninput="autoSave('${s.id}',this.value)"></td>
+      </tr>`;
   });
 }
 
-/* AUTO SAVE */
-async function autoSave(student_id, value){
+/* SAVE */
+async function autoSave(id,val){
 
-  if(!teacherId || !selectedClass || !selectedSubject) return;
-  if(isClassLocked) return;
+  if(val==="") return;
 
-  const mark = value.trim();
-
-  if(mark === ""){
-    await supabaseClient
-      .from("results")
-      .delete()
-      .eq("student_id", student_id)
-      .eq("subject_id", selectedSubject);
-    return;
-  }
-
-  await supabaseClient
-    .from("results")
-    .upsert([{
-      student_id,
-      subject_id: selectedSubject,
-      teacher_id: teacherId,
-      marks: Number(mark)
-    }], { onConflict: "student_id,subject_id" });
+  await supabaseClient.from("results").upsert([{
+    student_id:id,
+    subject_id:selectedSubject,
+    teacher_id:teacherId,
+    marks:Number(val)
+  }]);
 }
 
 /* UI */
 function showSubject(){
-  document.getElementById("subject").classList.remove("hidden");
-  document.getElementById("subjectLabel").classList.remove("hidden");
+  subject.classList.remove("hidden");
+  subjectLabel.classList.remove("hidden");
 }
 
-function hideSubject(){
-  document.getElementById("subject").classList.add("hidden");
-  document.getElementById("subjectLabel").classList.add("hidden");
-}
+function showSection(s){
+  classTeacherSection.classList.add("hidden");
+  resultsSection.classList.add("hidden");
+  chatSection.classList.add("hidden");
 
-function showSection(section){
-
-  document.getElementById("classTeacherSection").classList.add("hidden");
-  document.getElementById("resultsSection").classList.add("hidden");
-  document.getElementById("chatSection").classList.add("hidden");
-
-  if(section==="classTeacher"){
-    document.getElementById("classTeacherSection").classList.remove("hidden");
-  }
-  if(section==="results"){
-    document.getElementById("resultsSection").classList.remove("hidden");
-  }
-  if(section==="chat"){
-    document.getElementById("chatSection").classList.remove("hidden");
-  }
+  if(s==="classTeacher") classTeacherSection.classList.remove("hidden");
+  if(s==="results") resultsSection.classList.remove("hidden");
+  if(s==="chat") chatSection.classList.remove("hidden");
 }
 
 /* LOGOUT */
