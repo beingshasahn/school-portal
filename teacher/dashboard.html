@@ -20,7 +20,7 @@ body{margin:0;background:#f4f6f9}
   text-align:center;
 }
 
-/* T.O.D */
+/* T.O.D SCROLL */
 .tod-wrapper{
   overflow:hidden;
   white-space:nowrap;
@@ -53,6 +53,7 @@ body{margin:0;background:#f4f6f9}
 
 #teacherInfo{font-weight:bold}
 
+/* LOGOUT */
 .logout{
   width:38px;height:38px;
   border-radius:50%;
@@ -190,11 +191,54 @@ let assignments = [];
 let selectedClass = null;
 let selectedSubject = null;
 
+/* AUTH */
+async function protect(roleRequired){
+
+  const { data:{ user } } = await supabaseClient.auth.getUser();
+
+  if(!user){
+    location.href="../index.html";
+    return false;
+  }
+
+  const { data: profile } = await supabaseClient
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if(!profile || profile.role !== roleRequired){
+    alert("No permission");
+    location.href="../index.html";
+    return false;
+  }
+
+  return true;
+}
+
+/* INIT */
+async function init(){
+
+  const ok = await protect("teacher");
+  if(!ok) return;
+
+  const { data:{ user } } = await supabaseClient.auth.getUser();
+  teacherId = user.id;
+
+  document.getElementById("teacherInfo").innerText =
+    "Teacher: " + user.email;
+
+  await loadAssignments();
+  await ensureWeeklyTOD();
+  await loadTOD();
+}
+
 /* WEEK */
 function getWeekRange(){
   const d = new Date();
   const day = d.getDay();
   const diff = (day === 0 ? -6 : 1) - day;
+
   const monday = new Date(d.setDate(d.getDate()+diff));
   const sunday = new Date(monday);
   sunday.setDate(monday.getDate()+6);
@@ -205,10 +249,10 @@ function getWeekRange(){
   };
 }
 
-/* T.O.D */
+/* TOD */
 async function ensureWeeklyTOD(){
 
-  const { start } = getWeekRange();
+  const { start, end } = getWeekRange();
 
   const { data: exists } = await supabaseClient
     .from("tod_rotation")
@@ -230,7 +274,7 @@ async function ensureWeeklyTOD(){
   await supabaseClient.from("tod_rotation").insert([{
     teacher_id: teachers[index].id,
     week_start: start,
-    week_end: getWeekRange().end
+    week_end: end
   }]);
 }
 
@@ -245,7 +289,8 @@ async function loadTOD(){
     .maybeSingle();
 
   if(!row){
-    document.getElementById("todText").innerText = "T.O.D: Not assigned";
+    document.getElementById("todText").innerText =
+      "T.O.D: Not assigned this week";
     return;
   }
 
@@ -263,22 +308,7 @@ async function loadTOD(){
       : "T.O.D: " + (t?.full_name || "Unknown");
 }
 
-/* INIT */
-async function init(){
-
-  const { data:{ user } } = await supabaseClient.auth.getUser();
-  teacherId = user.id;
-
-  document.getElementById("teacherInfo").innerText =
-    "Teacher: " + user.email;
-
-  await loadAssignments();
-
-  await ensureWeeklyTOD();
-  await loadTOD();
-}
-
-/* LOAD ASSIGNMENTS */
+/* ASSIGNMENTS */
 async function loadAssignments(){
 
   const { data } = await supabaseClient
@@ -303,7 +333,7 @@ async function loadAssignments(){
 
 /* CLASS */
 function handleClassChange(){
-  selectedClass = class.value;
+  selectedClass = document.getElementById("class").value;
   selectedSubject = null;
   document.getElementById("students").innerHTML = "";
   loadSubjects(selectedClass);
@@ -311,21 +341,25 @@ function handleClassChange(){
 
 /* SUBJECT */
 function handleSubjectChange(){
-  selectedSubject = subject.value;
+  selectedSubject = document.getElementById("subject").value;
   loadStudents(selectedClass);
 }
 
-/* LOAD SUBJECTS */
+/* SUBJECTS */
 function loadSubjects(class_id){
 
   const sub = document.getElementById("subject");
   sub.innerHTML = `<option value="">Select Subject</option>`;
 
-  assignments.filter(a=>a.class_id==class_id).forEach(a=>{
-    sub.innerHTML += `<option value="${a.subjects.id}">
-      ${a.subjects.subject_name}
-    </option>`;
-  });
+  assignments
+    .filter(a => String(a.class_id) === String(class_id))
+    .forEach(a=>{
+      if(a.subjects){
+        sub.innerHTML += `<option value="${a.subjects.id}">
+          ${a.subjects.subject_name}
+        </option>`;
+      }
+    });
 
   showSubject();
 }
@@ -333,7 +367,7 @@ function loadSubjects(class_id){
 /* STUDENTS */
 async function loadStudents(class_id){
 
-  const { data: students } = await supabaseClient
+  const { data } = await supabaseClient
     .from("students")
     .select("*")
     .eq("class_id", class_id);
@@ -341,12 +375,15 @@ async function loadStudents(class_id){
   const tbody = document.getElementById("students");
   tbody.innerHTML = "";
 
-  students.forEach(s=>{
+  data.forEach(s=>{
     tbody.innerHTML += `
       <tr>
         <td>${s.admission_no}</td>
         <td>${s.student_name}</td>
-        <td><input type="number" oninput="autoSave('${s.id}',this.value)"></td>
+        <td>
+          <input type="number"
+            oninput="autoSave('${s.id}',this.value)">
+        </td>
       </tr>`;
   });
 }
@@ -361,7 +398,7 @@ async function autoSave(id,val){
     subject_id:selectedSubject,
     teacher_id:teacherId,
     marks:Number(val)
-  }]);
+  }],{ onConflict:"student_id,subject_id" });
 }
 
 /* UI */
@@ -371,6 +408,7 @@ function showSubject(){
 }
 
 function showSection(s){
+
   classTeacherSection.classList.add("hidden");
   resultsSection.classList.add("hidden");
   chatSection.classList.add("hidden");
@@ -391,4 +429,4 @@ init();
 </script>
 
 </body>
-  </html>
+</html>
