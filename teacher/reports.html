@@ -67,7 +67,7 @@ th{
   border:1px solid #999;
   padding:2px;
   white-space:nowrap;
-  text-align:left;
+  text-align:center;
 }
 
 /* CELLS (COMPACT PRO STYLE) */
@@ -95,7 +95,10 @@ td{
 tr:hover td{
   background:#f3f8ff;
 }
-
+#gradePerf td{
+  padding:2px 6px;
+  white-space:nowrap;
+}
 /* PRINT */
 @media print{
   select,button{display:none;}
@@ -188,6 +191,8 @@ let isPublished = false;
 /* ================= AUTO COLUMN WIDTH (YOUR ORIGINAL - KEPT) ================= */
 function autoFitTable(tableId){
 
+  if(tableId === "gradePerf") return;
+
   const table = document.getElementById(tableId);
   if(!table) return;
 
@@ -212,10 +217,7 @@ function autoFitTable(tableId){
 
       let width = (maxWidths[i] * 7) + 8;
 
-      // minimum width protection
       if(width < 60) width = 60;
-
-      // SUBJECTS column free expansion
       if(i !== 3 && width > 180) width = 180;
 
       cell.style.width = width + "px";
