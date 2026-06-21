@@ -180,6 +180,7 @@ th,td{padding:10px;border-bottom:1px solid #eee}
 
 </div>
 
+  <!-- ONLY SCRIPT SECTION REPLACE THIS WHOLE SCRIPT -->
 <script>
 
 const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
@@ -252,7 +253,7 @@ function getWeekRange(){
 /* TOD */
 async function ensureWeeklyTOD(){
 
-  const { start, end } = getWeekRange();
+  const { start } = getWeekRange();
 
   const { data: exists } = await supabaseClient
     .from("tod_rotation")
@@ -274,7 +275,7 @@ async function ensureWeeklyTOD(){
   await supabaseClient.from("tod_rotation").insert([{
     teacher_id: teachers[index].id,
     week_start: start,
-    week_end: end
+    week_end: getWeekRange().end
   }]);
 }
 
@@ -308,6 +309,26 @@ async function loadTOD(){
       : "T.O.D: " + (t?.full_name || "Unknown");
 }
 
+/* CLASS TEACHER ROUTE (NEW) */
+async function openMyClass(){
+
+  const { data:{ user } } = await supabaseClient.auth.getUser();
+
+  const { data } = await supabaseClient
+    .from("teacher_assignments")
+    .select("class_id")
+    .eq("teacher_id", user.id)
+    .eq("is_class_teacher", true)
+    .maybeSingle();
+
+  if(!data){
+    alert("You are not assigned as a class teacher yet.");
+    return;
+  }
+
+  location.href = "classteacher.html";
+}
+
 /* ASSIGNMENTS */
 async function loadAssignments(){
 
@@ -326,7 +347,9 @@ async function loadAssignments(){
   assignments.forEach(a=>{
     if(a.classes && !seen.has(a.classes.id)){
       seen.add(a.classes.id);
-      sel.innerHTML += `<option value="${a.classes.id}">${a.classes.class_name}</option>`;
+      sel.innerHTML += `<option value="${a.classes.id}">
+        ${a.classes.class_name}
+      </option>`;
     }
   });
 }
@@ -336,32 +359,32 @@ function handleClassChange(){
   selectedClass = document.getElementById("class").value;
   selectedSubject = null;
   document.getElementById("students").innerHTML = "";
-  loadSubjects(selectedClass);
+
+  if(selectedClass) loadSubjects(selectedClass);
+}
+
+/* SUBJECTS (FIXED) */
+function loadSubjects(class_id){
+
+  const sub = document.getElementById("subject");
+  sub.innerHTML = `<option value="">Select Subject</option>`;
+
+  assignments.forEach(a=>{
+    if(String(a.classes?.id) === String(class_id) && a.subjects){
+      sub.innerHTML += `
+        <option value="${a.subjects.id}">
+          ${a.subjects.subject_name}
+        </option>`;
+    }
+  });
+
+  showSubject();
 }
 
 /* SUBJECT */
 function handleSubjectChange(){
   selectedSubject = document.getElementById("subject").value;
   loadStudents(selectedClass);
-}
-
-/* SUBJECTS */
-function loadSubjects(class_id){
-
-  const sub = document.getElementById("subject");
-  sub.innerHTML = `<option value="">Select Subject</option>`;
-
-  assignments
-    .filter(a => String(a.class_id) === String(class_id))
-    .forEach(a=>{
-      if(a.subjects){
-        sub.innerHTML += `<option value="${a.subjects.id}">
-          ${a.subjects.subject_name}
-        </option>`;
-      }
-    });
-
-  showSubject();
 }
 
 /* STUDENTS */
@@ -391,31 +414,37 @@ async function loadStudents(class_id){
 /* SAVE */
 async function autoSave(id,val){
 
-  if(val==="") return;
+  if(val === "") return;
 
   await supabaseClient.from("results").upsert([{
     student_id:id,
     subject_id:selectedSubject,
     teacher_id:teacherId,
     marks:Number(val)
-  }],{ onConflict:"student_id,subject_id" });
+  }], { onConflict:"student_id,subject_id" });
 }
 
-/* UI */
+/* UI FIXED */
 function showSubject(){
-  subject.classList.remove("hidden");
-  subjectLabel.classList.remove("hidden");
+  document.getElementById("subject").classList.remove("hidden");
+  document.getElementById("subjectLabel").classList.remove("hidden");
 }
 
+/* SECTION */
 function showSection(s){
 
-  classTeacherSection.classList.add("hidden");
-  resultsSection.classList.add("hidden");
-  chatSection.classList.add("hidden");
+  document.getElementById("classTeacherSection").classList.add("hidden");
+  document.getElementById("resultsSection").classList.add("hidden");
+  document.getElementById("chatSection").classList.add("hidden");
 
-  if(s==="classTeacher") classTeacherSection.classList.remove("hidden");
-  if(s==="results") resultsSection.classList.remove("hidden");
-  if(s==="chat") chatSection.classList.remove("hidden");
+  if(s==="classTeacher")
+    document.getElementById("classTeacherSection").classList.remove("hidden");
+
+  if(s==="results")
+    document.getElementById("resultsSection").classList.remove("hidden");
+
+  if(s==="chat")
+    document.getElementById("chatSection").classList.remove("hidden");
 }
 
 /* LOGOUT */
