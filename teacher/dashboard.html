@@ -269,8 +269,9 @@ async function init(){
     "Teacher: " + user.user.email;
 
   loadAssignments();
-  loadTOD();
-  checkClassTeacher();
+
+  await ensureWeeklyTOD();  // 🔥 NEW
+  await loadTOD();          // 🔥 NEW
 }
 
 /* T.O.D */
@@ -300,7 +301,6 @@ async function loadTOD(){
 
   document.getElementById("todText").innerText = label;
 }
-
 /* CLASS TEACHER CHECK */
 async function checkClassTeacher(){
 
