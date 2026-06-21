@@ -73,6 +73,14 @@ button{
   cursor:pointer;
 }
 
+/* CHECKBOX */
+.check-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:8px;
+}
+
 /* TABLE */
 table{
   width:100%;
@@ -85,6 +93,23 @@ table{
 th,td{
   padding:10px;
   border-bottom:1px solid #eee;
+}
+
+.badge{
+  padding:4px 8px;
+  border-radius:6px;
+  font-size:12px;
+  font-weight:bold;
+}
+
+.ct{
+  background:#28a745;
+  color:white;
+}
+
+.st{
+  background:#1e3c72;
+  color:white;
 }
 
 .deleteBtn{
@@ -109,7 +134,6 @@ th,td{
 
 <body>
 
-<!-- SIDEBAR -->
 <div class="sidebar">
   <h3>Admin Panel</h3>
 
@@ -121,31 +145,35 @@ th,td{
   <a href="assignments.html">Assignments</a>
 </div>
 
-<!-- MAIN -->
 <div class="main">
 
 <div class="header">
   <h2>Teacher Assignments</h2>
 </div>
 
-<!-- FORM -->
 <div class="form">
 
   <select id="teacher"></select>
   <select id="class"></select>
   <select id="subject"></select>
 
+  <!-- NEW: CLASS TEACHER FLAG -->
+  <div class="check-row">
+    <input type="checkbox" id="isClassTeacher">
+    <label>Make Class Teacher</label>
+  </div>
+
   <button onclick="assign()">Assign Teacher</button>
 
 </div>
 
-<!-- TABLE -->
 <table>
   <thead>
     <tr>
       <th>Teacher</th>
       <th>Class</th>
       <th>Subject</th>
+      <th>Type</th>
       <th>Action</th>
     </tr>
   </thead>
@@ -171,7 +199,6 @@ async function init(){
 
 /* LOAD TEACHERS */
 async function loadTeachers(){
-
   const { data } = await supabaseClient
     .from("profiles")
     .select("*")
@@ -187,7 +214,6 @@ async function loadTeachers(){
 
 /* LOAD CLASSES */
 async function loadClasses(){
-
   const { data } = await supabaseClient
     .from("classes")
     .select("*");
@@ -202,7 +228,6 @@ async function loadClasses(){
 
 /* LOAD SUBJECTS */
 async function loadSubjects(){
-
   const { data } = await supabaseClient
     .from("subjects")
     .select("*");
@@ -215,19 +240,35 @@ async function loadSubjects(){
   });
 }
 
-/* ASSIGN */
+/* ASSIGN (UPDATED) */
 async function assign(){
 
   const teacher_id = document.getElementById("teacher").value;
   const class_id = document.getElementById("class").value;
   const subject_id = document.getElementById("subject").value;
+  const is_class_teacher = document.getElementById("isClassTeacher").checked;
+
+  // OPTIONAL SAFETY: prevent multiple class teachers per class
+  if(is_class_teacher){
+    const { data: existing } = await supabaseClient
+      .from("teacher_assignments")
+      .select("*")
+      .eq("class_id", class_id)
+      .eq("is_class_teacher", true);
+
+    if(existing.length > 0){
+      alert("This class already has a Class Teacher!");
+      return;
+    }
+  }
 
   const { error } = await supabaseClient
     .from("teacher_assignments")
     .insert([{
       teacher_id,
       class_id,
-      subject_id
+      subject_id,
+      is_class_teacher
     }]);
 
   if(error){
@@ -238,7 +279,7 @@ async function assign(){
   }
 }
 
-/* LOAD ASSIGNMENTS */
+/* LOAD ASSIGNMENTS (UPDATED) */
 async function loadAssignments(){
 
   const { data } = await supabaseClient
@@ -259,6 +300,12 @@ async function loadAssignments(){
         <td>${t.data.full_name}</td>
         <td>${c.data.class_name}</td>
         <td>${s.data.subject_name}</td>
+        <td>
+          ${a.is_class_teacher
+            ? `<span class="badge ct">CLASS TEACHER</span>`
+            : `<span class="badge st">SUBJECT</span>`
+          }
+        </td>
         <td><button class="deleteBtn" onclick="remove('${a.id}')">Delete</button></td>
       </tr>
     `;
@@ -267,7 +314,6 @@ async function loadAssignments(){
 
 /* DELETE */
 async function remove(id){
-
   await supabaseClient
     .from("teacher_assignments")
     .delete()
