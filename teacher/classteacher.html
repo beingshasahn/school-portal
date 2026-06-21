@@ -157,7 +157,7 @@ th,td{padding:8px;border-bottom:1px solid #eee}
 
 </div>
 
-<script>
+  <script>
 
 const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
@@ -171,7 +171,11 @@ let today = new Date().toISOString().split("T")[0];
 async function init(){
 
   const { data:{ user } } = await supabaseClient.auth.getUser();
-  if(!user) location.href="../index.html";
+
+  if(!user){
+    location.href="../index.html";
+    return;
+  }
 
   teacherId = user.id;
 
@@ -182,12 +186,24 @@ async function init(){
   await loadClassTeacher();
 }
 
+/* FIXED WEEK FUNCTION */
+function getWeekStart(){
+
+  const d = new Date();
+  const day = d.getDay();
+
+  const diff = day === 0 ? -6 : 1 - day; // Monday start
+
+  const monday = new Date(d);
+  monday.setDate(d.getDate() + diff);
+
+  return monday.toISOString().split("T")[0];
+}
+
 /* T.O.D */
 async function loadTOD(){
 
-  const d = new Date();
-  const start = new Date(d.setDate(d.getDate() - d.getDay() + 1))
-    .toISOString().split("T")[0];
+  const start = getWeekStart();
 
   const { data } = await supabaseClient
     .from("tod_rotation")
@@ -200,7 +216,7 @@ async function loadTOD(){
       "YOU ARE A T.O.D THIS WEEK";
   }else{
     document.getElementById("todText").innerText =
-      "School Running Normally";
+      "T.O.D Running This Week";
   }
 }
 
@@ -225,8 +241,8 @@ async function loadClassTeacher(){
   document.getElementById("className").innerText =
     data.classes.class_name;
 
-  loadStudents();
-  loadStats();
+  await loadStudents();
+  await loadStats();
 }
 
 /* STUDENTS */
@@ -253,7 +269,7 @@ async function loadStudents(){
     `;
   });
 
-  document.getElementById("totalStudents").innerText = data.length;
+  document.getElementById("totalStudents").innerText = data?.length || 0;
 }
 
 /* ATTENDANCE */
@@ -267,10 +283,10 @@ async function mark(studentId,status){
       date: today,
       status: status
     }],{
-      onConflict: "student_id,date"
+      onConflict: "student_id,class_id,date"
     });
 
-  loadStats();
+  await loadStats();
 }
 
 /* STATS */
@@ -278,7 +294,7 @@ async function loadStats(){
 
   const { data } = await supabaseClient
     .from("attendance")
-    .select("*")
+    .select("status")
     .eq("class_id", classId)
     .eq("date", today);
 
@@ -297,7 +313,7 @@ async function logout(){
 
 init();
 
-</script>
+  </script>
 
 </body>
 </html>
