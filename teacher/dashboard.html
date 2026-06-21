@@ -60,6 +60,27 @@ select,input{
   margin-top:6px;
 }
 
+  .menu{
+  display:flex;
+  gap:10px;
+  padding:10px 15px;
+  background:#fff;
+  justify-content:center;
+  flex-wrap:wrap;
+}
+
+.menu button{
+  padding:10px 15px;
+  border:none;
+  border-radius:8px;
+  background:#1e3c72;
+  color:white;
+  cursor:pointer;
+}
+
+.menu button:hover{
+  background:#16305c;
+}
 /* TABLE */
 table{width:100%;border-collapse:collapse}
 th,td{padding:10px;border-bottom:1px solid #eee}
@@ -82,9 +103,27 @@ th,td{padding:10px;border-bottom:1px solid #eee}
   <div id="teacherInfo">Loading...</div>
   <button class="logout" onclick="logout()">⎋</button>
 </div>
-
+<div class="menu">
+  <button onclick="showSection('classTeacher')">📚 My Class</button>
+  <button onclick="showSection('results')">📊 Results</button>
+  <button onclick="showSection('chat')">💬 Chat Room</button>
+</div>
+  
 <div class="container">
+<div id="classTeacherSection" class="card hidden">
+  <h3>My Class (Class Teacher)</h3>
+  <div id="myClassData">Loading...</div>
+</div>
 
+<div id="resultsSection" class="card hidden">
+  <h3>Results View</h3>
+  <p>Use existing class & subject system above</p>
+</div>
+
+<div id="chatSection" class="card hidden">
+  <h3>Chat Room</h3>
+  <p>Coming soon...</p>
+</div>
 <!-- CLASS + SUBJECT -->
 <div class="card">
   <h3>Select Class & Subject</h3>
@@ -349,6 +388,25 @@ function hideSubject(){
   document.getElementById("subject").classList.add("hidden");
   document.getElementById("subjectLabel").classList.add("hidden");
 }
+  function showSection(section){
+
+  document.getElementById("classTeacherSection").classList.add("hidden");
+  document.getElementById("resultsSection").classList.add("hidden");
+  document.getElementById("chatSection").classList.add("hidden");
+
+  if(section === "classTeacher"){
+    document.getElementById("classTeacherSection").classList.remove("hidden");
+    loadClassTeacher();
+  }
+
+  if(section === "results"){
+    document.getElementById("resultsSection").classList.remove("hidden");
+  }
+
+  if(section === "chat"){
+    document.getElementById("chatSection").classList.remove("hidden");
+  }
+  }
 
 /* LOGOUT */
 async function logout(){
@@ -356,6 +414,28 @@ async function logout(){
   location.href="../index.html";
 }
 
+ async function loadClassTeacher(){
+
+  const { data } = await supabaseClient
+    .from("teacher_assignments")
+    .select("classes(id,class_name)")
+    .eq("teacher_id", teacherId);
+
+  let html = "<ul>";
+
+  const seen = new Set();
+
+  (data || []).forEach(a=>{
+    if(a.classes && !seen.has(a.classes.id)){
+      seen.add(a.classes.id);
+      html += `<li>${a.classes.class_name}</li>`;
+    }
+  });
+
+  html += "</ul>";
+
+  document.getElementById("myClassData").innerHTML = html;
+ } 
 init();
 
 </script>
