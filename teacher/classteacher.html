@@ -352,13 +352,15 @@ async function mark(studentId,status){
 
   loadStats();
 }
+
 function animateNumber(el, value){
   el.style.transform = "scale(1.2)";
   setTimeout(()=> {
     el.innerText = value;
     el.style.transform = "scale(1)";
   }, 150);
-  }
+}
+
 async function loadStats(){
 
   const { data } = await supabaseClient
@@ -372,13 +374,16 @@ async function loadStats(){
 
   animateNumber(document.getElementById("presentCount"), present);
   animateNumber(document.getElementById("absentCount"), absent);
+}
 
+/* LOGOUT */
 async function logout(){
   await supabaseClient.auth.signOut();
   location.href="../index.html";
 }
 
 init();
+
 // LIVE AUTO REFRESH
 setInterval(()=>{
   if(classId){
