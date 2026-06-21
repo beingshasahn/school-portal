@@ -161,7 +161,9 @@ th,td{padding:10px;border-bottom:1px solid #eee}
 
   <label>Confirm New Password</label>
   <input type="password" id="confirmPassword">
-
+ <label>
+  <input type="checkbox" onclick="togglePassword()"> Show Password
+ </label>
   <br><br>
 
   <button onclick="changePassword()"
@@ -603,6 +605,25 @@ async function changePassword(){
     msg.innerHTML = err.message;
 
   }
+  }
+
+  function togglePassword(){
+
+  const fields = [
+    "currentPassword",
+    "newPassword",
+    "confirmPassword"
+  ];
+
+  fields.forEach(id => {
+    const input = document.getElementById(id);
+
+    if(input.type === "password"){
+      input.type = "text";
+    } else {
+      input.type = "password";
+    }
+  });
   }
 init();
 
