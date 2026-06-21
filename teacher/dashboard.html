@@ -30,12 +30,11 @@ body{margin:0;background:#f4f6f9}
 }
 
 /* TOPBAR */
-.topbar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:10px 15px;
-  background:#fff;
+.tod-bar{
+  background:#000;
+  color:#fff;
+  padding:6px;
+  font-weight:bold;
 }
 
 #teacherInfo{font-weight:bold}
@@ -207,7 +206,7 @@ let isClassLocked = false;
 
   const { data: existing } = await supabaseClient
     .from("tod_rotation")
-    .select("*")
+    .select("id")
     .eq("week_start", start)
     .maybeSingle();
 
@@ -216,21 +215,29 @@ let isClassLocked = false;
   const { data: teachers } = await supabaseClient
     .from("profiles")
     .select("id")
-    .eq("role", "teacher");
+    .eq("role","teacher");
 
   if(!teachers || teachers.length === 0) return;
 
-  const random = teachers[Math.floor(Math.random() * teachers.length)];
+  const countWeeks =
+    Math.floor(
+      (new Date(start) - new Date("2026-01-05"))
+      / (1000*60*60*24*7)
+    );
+
+  const index =
+    Math.abs(countWeeks) % teachers.length;
+
+  const selectedTeacher = teachers[index];
 
   await supabaseClient
     .from("tod_rotation")
     .insert([{
-      teacher_id: random.id,
+      teacher_id: selectedTeacher.id,
       week_start: start,
-      week_end: end,
-      is_active: true
+      week_end: end
     }]);
-    }
+  }
 /* AUTH */
 async function protect(roleRequired){
 
@@ -279,27 +286,38 @@ async function loadTOD(){
 
   const { start } = getWeekRange();
 
-  const { data } = await supabaseClient
+  const { data: row } = await supabaseClient
     .from("tod_rotation")
-    .select("teacher_id, profiles(name,email)")
+    .select("teacher_id")
     .eq("week_start", start)
     .maybeSingle();
 
-  const { data: user } = await supabaseClient.auth.getUser();
-
-  if(!data){
+  if(!row){
     document.getElementById("todText").innerText =
-      "No T.O.D assigned this week";
+      "No T.O.D Assigned";
     return;
   }
 
-  let label = "T.O.D: " + (data.profiles?.name || "Unknown");
+  const { data: teacher } = await supabaseClient
+    .from("profiles")
+    .select("full_name")
+    .eq("id", row.teacher_id)
+    .maybeSingle();
 
-  if(data.teacher_id === user.user.id){
-    label = "🔥 YOU ARE A T.O.D THIS WEEK";
+  const { data:{ user } } =
+    await supabaseClient.auth.getUser();
+
+  if(row.teacher_id === user.id){
+
+    document.getElementById("todText").innerText =
+      "🔥 YOU ARE A T.O.D THIS WEEK";
+
+  }else{
+
+    document.getElementById("todText").innerText =
+      "T.O.D : " + (teacher?.full_name || "Unknown");
+
   }
-
-  document.getElementById("todText").innerText = label;
 }
 /* CLASS TEACHER CHECK */
 async function checkClassTeacher(){
