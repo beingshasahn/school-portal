@@ -212,13 +212,14 @@ function autoFitTable(tableId){
 
       let width = (maxWidths[i] * 7) + 8;
 
-      /* Compact NECTA style */
-      if(width < 80) width = 80;
+      // minimum width protection
+      if(width < 60) width = 60;
+
+      // SUBJECTS column free expansion
       if(i !== 3 && width > 180) width = 180;
 
       cell.style.width = width + "px";
       cell.style.minWidth = width + "px";
-      cell.style.maxWidth = width + "px";
     });
   });
 }
