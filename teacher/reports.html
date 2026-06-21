@@ -325,7 +325,16 @@ function grade(m){
 function gpa(g){
   return {A:5,B:4,C:3,D:2,E:1}[g] || 1;
 }
+function formatSubject(name){
 
+  const map = {
+    "HISTORIA YA TANZANIA NA MAADILI": "HIST.TZ",
+    "GEOGRAPHY AND THE ENVIRONMENT": "GEOGRAPHY",
+    "ARTS AND SPORTS": "ARTS & SPORTS"
+  };
+
+  return map[name] || name;
+  }
 /* ================= REPORT (UNCHANGED) ================= */
 async function loadReport(){
 
@@ -363,14 +372,14 @@ async function loadReport(){
       total += m;
       count++;
 
-      detail.push(sub.subject_name.slice(0,4)+"-"+grade(m));
+      detail.push(formatSubject(sub.subject_name) + "-" + grade(m));
     });
 
     if(count===0) return;
 
     let avg = total/count;
     let g = grade(avg);
-
+   detail.push("AVERAGE-" + avg.toFixed(1) + "-" + g);
     gradePerf[stu.gender||"Male"][g]++;
 
     final.push({
