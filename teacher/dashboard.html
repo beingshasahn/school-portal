@@ -47,6 +47,13 @@ body{margin:0;background:#f4f6f9}
   color:white;
   border:none;
 }
+  .tod-text{
+  text-align:center;
+  padding:4px;
+  font-size:14px;
+  font-weight:normal;
+  color:#333;
+  }
 
 /* MENU */
 .menu{
@@ -101,9 +108,7 @@ th,td{padding:10px;border-bottom:1px solid #eee}
   <b>TEACHER DASHBOARD</b>
 </div>
 
-<div class="tod-bar">
-  <marquee id="todText">Loading T.O.D...</marquee>
-</div>
+<div id="todText" class="tod-text">Loading T.O.D...</div>
 
 <div class="topbar">
   <div id="teacherInfo">Loading...</div>
@@ -294,7 +299,7 @@ async function loadTOD(){
 
   if(!row){
     document.getElementById("todText").innerText =
-      "No T.O.D Assigned";
+      "T.O.D: Not assigned this week";
     return;
   }
 
@@ -308,15 +313,11 @@ async function loadTOD(){
     await supabaseClient.auth.getUser();
 
   if(row.teacher_id === user.id){
-
     document.getElementById("todText").innerText =
-      "🔥 YOU ARE A T.O.D THIS WEEK";
-
+      "YOU ARE A T.O.D THIS WEEK";
   }else{
-
     document.getElementById("todText").innerText =
-      "T.O.D : " + (teacher?.full_name || "Unknown");
-
+      "T.O.D: " + (teacher?.full_name || "Unknown");
   }
 }
 /* CLASS TEACHER CHECK */
