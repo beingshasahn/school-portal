@@ -21,6 +21,14 @@ body{margin:0;background:#f4f6f9}
   line-height:1.4;
 }
 
+/* T.O.D BAR */
+.tod-bar{
+  background:#000;
+  color:#fff;
+  padding:6px;
+  font-weight:bold;
+}
+
 /* TOPBAR */
 .topbar{
   display:flex;
@@ -30,9 +38,7 @@ body{margin:0;background:#f4f6f9}
   background:#fff;
 }
 
-#teacherInfo{
-  font-weight:bold;
-}
+#teacherInfo{font-weight:bold}
 
 /* LOGOUT */
 .logout{
@@ -41,6 +47,24 @@ body{margin:0;background:#f4f6f9}
   background:#ff3b30;
   color:white;
   border:none;
+}
+
+/* MENU */
+.menu{
+  display:flex;
+  gap:10px;
+  padding:10px 15px;
+  background:#fff;
+  justify-content:center;
+  flex-wrap:wrap;
+}
+
+.menu button{
+  padding:10px 15px;
+  border:none;
+  border-radius:8px;
+  background:#1e3c72;
+  color:white;
 }
 
 /* CONTAINER */
@@ -60,27 +84,6 @@ select,input{
   margin-top:6px;
 }
 
-  .menu{
-  display:flex;
-  gap:10px;
-  padding:10px 15px;
-  background:#fff;
-  justify-content:center;
-  flex-wrap:wrap;
-}
-
-.menu button{
-  padding:10px 15px;
-  border:none;
-  border-radius:8px;
-  background:#1e3c72;
-  color:white;
-  cursor:pointer;
-}
-
-.menu button:hover{
-  background:#16305c;
-}
 /* TABLE */
 table{width:100%;border-collapse:collapse}
 th,td{padding:10px;border-bottom:1px solid #eee}
@@ -99,31 +102,41 @@ th,td{padding:10px;border-bottom:1px solid #eee}
   <b>TEACHER DASHBOARD</b>
 </div>
 
+<div class="tod-bar">
+  <marquee id="todText">Loading T.O.D...</marquee>
+</div>
+
 <div class="topbar">
   <div id="teacherInfo">Loading...</div>
   <button class="logout" onclick="logout()">⎋</button>
 </div>
+
 <div class="menu">
   <button onclick="showSection('classTeacher')">📚 My Class</button>
   <button onclick="showSection('results')">📊 Results</button>
-  <button onclick="showSection('chat')">💬 Chat Room</button>
+  <button onclick="showSection('chat')">💬 Chat</button>
 </div>
-  
+
 <div class="container">
+
+<!-- CLASS TEACHER -->
 <div id="classTeacherSection" class="card hidden">
-  <h3>My Class (Class Teacher)</h3>
+  <h3>📚 My Class Dashboard</h3>
   <div id="myClassData">Loading...</div>
 </div>
 
+<!-- RESULTS -->
 <div id="resultsSection" class="card hidden">
   <h3>Results View</h3>
-  <p>Use existing class & subject system above</p>
+  <p>Use subject & class system below</p>
 </div>
 
+<!-- CHAT -->
 <div id="chatSection" class="card hidden">
   <h3>Chat Room</h3>
   <p>Coming soon...</p>
 </div>
+
 <!-- CLASS + SUBJECT -->
 <div class="card">
   <h3>Select Class & Subject</h3>
@@ -151,7 +164,6 @@ th,td{padding:10px;border-bottom:1px solid #eee}
         <th>Marks</th>
       </tr>
     </thead>
-
     <tbody id="students"></tbody>
   </table>
 </div>
@@ -159,18 +171,19 @@ th,td{padding:10px;border-bottom:1px solid #eee}
 </div>
 
 <script>
-  
+
 const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-let isClassLocked = false;
 let teacherId = null;
 let assignments = [];
 let studentsList = [];
 
 let selectedClass = null;
 let selectedSubject = null;
+let selectedClassForTeacher = null;
+let isClassLocked = false;
 
 /* AUTH */
 async function protect(roleRequired){
@@ -210,6 +223,50 @@ async function init(){
     "Teacher: " + user.user.email;
 
   loadAssignments();
+  loadTOD();
+  checkClassTeacher();
+}
+
+/* T.O.D */
+async function loadTOD(){
+
+  const { data } = await supabaseClient
+    .from("school_settings")
+    .select("tod_name")
+    .maybeSingle();
+
+  let name = data?.tod_name || "No T.O.D";
+
+  const { data: user } = await supabaseClient.auth.getUser();
+
+  if(name === user.user.email){
+    name = "🔥 YOU ARE A T.O.D";
+  } else {
+    name = "T.O.D: " + name;
+  }
+
+  document.getElementById("todText").innerText = name;
+}
+
+/* CLASS TEACHER CHECK */
+async function checkClassTeacher(){
+
+  const { data } = await supabaseClient
+    .from("teacher_assignments")
+    .select("classes(id,class_name)")
+    .eq("teacher_id", teacherId)
+    .eq("is_class_teacher", true)
+    .maybeSingle();
+
+  if(!data){
+    document.getElementById("myClassData").innerText =
+      "❌ You are not assigned to any class yet.";
+    return;
+  }
+
+  selectedClassForTeacher = data.classes.id;
+
+  showSection("classTeacher");
 }
 
 /* LOAD ASSIGNMENTS */
@@ -225,11 +282,11 @@ async function loadAssignments(){
   const classSelect = document.getElementById("class");
   classSelect.innerHTML = `<option value="">Select Class</option>`;
 
-  const seen = new Map();
+  const seen = new Set();
 
   assignments.forEach(a=>{
     if(a.classes && !seen.has(a.classes.id)){
-      seen.set(a.classes.id, true);
+      seen.add(a.classes.id);
       classSelect.innerHTML += `<option value="${a.classes.id}">${a.classes.class_name}</option>`;
     }
   });
@@ -240,7 +297,6 @@ function handleClassChange(){
 
   selectedClass = document.getElementById("class").value;
   selectedSubject = null;
-
   document.getElementById("students").innerHTML = "";
 
   if(!selectedClass){
@@ -251,49 +307,31 @@ function handleClassChange(){
   loadSubjects(selectedClass);
 }
 
-/* LOAD SUBJECTS */
+/* SUBJECTS */
 function loadSubjects(class_id){
 
   const subject = document.getElementById("subject");
-
   subject.innerHTML = `<option value="">Select Subject</option>`;
 
   const filtered = assignments.filter(a =>
     String(a.classes.id) === String(class_id)
   );
 
-  const seen = new Map();
+  const seen = new Set();
 
   filtered.forEach(a=>{
     if(a.subjects && !seen.has(a.subjects.id)){
-      seen.set(a.subjects.id,true);
-      subject.innerHTML += `
-        <option value="${a.subjects.id}">
-          ${a.subjects.subject_name}
-        </option>`;
+      seen.add(a.subjects.id);
+      subject.innerHTML += `<option value="${a.subjects.id}">${a.subjects.subject_name}</option>`;
     }
   });
 
   showSubject();
 }
 
-/* SUBJECT CHANGE */
-function handleSubjectChange(){
-
-  selectedSubject = document.getElementById("subject").value;
-
-  if(selectedClass && selectedSubject){
-    loadStudents(selectedClass);
-  } else {
-    document.getElementById("students").innerHTML = "";
-  }
-}
-
-/* LOAD STUDENTS */
-/* LOAD STUDENTS */
+/* STUDENTS */
 async function loadStudents(class_id){
 
-  // Pata wanafunzi
   const { data: students } = await supabaseClient
     .from("students")
     .select("*")
@@ -301,68 +339,48 @@ async function loadStudents(class_id){
 
   studentsList = students || [];
 
-  // Pata marks zilizopo tayari kwa subject iliyochaguliwa
   const { data: existingResults } = await supabaseClient
     .from("results")
     .select("student_id, marks")
     .eq("subject_id", selectedSubject);
 
-  const marksMap = {};
-
-  (existingResults || []).forEach(r => {
-    marksMap[r.student_id] = r.marks;
+  const map = {};
+  (existingResults || []).forEach(r=>{
+    map[r.student_id] = r.marks;
   });
 
-  const table = document.getElementById("students");
-  table.innerHTML = "";
+  const tbody = document.getElementById("students");
+  tbody.innerHTML = "";
 
-  studentsList.forEach(s => {
-
-    const existingMark = marksMap[s.id] ?? "";
-
-    table.innerHTML += `
+  studentsList.forEach(s=>{
+    tbody.innerHTML += `
       <tr>
         <td>${s.admission_no}</td>
         <td>${s.student_name}</td>
         <td>
-          <input
-            type="number"
-            value="${existingMark}"
+          <input type="number"
+            value="${map[s.id] ?? ''}"
             oninput="autoSave('${s.id}', this.value)">
         </td>
       </tr>
     `;
   });
-    }
+}
 
-/* AUTO SAVE (UPSERT + DELETE LOGIC) */
+/* AUTO SAVE */
 async function autoSave(student_id, value){
-if(!teacherId){
-  console.error("Teacher not loaded");
-  return;
-}
 
-if(!selectedClass || !selectedSubject){
-  console.error("Class or Subject missing");
-  return;
-}
-
-if(isClassLocked){
-  alert("Results have been published. You cannot edit.");
-  return;
-}
+  if(!teacherId || !selectedClass || !selectedSubject) return;
+  if(isClassLocked) return;
 
   const mark = value.trim();
 
-  if(mark === "" || mark === null){
-
-    // DELETE IF EMPTY
+  if(mark === ""){
     await supabaseClient
       .from("results")
       .delete()
       .eq("student_id", student_id)
       .eq("subject_id", selectedSubject);
-
     return;
   }
 
@@ -373,12 +391,10 @@ if(isClassLocked){
       subject_id: selectedSubject,
       teacher_id: teacherId,
       marks: Number(mark)
-    }], {
-      onConflict: "student_id,subject_id"
-    });
+    }], { onConflict: "student_id,subject_id" });
 }
 
-/* UI HELPERS */
+/* UI */
 function showSubject(){
   document.getElementById("subject").classList.remove("hidden");
   document.getElementById("subjectLabel").classList.remove("hidden");
@@ -388,25 +404,23 @@ function hideSubject(){
   document.getElementById("subject").classList.add("hidden");
   document.getElementById("subjectLabel").classList.add("hidden");
 }
-  function showSection(section){
+
+function showSection(section){
 
   document.getElementById("classTeacherSection").classList.add("hidden");
   document.getElementById("resultsSection").classList.add("hidden");
   document.getElementById("chatSection").classList.add("hidden");
 
-  if(section === "classTeacher"){
+  if(section==="classTeacher"){
     document.getElementById("classTeacherSection").classList.remove("hidden");
-    loadClassTeacher();
   }
-
-  if(section === "results"){
+  if(section==="results"){
     document.getElementById("resultsSection").classList.remove("hidden");
   }
-
-  if(section === "chat"){
+  if(section==="chat"){
     document.getElementById("chatSection").classList.remove("hidden");
   }
-  }
+}
 
 /* LOGOUT */
 async function logout(){
@@ -414,31 +428,9 @@ async function logout(){
   location.href="../index.html";
 }
 
- async function loadClassTeacher(){
-
-  const { data } = await supabaseClient
-    .from("teacher_assignments")
-    .select("classes(id,class_name)")
-    .eq("teacher_id", teacherId);
-
-  let html = "<ul>";
-
-  const seen = new Set();
-
-  (data || []).forEach(a=>{
-    if(a.classes && !seen.has(a.classes.id)){
-      seen.add(a.classes.id);
-      html += `<li>${a.classes.class_name}</li>`;
-    }
-  });
-
-  html += "</ul>";
-
-  document.getElementById("myClassData").innerHTML = html;
- } 
 init();
 
 </script>
 
 </body>
-</html>
+  </html>
