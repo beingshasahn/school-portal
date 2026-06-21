@@ -225,10 +225,16 @@ async function init(){
   if(!ok) return;
 
   const { data:{ user } } = await supabaseClient.auth.getUser();
-  teacherId = user.id;
+teacherId = user.id;
 
-  document.getElementById("teacherInfo").innerText =
-    "Teacher: " + user.email;
+const { data: profile } = await supabaseClient
+  .from("profiles")
+  .select("full_name")
+  .eq("id", teacherId)
+  .single();
+
+document.getElementById("teacherInfo").innerText =
+  "Welcome, " + (profile?.full_name || "Teacher");
 
   await loadAssignments();
   await ensureWeeklyTOD();
