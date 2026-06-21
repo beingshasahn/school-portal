@@ -129,6 +129,7 @@ th,td{padding:10px;border-bottom:1px solid #eee}
   <button onclick="openMyClass()">📚 My Class</button>
   <button onclick="showSection('results')">📊 Results</button>
   <button onclick="showSection('chat')">💬 Chat</button>
+  <button onclick="openChangePassword()">🔑 Change Password</button>
 </div>
 
 <div class="container">
@@ -148,7 +149,28 @@ th,td{padding:10px;border-bottom:1px solid #eee}
 <div id="chatSection" class="card hidden">
   <h3>Chat Room</h3>
 </div>
+<!-- CHANGE PASSWORD -->
+<div id="passwordSection" class="card hidden">
+  <h3>🔑 Change Password</h3>
 
+  <label>Current Password</label>
+  <input type="password" id="currentPassword">
+
+  <label>New Password</label>
+  <input type="password" id="newPassword">
+
+  <label>Confirm New Password</label>
+  <input type="password" id="confirmPassword">
+
+  <br><br>
+
+  <button onclick="changePassword()"
+    style="background:#1e3c72;color:white;border:none;padding:10px 15px;border-radius:6px;cursor:pointer;">
+    Update Password
+  </button>
+
+  <div id="passwordMsg" style="margin-top:10px;font-weight:bold;"></div>
+</div>
 <!-- CLASS + SUBJECT -->
 <div class="card">
   <h3>Select Class & Subject</h3>
@@ -483,6 +505,7 @@ function showSection(s){
   document.getElementById("classTeacherSection").classList.add("hidden");
   document.getElementById("resultsSection").classList.add("hidden");
   document.getElementById("chatSection").classList.add("hidden");
+  document.getElementById("passwordSection").classList.add("hidden");
 
   if(s==="classTeacher")
     document.getElementById("classTeacherSection").classList.remove("hidden");
@@ -492,6 +515,9 @@ function showSection(s){
 
   if(s==="chat")
     document.getElementById("chatSection").classList.remove("hidden");
+
+  if(s==="password")
+    document.getElementById("passwordSection").classList.remove("hidden");
 }
 
 /* LOGOUT */
@@ -499,7 +525,85 @@ async function logout(){
   await supabaseClient.auth.signOut();
   location.href="../index.html";
 }
+function openChangePassword(){
+  showSection("password");
+}
 
+async function changePassword(){
+
+  const currentPassword =
+    document.getElementById("currentPassword").value.trim();
+
+  const newPassword =
+    document.getElementById("newPassword").value.trim();
+
+  const confirmPassword =
+    document.getElementById("confirmPassword").value.trim();
+
+  const msg = document.getElementById("passwordMsg");
+
+  msg.innerHTML = "";
+
+  if(!currentPassword || !newPassword || !confirmPassword){
+    msg.style.color = "red";
+    msg.innerHTML = "Fill all fields";
+    return;
+  }
+
+  if(newPassword.length < 6){
+    msg.style.color = "red";
+    msg.innerHTML = "Password must be at least 6 characters";
+    return;
+  }
+
+  if(newPassword !== confirmPassword){
+    msg.style.color = "red";
+    msg.innerHTML = "Passwords do not match";
+    return;
+  }
+
+  try{
+
+    const { data:{ user } } =
+      await supabaseClient.auth.getUser();
+
+    const { error: loginError } =
+      await supabaseClient.auth.signInWithPassword({
+        email: user.email,
+        password: currentPassword
+      });
+
+    if(loginError){
+      msg.style.color = "red";
+      msg.innerHTML = "Current password is incorrect";
+      return;
+    }
+
+    const { error } =
+      await supabaseClient.auth.updateUser({
+        password: newPassword
+      });
+
+    if(error){
+      msg.style.color = "red";
+      msg.innerHTML = error.message;
+      return;
+    }
+
+    msg.style.color = "green";
+    msg.innerHTML = "Password updated successfully";
+
+    document.getElementById("currentPassword").value = "";
+    document.getElementById("newPassword").value = "";
+    document.getElementById("confirmPassword").value = "";
+
+  }catch(err){
+
+    msg.style.color = "red";
+    msg.innerHTML = err.message;
+
+  }
+  }
 init();
 
 </script>
