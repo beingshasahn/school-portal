@@ -20,21 +20,23 @@ body{margin:0;background:#f4f6f9}
   text-align:center;
 }
 
-/* T.O.D SCROLL */
+/* T.O.D */
 .tod-wrapper{
   overflow:hidden;
   white-space:nowrap;
   width:100%;
   padding:4px 0;
+  background:#000;
 }
 
 .tod-scroll{
   display:inline-block;
   white-space:nowrap;
-  animation: scrollLeft 12s linear infinite;
+  animation:scrollLeft 12s linear infinite;
   font-size:14px;
-  color:green;
+  color:#00ff6a;
   font-weight:bold;
+  padding:6px;
 }
 
 @keyframes scrollLeft{
@@ -53,7 +55,6 @@ body{margin:0;background:#f4f6f9}
 
 #teacherInfo{font-weight:bold}
 
-/* LOGOUT */
 .logout{
   width:38px;height:38px;
   border-radius:50%;
@@ -125,7 +126,7 @@ th,td{padding:10px;border-bottom:1px solid #eee}
 </div>
 
 <div class="menu">
-  <button onclick="showSection('classTeacher')">📚 My Class</button>
+  <button onclick="openMyClass()">📚 My Class</button>
   <button onclick="showSection('results')">📊 Results</button>
   <button onclick="showSection('chat')">💬 Chat</button>
 </div>
@@ -180,9 +181,9 @@ th,td{padding:10px;border-bottom:1px solid #eee}
 
 </div>
 
-  <!-- ONLY SCRIPT SECTION REPLACE THIS WHOLE SCRIPT -->
 <script>
-  const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
+
+const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
 
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
@@ -250,7 +251,7 @@ function getWeekRange(){
   };
 }
 
-/* TOD */
+/* T.O.D SYSTEM */
 async function ensureWeeklyTOD(){
 
   const { start } = getWeekRange();
@@ -309,7 +310,7 @@ async function loadTOD(){
       : "T.O.D: " + (t?.full_name || "Unknown");
 }
 
-/* ✅ FIXED: OPEN CLASS TEACHER */
+/* MY CLASS ROUTE */
 async function openMyClass(){
 
   const { data:{ user } } = await supabaseClient.auth.getUser();
@@ -329,7 +330,7 @@ async function openMyClass(){
   location.href = "classteacher.html";
 }
 
-/* LOAD ASSIGNMENTS */
+/* ASSIGNMENTS */
 async function loadAssignments(){
 
   const { data } = await supabaseClient
@@ -363,14 +364,22 @@ function handleClassChange(){
   if(selectedClass) loadSubjects(selectedClass);
 }
 
-/* SUBJECTS FIXED SAFE */
+/* SUBJECT */
+function handleSubjectChange(){
+  selectedSubject = document.getElementById("subject").value;
+  loadStudents(selectedClass);
+}
+
+/* SUBJECT LOAD FIXED */
 function loadSubjects(class_id){
 
   const sub = document.getElementById("subject");
   sub.innerHTML = `<option value="">Select Subject</option>`;
 
   assignments.forEach(a=>{
-    if(String(a.class_id || a.classes?.id) === String(class_id) && a.subjects){
+    const cid = a.classes?.id || a.class_id;
+
+    if(String(cid) === String(class_id) && a.subjects){
       sub.innerHTML += `
         <option value="${a.subjects.id}">
           ${a.subjects.subject_name}
@@ -379,12 +388,6 @@ function loadSubjects(class_id){
   });
 
   showSubject();
-}
-
-/* SUBJECT */
-function handleSubjectChange(){
-  selectedSubject = document.getElementById("subject").value;
-  loadStudents(selectedClass);
 }
 
 /* STUDENTS */
@@ -411,7 +414,7 @@ async function loadStudents(class_id){
   });
 }
 
-/* SAVE */
+/* SAVE MARKS */
 async function autoSave(id,val){
 
   if(val === "" || !selectedSubject) return;
@@ -430,7 +433,7 @@ function showSubject(){
   document.getElementById("subjectLabel").classList.remove("hidden");
 }
 
-/* SECTION */
+/* SECTION CONTROL */
 function showSection(s){
 
   document.getElementById("classTeacherSection").classList.add("hidden");
@@ -454,6 +457,8 @@ async function logout(){
 }
 
 init();
+
 </script>
+
 </body>
 </html>
