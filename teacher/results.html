@@ -90,7 +90,15 @@ const client = supabase.createClient(
 );
 
 let currentClass = null;
-let isPublished = false;
+
+/* ================= GRADE SYSTEM (SAME AS REPORTS) ================= */
+function grade(m){
+  if(m >= 81) return "A";
+  if(m >= 61) return "B";
+  if(m >= 41) return "C";
+  if(m >= 21) return "D";
+  return "E";
+}
 
 /* ================= LOAD CLASSES ================= */
 async function loadClasses(){
@@ -104,7 +112,7 @@ async function loadClasses(){
   });
 }
 
-/* ================= CHECK PUBLISH STATUS ================= */
+/* ================= PUBLISH CHECK ================= */
 async function checkPublishStatus(){
 
   const { data } = await client
@@ -113,16 +121,17 @@ async function checkPublishStatus(){
     .eq("class_id", currentClass)
     .maybeSingle();
 
-  isPublished = data?.is_published || false;
+  const isPublished = data?.is_published || false;
 
   if(!isPublished){
     document.getElementById("status").innerText =
       "⚠ RESULTS NOT PUBLISHED";
+
     return false;
-  } else {
-    document.getElementById("status").innerText = "";
-    return true;
   }
+
+  document.getElementById("status").innerText = "";
+  return true;
 }
 
 /* ================= CLASS CHANGE ================= */
@@ -141,7 +150,7 @@ async function onClassChange(){
   loadReport();
 }
 
-/* ================= LOAD REPORT ================= */
+/* ================= REPORT (REPORTS LOGIC STYLE) ================= */
 async function loadReport(){
 
   const { data:students } = await client.from("students").select("*");
@@ -156,6 +165,8 @@ async function loadReport(){
 
   filtered.forEach(stu=>{
 
+    let total = 0;
+    let count = 0;
     let detail = [];
 
     subjects.forEach(sub=>{
@@ -166,10 +177,20 @@ async function loadReport(){
 
       if(!r) return;
 
-      detail.push(sub.subject_name + "-" + r.marks);
+      let m = Number(r.marks);
+
+      total += m;
+      count++;
+
+      detail.push(sub.subject_name + "-" + grade(m));
     });
 
-    if(detail.length === 0) return;
+    if(count === 0) return;
+
+    let avg = total / count;
+    let g = grade(avg);
+
+    detail.push("AVERAGE-" + g);
 
     final.push({
       adm: stu.admission_no,
@@ -178,6 +199,7 @@ async function loadReport(){
       sex: stu.gender === "Female" ? "F" : "M",
       detail: detail.join(" ")
     });
+
   });
 
   document.getElementById("tbody").innerHTML =
