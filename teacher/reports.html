@@ -484,7 +484,15 @@ detail.push(subName + "-" + grade(m));
 
   let subjectStats = subjects.map(sub => {
 
-  let st = results.filter(r => r.subject_id === sub.id);
+  let st = results.filter(r => {
+
+  if (String(r.subject_id) !== String(sub.id)) return false;
+
+  return filtered.some(s =>
+    String(s.id) === String(r.student_id)
+  );
+
+});
 
   if (st.length === 0) return null;
 
@@ -500,6 +508,13 @@ detail.push(subName + "-" + grade(m));
 
 }).filter(Boolean);
 
+  if(subjectStats.length === 0){
+  document.getElementById("subtbody").innerHTML =
+    `<tr><td colspan="7" style="text-align:center;">
+      NO SUBJECT PERFORMANCE AVAILABLE
+    </td></tr>`;
+} else {
+    
 let i = 1;
 
 document.getElementById("subtbody").innerHTML =
