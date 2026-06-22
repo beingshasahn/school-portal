@@ -388,7 +388,6 @@ th,td{
 /* PAGE SWITCHER */
 function switchPage(page, el){
 
-  // fade out
   document.querySelectorAll('.page')
     .forEach(p=>{
       p.style.opacity = "0";
@@ -412,18 +411,9 @@ function switchPage(page, el){
 
   el.classList.add('active');
 
-  // ✅ HII NDIO STEP 5
+  // 👉 RESULTS PAGE ONLY
   if(page === "results"){
-  initResultsPage();
-  }
-  if(!selectedClass){
-    document.getElementById("publishStatus").innerText =
-      "Please select a class from Home page first";
-    document.getElementById("resultsContent").innerHTML = "";
-    return;
-  }
-
-  loadResults();
+    initResultsPage();
   }
 }
 
@@ -612,20 +602,19 @@ async function loadStudents(class_id){
     return;
   }
 
-  const { data, error } = await supabaseClient
-    .from("results")
-    .select(`
-      student_id,
-      marks,
-      subject_id,
-      students(admission_no, student_name)
-    `)
-    .eq("class_id", selectedClass);
+  // 🔥 FIX #3 INAKAA HAPA HAPA
+  const { data: pub } = await supabaseClient
+    .from("published_reports")
+    .select("is_published")
+    .eq("class_id", selectedClass)
+    .maybeSingle();
 
-  if(!data || data.length === 0){
-    container.innerHTML = "<p>No results found</p>";
+  if(!pub || pub.is_published !== true){
+    container.innerHTML = "<p>Results not published yet</p>";
     return;
   }
+
+  // 👇 baada ya hapa ndio results zako zinaanza
 
   let html = `
     <table>
@@ -796,11 +785,16 @@ async function logout(){
   container.innerHTML = html;
 
   document.getElementById("publishedClassSelect")
-    .addEventListener("change", async (e)=>{
-      selectedClass = e.target.value;
-      await loadResults();
-    });
+  .addEventListener("change", async (e)=>{
+    selectedClass = e.target.value;
+
+    if(!selectedClass){
+      document.getElementById("resultsContent").innerHTML = "";
+      return;
     }
+
+    await loadResults();
+  });
   
 init();
 
