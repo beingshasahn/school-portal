@@ -261,14 +261,26 @@ async function init(){
   const { data:{ user } } = await supabaseClient.auth.getUser();
 teacherId = user.id;
 
-const { data: profile } = await supabaseClient
-  .from("profiles")
-  .select("full_name")
-  .eq("id", teacherId)
-  .single();
+/* FETCH PROFILE NAME */
+  const { data: profile } = await supabaseClient
+    .from("profiles")
+    .select("full_name")
+    .eq("id", user.id)
+    .maybeSingle();
 
-document.getElementById("teacherInfo").innerText =
-  "Welcome, " + (profile?.full_name || "Teacher");
+  const name = profile?.full_name || "Teacher";
+
+  const hour = new Date().getHours();
+
+  let greeting = "Good morning";
+  if(hour >= 12 && hour < 17){
+    greeting = "Good afternoon";
+  }else if(hour >= 17){
+    greeting = "Good evening";
+  }
+
+  document.getElementById("teacherInfo").innerText =
+    `🌅 ${greeting}, ${name}`;
 
   await loadAssignments();
   await ensureWeeklyTOD();
