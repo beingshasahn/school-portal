@@ -482,9 +482,9 @@ async function init(){
   const hour = new Date().getHours();
 
   let greeting = "Good morning";
-  if(hour >= 12 && hour < 17){
+  if(hour >= 12 && hour < 16){
     greeting = "Good afternoon";
-  }else if(hour >= 17){
+  }else if(hour >= 16){
     greeting = "Good evening";
   }
 
@@ -616,7 +616,6 @@ async function loadStudents(class_id){
   .from("published_reports")
   .select("*")
   .eq("class_id", String(selectedClass));
-console.log("Selected class:", selectedClass);
 console.log("PUBLISH ROWS:", data);
     
   isPublished = data?.is_published || false;
