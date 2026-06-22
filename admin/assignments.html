@@ -121,6 +121,58 @@ th,td{
   cursor:pointer;
 }
 
+/* DISABLED SELECT */
+select:disabled{
+  background:#e9ecef;
+  opacity:0.7;
+  cursor:not-allowed;
+}
+
+  /* MODAL BACKDROP */
+.modal{
+  display:none;
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.5);
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+}
+
+/* MODAL BOX */
+.modal-box{
+  background:white;
+  padding:20px;
+  border-radius:12px;
+  width:320px;
+  text-align:center;
+
+  /* animation base */
+  transform:scale(0.7) translateY(-30px);
+  opacity:0;
+  transition:all 0.25s ease;
+}
+
+/* SHOW STATE (ZOOM IN + SLIDE DOWN) */
+.modal.show .modal-box{
+  transform:scale(1) translateY(0);
+  opacity:1;
+}
+
+/* BUTTON */
+.modal-box button{
+  margin-top:10px;
+  padding:8px 15px;
+  background:#1e3c72;
+  color:white;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+
 /* RESPONSIVE */
 @media(max-width:768px){
   body{flex-direction:column;}
@@ -133,7 +185,17 @@ th,td{
 </head>
 
 <body>
+<!-- WARNING MODAL -->
+<div id="warningModal" class="modal">
 
+  <div id="modalBox" class="modal-box">
+    <h3 id="modalTitle">Warning</h3>
+    <p id="warningText"></p>
+
+    <button onclick="closeModal()">OK</button>
+  </div>
+
+</div>
 <div class="sidebar">
   <h3>Admin Panel</h3>
 
@@ -190,6 +252,19 @@ const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
+const subjectSelect = document.getElementById("subject");
+const classTeacherCheckbox = document.getElementById("isClassTeacher");
+
+/* TOGGLE SUBJECT WHEN CHECKBOX CHANGES */
+classTeacherCheckbox.addEventListener("change", function(){
+  if(this.checked){
+    subjectSelect.disabled = true;
+    subjectSelect.value = "";
+  }else{
+    subjectSelect.disabled = false;
+  }
+});
+
 async function init(){
   loadTeachers();
   loadClasses();
@@ -240,26 +315,42 @@ async function loadSubjects(){
   });
 }
 
-/* ASSIGN (UPDATED) */
+/* ASSIGN */
 async function assign(){
 
   const teacher_id = document.getElementById("teacher").value;
   const class_id = document.getElementById("class").value;
-  const subject_id = document.getElementById("subject").value;
   const is_class_teacher = document.getElementById("isClassTeacher").checked;
 
-  // OPTIONAL SAFETY: prevent multiple class teachers per class
-  if(is_class_teacher){
-    const { data: existing } = await supabaseClient
-      .from("teacher_assignments")
-      .select("*")
-      .eq("class_id", class_id)
-      .eq("is_class_teacher", true);
+  const subject_id = is_class_teacher
+    ? null
+    : document.getElementById("subject").value;
 
-    if(existing.length > 0){
-      alert("This class already has a Class Teacher!");
-      return;
-    }
+  if(is_class_teacher){
+
+  // CHECK 1: class tayari ina Class Teacher?
+  const { data: classCheck } = await supabaseClient
+    .from("teacher_assignments")
+    .select("*")
+    .eq("class_id", class_id)
+    .eq("is_class_teacher", true);
+
+  if(classCheck.length > 0){
+    showWarning("This class already has a Class Teacher!");
+    return;
+  }
+
+  // CHECK 2: teacher tayari ni Class Teacher mahali pengine?
+  const { data: teacherCheck } = await supabaseClient
+    .from("teacher_assignments")
+    .select("*")
+    .eq("teacher_id", teacher_id)
+    .eq("is_class_teacher", true);
+
+  if(teacherCheck.length > 0){
+    showWarning("This teacher is already assigned as a Class Teacher!");
+    return;
+  }
   }
 
   const { error } = await supabaseClient
@@ -274,12 +365,12 @@ async function assign(){
   if(error){
     alert(error.message);
   } else {
-    alert("Assigned successfully 👍");
+    showWarning("Assigned successfully 👍");
     loadAssignments();
   }
 }
 
-/* LOAD ASSIGNMENTS (UPDATED) */
+/* LOAD ASSIGNMENTS */
 async function loadAssignments(){
 
   const { data } = await supabaseClient
@@ -293,13 +384,24 @@ async function loadAssignments(){
 
     const t = await supabaseClient.from("profiles").select("*").eq("id", a.teacher_id).single();
     const c = await supabaseClient.from("classes").select("*").eq("id", a.class_id).single();
-    const s = await supabaseClient.from("subjects").select("*").eq("id", a.subject_id).single();
+
+    let subjectName = "-";
+
+    if(!a.is_class_teacher && a.subject_id){
+      const s = await supabaseClient
+        .from("subjects")
+        .select("*")
+        .eq("id", a.subject_id)
+        .single();
+
+      subjectName = s.data?.subject_name || "-";
+    }
 
     table.innerHTML += `
       <tr>
         <td>${t.data.full_name}</td>
         <td>${c.data.class_name}</td>
-        <td>${s.data.subject_name}</td>
+        <td>${subjectName}</td>
         <td>
           ${a.is_class_teacher
             ? `<span class="badge ct">CLASS TEACHER</span>`
@@ -321,7 +423,38 @@ async function remove(id){
 
   loadAssignments();
 }
+let modalTimer;
 
+function showWarning(message){
+  const modal = document.getElementById("warningModal");
+
+  document.getElementById("warningText").innerText = message;
+
+  modal.style.display = "flex";
+
+  // trigger animation
+  setTimeout(() => {
+    modal.classList.add("show");
+  }, 10);
+
+  // auto close after 3 seconds
+  clearTimeout(modalTimer);
+  modalTimer = setTimeout(() => {
+    closeModal();
+  }, 3000);
+}
+
+function closeModal(){
+  const modal = document.getElementById("warningModal");
+
+  modal.classList.remove("show");
+
+  // wait animation then hide
+  setTimeout(() => {
+    modal.style.display = "none";
+  }, 250);
+ }
+  
 init();
 
 </script>
