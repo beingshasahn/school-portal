@@ -298,7 +298,10 @@ th,td{
 <div id="results" class="page">
   <div class="card">
     <h3>Results</h3>
-    <p>View and manage results here</p>
+
+    <p id="publishStatus">Checking publication...</p>
+
+    <div id="resultsContent"></div>
   </div>
 </div>
 
@@ -385,7 +388,7 @@ th,td{
 /* PAGE SWITCHER */
 function switchPage(page, el){
 
-  // fade out first
+  // fade out
   document.querySelectorAll('.page')
     .forEach(p=>{
       p.style.opacity = "0";
@@ -408,6 +411,11 @@ function switchPage(page, el){
     .forEach(n=>n.classList.remove('active'));
 
   el.classList.add('active');
+
+  // ✅ HII NDIO STEP 5
+  if(page === "results"){
+    loadResults();
+  }
 }
 
 /* FIXED: removed duplicate variables */
@@ -415,7 +423,7 @@ let teacherId = null;
 let assignments = [];
 let selectedClass = null;
 let selectedSubject = null;
-
+let isPublished = false;
 /* SUPABASE */
 const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
@@ -579,6 +587,83 @@ async function loadStudents(class_id){
     }
   });
   }
+
+  async function checkPublishStatus(){
+
+  if(!selectedClass){
+    document.getElementById("publishStatus").innerText =
+      "Select a class first";
+    return;
+  }
+
+  const { data } = await supabaseClient
+    .from("published_reports")
+    .select("*")
+    .eq("class_id", selectedClass)
+    .maybeSingle();
+
+  isPublished = data?.is_published || false;
+
+  document.getElementById("publishStatus").innerText =
+    isPublished
+      ? "Results Published"
+      : "Results Not Published";
+  }
+
+  async function loadResults(){
+
+  const container = document.getElementById("resultsContent");
+
+  if(!selectedClass){
+    container.innerHTML = "<p>Select class first</p>";
+    return;
+  }
+
+  await checkPublishStatus();
+
+  if(!isPublished){
+    container.innerHTML =
+      "<p>Results have not been published yet.</p>";
+    return;
+  }
+
+  const { data } = await supabaseClient
+    .from("results")
+    .select(`
+      student_id,
+      marks,
+      students(student_name, admission_no)
+    `)
+    .eq("class_id", selectedClass);
+
+  if(!data || data.length === 0){
+    container.innerHTML = "<p>No results found</p>";
+    return;
+  }
+
+  let html = `
+    <table>
+      <tr>
+        <th>Adm</th>
+        <th>Name</th>
+        <th>Marks</th>
+      </tr>
+  `;
+
+  data.forEach(r=>{
+    html += `
+      <tr>
+        <td>${r.students?.admission_no || ""}</td>
+        <td>${r.students?.student_name || ""}</td>
+        <td>${r.marks}</td>
+      </tr>
+    `;
+  });
+
+  html += "</table>";
+
+  container.innerHTML = html;
+  }
   
 async function autoSave(studentId,value){
 
@@ -684,6 +769,17 @@ async function logout(){
     icon.style.background = "#6b7280";
   }
   }
+
+  async function checkPublishStatus(){
+
+  const { data } = await supabaseClient
+    .from("published_reports")
+    .select("is_published")
+    .eq("class_id", selectedClass)
+    .maybeSingle();
+
+  return data?.is_published === true;
+      }
   
 init();
 
