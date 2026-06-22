@@ -363,8 +363,8 @@ th,td{
     <span>🏠</span>Home
   </div>
 
-  <div class="nav-item" onclick="switchPage('results',this)">
-    <span>📊</span>Results
+  <div class="nav-item" onclick="goToReports(this)">
+  <span>📊</span>Results
   </div>
 
   <div class="nav-item" onclick="switchPage('chat',this)">
@@ -683,6 +683,14 @@ async function logout(){
     icon.classList.remove("sound-active");
     icon.style.background = "#6b7280";
   }
+  }
+  function goToReports(el){
+  document.querySelectorAll('.nav-item')
+    .forEach(n => n.classList.remove('active'));
+
+  el.classList.add('active');
+
+  window.location.href = 'reports.html';
   }
   
 init();
