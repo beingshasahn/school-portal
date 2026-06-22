@@ -187,7 +187,6 @@ const client = supabase.createClient(
 
 /* ================= ROLE ================= */
 let role = localStorage.getItem("role") || "teacher";
-let role = "admin";
 
 function isPublic(){
   return !["admin","teacher","headteacher"].includes(role);
@@ -345,17 +344,7 @@ async function togglePublish(){
 
   // 🔗 AUTO SHARE LINK
   if(newStatus){
-    const link =
-      window.location.origin +
-      "/dashboard.html?class=" + currentClass;
-
-    await client.from("shared_links").insert([{
-      class_id: currentClass,
-      link: link,
-      created_at: new Date()
-    }]);
-
-    alert("Class published!\nLink:\n" + link);
+    alert("Results published successfully.");
   }
 }
 
