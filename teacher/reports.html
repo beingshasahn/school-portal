@@ -375,9 +375,18 @@ async function loadReport(){
   const { data:subjects } = await client.from("subjects").select("*");
   const { data:results } = await client.from("results").select("*");
 
-  let filtered = students.filter(s =>
+  let filtered = students
+  .filter(s =>
     String(s.class_id) === String(currentClass)
-  );
+  )
+  .sort((a, b) => {
+
+    if ((a.gender || "Male") !== (b.gender || "Male")) {
+      return (a.gender === "Female") ? 1 : -1;
+    }
+
+    return (a.admission_no || "").localeCompare(b.admission_no || "");
+  });
 
   let final = [];
 
@@ -444,26 +453,49 @@ detail.push(subName + "-" + grade(m));
     </tr>
   `).join("");
 
-  let i=1;
-  document.getElementById("subtbody").innerHTML =
-  subjects.map(sub=>{
-    let st = results.filter(r=>r.subject_id===sub.id);
-    let sat = st.length;
-    if(!sat) return "";
+  let i = 1;
 
-    let total = st.reduce((a,b)=>a+Number(b.marks),0);
-    let avg = total/sat;
+document.getElementById("subtbody").innerHTML =
+subjectStats.map(sub => {
 
-    return `
-      <tr>
-        <td>${i++}</td>
-        <td>${sub.subject_name}</td>
-        <td>${sat}</td>
-        <td>${sat}</td>
-        <td>${st.filter(x=>x.marks>=41).length}</td>
-        <td>${avg.toFixed(1)}</td>
-        <td>${gpa(grade(avg))}</td>
-      </tr>`;
+  let g = grade(sub.avg);
+
+  return `
+    <tr>
+      <td>${i++}</td>
+      <td>${sub.name}</td>
+      <td>${sub.sat}</td>
+      <td>${sub.sat}</td>
+      <td>${sub.passed}</td>
+      <td>${sub.avg.toFixed(1)}</td>
+      <td>${g} (${
+  g === "A" ? "Excellent" :
+  g === "B" ? "Very Good" :
+  g === "C" ? "Good" :
+  g === "D" ? "Satisfactory" :
+  "Unsatisfactory"
+})</td>
+    </tr>
+  `;
+}).join("");
+    let subjectStats = subjects.map(sub => {
+
+  let st = results.filter(r => r.subject_id === sub.id);
+
+  if (st.length === 0) return null;
+
+  let total = st.reduce((a,b)=>a+Number(b.marks),0);
+  let avg = total / st.length;
+
+  return {
+    name: sub.subject_name,
+    sat: st.length,
+    passed: st.filter(x => x.marks >= 41).length,
+    avg
+  };
+
+}).filter(Boolean);
+    
   }).join("");
 
   setTimeout(()=>{
