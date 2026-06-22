@@ -162,6 +162,25 @@ th,td{
   }
 }
 
+  @keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(30, 58, 138, 0.6);
+  }
+  70% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 10px rgba(30, 58, 138, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(30, 58, 138, 0);
+  }
+}
+
+.sound-active {
+  animation: pulse 1.2s infinite;
+}
+  
 .nav-item.active{
   color:#f59e0b;
   font-weight:bold;
@@ -180,7 +199,29 @@ th,td{
 <!-- TOP -->
 <div class="topbar">
   <div class="brand">KempsPortal</div>
-  <div class="user" id="userInitials">SM</div>
+
+  <div style="display:flex;align-items:center;gap:10px;">
+
+    <!-- SOUND ICON -->
+    <div id="soundIcon" onclick="SoundManager.toggle()" style="
+      width:30px;
+      height:30px;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#1e3a8a;
+      color:#fff;
+      font-size:14px;
+      cursor:pointer;
+    ">
+      🔊
+    </div>
+
+    <!-- USER INITIALS -->
+    <div class="user" id="userInitials">SM</div>
+
+  </div>
 </div>
 
 <!-- HOME -->
@@ -577,17 +618,10 @@ const SoundManager = {
   toggle(){
     soundEnabled = !soundEnabled;
     updateSoundUI();
-  },
-
-  isEnabled(){
-    return soundEnabled;
   }
 };
 
   document.addEventListener("click",(e)=>{
-
-  // IMPORTANT: check toggle FIRST
-  if(!soundEnabled) return;
 
   if(
     e.target.closest("button") ||
@@ -611,15 +645,20 @@ async function logout(){
 
   function updateSoundUI(){
 
-  const btn = document.getElementById("soundBtn");
-  if(!btn) return;
+  const icon = document.getElementById("soundIcon");
 
-  btn.innerHTML = soundEnabled
-    ? "🔊 Sound: ON"
-    : "🔇 Sound: OFF";
-}
+  if(!icon) return;
 
-updateSoundUI();
+  icon.innerHTML = soundEnabled ? "🔊" : "🔇";
+
+  if(soundEnabled){
+    icon.classList.add("sound-active");
+    icon.style.background = "#1e3a8a";
+  } else {
+    icon.classList.remove("sound-active");
+    icon.style.background = "#6b7280";
+  }
+  }
   
 init();
 
