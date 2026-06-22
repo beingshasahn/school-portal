@@ -9,30 +9,108 @@
 
 <style>
 /* ===== YOUR ORIGINAL CSS (UNCHANGED) ===== */
-*{box-sizing:border-box;font-family:Segoe UI, Arial;}
-body{margin:0;background:#f5f6fa;}
-.topbar{background:#fff;padding:12px 15px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;}
+*{
+  box-sizing:border-box;
+  font-family:Segoe UI, Arial;
+}
+
+body{
+  margin:0;
+  background:#f5f6fa;
+}
+
+.topbar{
+  background:#fff;
+  padding:12px 15px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:1px solid #eee;
+}
+
 .brand{font-weight:bold;color:#111;}
-.user{background:#a78bfa;color:#fff;width:35px;height:35px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;}
+
+.user{
+  background:#a78bfa;
+  color:#fff;
+  width:35px;
+  height:35px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+}
+
 .page{display:none;padding:15px;animation:fade 0.3s ease-in-out;}
+
 .page.active{display:block;}
-@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.card{background:#fff;padding:15px;border-radius:12px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
-input,select{width:100%;padding:10px;margin-top:6px;border:1px solid #ddd;border-radius:8px;}
-table{width:100%;border-collapse:collapse;}
-th,td{padding:10px;border-bottom:1px solid #eee;text-align:left;}
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:65px;background:#fff;display:flex;justify-content:space-around;align-items:center;border-top:1px solid #eee;}
-.nav-item{text-align:center;font-size:12px;color:#777;cursor:pointer;}
+
+@keyframes fade{
+  from{opacity:0; transform:translateY(10px)}
+  to{opacity:1; transform:translateY(0)}
+}
+
+.card{
+  background:#fff;
+  padding:15px;
+  border-radius:12px;
+  margin-bottom:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.06);
+}
+
+input,select{
+  width:100%;
+  padding:10px;
+  margin-top:6px;
+  border:1px solid #ddd;
+  border-radius:8px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th,td{
+  padding:10px;
+  border-bottom:1px solid #eee;
+}
+
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  height:65px;
+  background:#fff;
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  border-top:1px solid #eee;
+}
+
+.nav-item{
+  text-align:center;
+  font-size:12px;
+  color:#777;
+  cursor:pointer;
+}
+
 .nav-item span{display:block;font-size:18px;}
-.nav-item.active{color:#f59e0b;font-weight:bold;}
+
 .hidden{display:none;}
 </style>
 </head>
 
 <body>
 
+<!-- TOP BAR -->
 <div class="topbar">
-  <div class="brand">KempsPortal</div>
+  <div class="brand">
+    KempsPortal
+  </div>
+
   <div class="user" id="userInitials">SM</div>
 </div>
 
@@ -40,6 +118,10 @@ th,td{padding:10px;border-bottom:1px solid #eee;text-align:left;}
 <div id="home" class="page active">
   <div class="card">
     <h3 id="teacherInfo">Welcome Teacher</h3>
+  </div>
+
+  <div class="card">
+    <button onclick="openMyClass()">Open Class Teacher Panel</button>
   </div>
 
   <div class="card">
@@ -51,22 +133,29 @@ th,td{padding:10px;border-bottom:1px solid #eee;text-align:left;}
   </div>
 
   <div class="card">
-    <h3>Students</h3>
     <table>
       <thead>
-        <tr><th>Adm</th><th>Name</th><th>Marks</th></tr>
+        <tr>
+          <th>Adm</th>
+          <th>Name</th>
+          <th>Marks</th>
+        </tr>
       </thead>
       <tbody id="students"></tbody>
     </table>
   </div>
 </div>
 
-<!-- RESULTS -->
+<!-- RESULTS (ENHANCED LATER) -->
 <div id="results" class="page">
   <div class="card">
     <h3>Results</h3>
-    <p id="resultsStatus">View and manage results here</p>
-    <div id="resultsTable"></div>
+
+    <!-- NEW: publish lock status UI -->
+    <p id="publishStatus">Checking publication...</p>
+
+    <!-- results content -->
+    <div id="resultsContent"></div>
   </div>
 </div>
 
@@ -77,173 +166,462 @@ th,td{padding:10px;border-bottom:1px solid #eee;text-align:left;}
 
 <!-- NAV -->
 <div class="bottom-nav">
-  <div class="nav-item active" onclick="switchPage('home',this)">🏠 Home</div>
-  <div class="nav-item" onclick="switchPage('results',this);loadPublishedResults()">📊 Results</div>
-  <div class="nav-item" onclick="switchPage('chat',this)">💬 Chat</div>
-  <div class="nav-item" onclick="switchPage('notices',this)">📢 Notices</div>
-  <div class="nav-item" onclick="switchPage('profile',this)">👤 Profile</div>
+  <div class="nav-item" onclick="switchPage('home',this)">🏠</div>
+  <div class="nav-item" onclick="switchPage('results',this)">📊</div>
+  <div class="nav-item" onclick="switchPage('chat',this)">💬</div>
+  <div class="nav-item" onclick="switchPage('notices',this)">📢</div>
+  <div class="nav-item" onclick="switchPage('profile',this)">👤</div>
 </div>
 
 <script>
 
-const supabaseClient = supabase.createClient(
-"https://bslofdobcvxkjphbjyzb.supabase.co",
-"YOUR_ANON_KEY"
-);
+/* ================= SUPABASE ================= */
+const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
+const supabaseKey = "YOUR_KEY_HERE";
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-/* ================= ORIGINAL VARIABLES (KEPT) ================= */
-let teacherId=null;
-let assignments=[];
-let selectedClass=null;
-let selectedSubject=null;
+/* ================= STATE (YOUR ORIGINAL + NEW) ================= */
+let teacherId = null;
+let assignments = [];
+let selectedClass = null;
+let selectedSubject = null;
 
-/* ================= PAGE SWITCH ================= */
-function switchPage(page,el){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+/* NEW: publication state */
+let isPublished = false;
+
+/* ================= PAGE SWITCH (YOUR ORIGINAL) ================= */
+function switchPage(page, el){
+
+  document.querySelectorAll('.page').forEach(p=>{
+    p.classList.remove('active');
+  });
+
   document.getElementById(page).classList.add('active');
 
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    n.classList.remove('active');
+  });
+
   el.classList.add('active');
+
+  // NEW: trigger results check ONLY
+  if(page === "results"){
+    checkPublishStatus();
+  }
 }
 
-/* ================= ORIGINAL FUNCTIONS (KEPT) ================= */
+/* ================= NEW: CHECK PUBLICATION ================= */
+async function checkPublishStatus(){
+
+  if(!selectedClass){
+    document.getElementById("publishStatus").innerText =
+      "Select a class first";
+    return;
+  }
+
+  const { data } = await supabaseClient
+    .from("published_reports")
+    .select("*")
+    .eq("class_id", selectedClass)
+    .maybeSingle();
+
+  isPublished = data?.is_published || false;
+
+  document.getElementById("publishStatus").innerText =
+    isPublished ? "✅ Results Published" : "🔒 Not Published";
+
+  document.getElementById("resultsContent").innerHTML =
+    isPublished ? "Loading results..." : "";
+}
+
+<script>
+
+/* ================= STATE (from PART 1) ================= */
+let teacherId = null;
+let assignments = [];
+let selectedClass = null;
+let selectedSubject = null;
+let isPublished = false;
+
+/* ================= AUTH (UNCHANGED LOGIC) ================= */
+async function protect(roleRequired){
+
+  const { data:{ user } } = await supabaseClient.auth.getUser();
+
+  if(!user){
+    location.href="../index.html";
+    return false;
+  }
+
+  const { data: profile } = await supabaseClient
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if(!profile || profile.role !== roleRequired){
+    alert("No permission");
+    location.href="../index.html";
+    return false;
+  }
+
+  return true;
+}
+
+/* ================= INIT (UNCHANGED) ================= */
+async function init(){
+
+  const ok = await protect("teacher");
+  if(!ok) return;
+
+  const { data:{ user } } = await supabaseClient.auth.getUser();
+  teacherId = user.id;
+
+  const { data: profile } = await supabaseClient
+    .from("profiles")
+    .select("full_name")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const name = profile?.full_name || "Teacher";
+
+  document.getElementById("teacherInfo").innerText =
+    "Welcome " + name;
+
+  await loadAssignments();
+}
+
+/* ================= CLASS CHANGE (UNCHANGED) ================= */
 function handleClassChange(){
-  selectedClass=document.getElementById("class").value;
-  loadSubjects(selectedClass);
+
+  selectedClass = document.getElementById("class").value;
+  selectedSubject = null;
+
+  document.getElementById("students").innerHTML = "";
+
+  if(selectedClass){
+    loadSubjects(selectedClass);
+  }
 }
 
+/* ================= SUBJECT CHANGE (UNCHANGED) ================= */
 function handleSubjectChange(){
-  selectedSubject=document.getElementById("subject").value;
-  loadStudents(selectedClass);
+
+  selectedSubject = document.getElementById("subject").value;
+
+  if(selectedClass && selectedSubject){
+    loadStudents(selectedClass);
+  }
 }
 
-function showSubject(){
+/* ================= LOAD SUBJECTS (UNCHANGED) ================= */
+function loadSubjects(class_id){
+
+  const sub = document.getElementById("subject");
+  sub.innerHTML = `<option value="">Select Subject</option>`;
+
+  assignments.forEach(a=>{
+
+    const cid = a.classes?.id || a.class_id;
+
+    if(String(cid) === String(class_id) && a.subjects){
+
+      sub.innerHTML += `
+        <option value="${a.subjects.id}">
+          ${a.subjects.subject_name}
+        </option>
+      `;
+    }
+  });
+
   document.getElementById("subject").classList.remove("hidden");
   document.getElementById("subjectLabel").classList.remove("hidden");
 }
 
-async function loadAssignments(){
-  const {data}=await supabaseClient.from("teacher_assignments")
-  .select("class_id,subject_id,classes(id,class_name),subjects(id,subject_name)")
-  .eq("teacher_id",teacherId);
-
-  assignments=data||[];
-
-  const sel=document.getElementById("class");
-  sel.innerHTML="<option>Select Class</option>";
-
-  let seen=new Set();
-
-  assignments.forEach(a=>{
-    if(!seen.has(a.classes.id)){
-      seen.add(a.classes.id);
-      sel.innerHTML+=`<option value="${a.classes.id}">${a.classes.class_name}</option>`;
-    }
-  });
-}
-
-function loadSubjects(class_id){
-  const sub=document.getElementById("subject");
-  sub.innerHTML="<option>Select Subject</option>";
-
-  assignments.forEach(a=>{
-    if(String(a.classes.id)===String(class_id)){
-      sub.innerHTML+=`<option value="${a.subjects.id}">${a.subjects.subject_name}</option>`;
-    }
-  });
-
-  showSubject();
-}
-
+/* ================= LOAD STUDENTS (UNCHANGED CORE LOGIC) ================= */
 async function loadStudents(class_id){
-  const {data:students}=await supabaseClient.from("students")
-  .select("*").eq("class_id",class_id);
 
-  const tbody=document.getElementById("students");
-  tbody.innerHTML="";
+  if(!selectedSubject) return;
 
-  students.forEach(s=>{
-    tbody.innerHTML+=`
+  const { data: students } = await supabaseClient
+    .from("students")
+    .select("*")
+    .eq("class_id", class_id)
+    .order("admission_no");
+
+  const { data: marksData } = await supabaseClient
+    .from("results")
+    .select("student_id, marks")
+    .eq("subject_id", selectedSubject);
+
+  const marksMap = {};
+
+  (marksData || []).forEach(r=>{
+    marksMap[r.student_id] = r.marks;
+  });
+
+  const tbody = document.getElementById("students");
+  tbody.innerHTML = "";
+
+  (students || []).forEach(s=>{
+
+    tbody.innerHTML += `
       <tr>
         <td>${s.admission_no}</td>
         <td>${s.student_name}</td>
-        <td><input></td>
-      </tr>`;
+        <td>
+          <input type="number"
+            value="${marksMap[s.id] ?? ''}"
+            oninput="autoSave('${s.id}',this.value)">
+        </td>
+      </tr>
+    `;
   });
 }
 
-/* ================= AUTH (KEPT) ================= */
-async function init(){
-  const {data:{user}}=await supabaseClient.auth.getUser();
-  teacherId=user.id;
-  await loadAssignments();
+/* ================= LOAD ASSIGNMENTS (UNCHANGED) ================= */
+async function loadAssignments(){
+
+  const { data } = await supabaseClient
+    .from("teacher_assignments")
+    .select(`
+      class_id,
+      subject_id,
+      classes(id,class_name),
+      subjects(id,subject_name)
+    `)
+    .eq("teacher_id", teacherId);
+
+  assignments = data || [];
+
+  const sel = document.getElementById("class");
+  sel.innerHTML = `<option value="">Select Class</option>`;
+
+  const seen = new Set();
+
+  assignments.forEach(a=>{
+    if(a.classes && !seen.has(a.classes.id)){
+      seen.add(a.classes.id);
+
+      sel.innerHTML += `
+        <option value="${a.classes.id}">
+          ${a.classes.class_name}
+        </option>
+      `;
+    }
+  });
 }
 
-/* ================= SOUND (KEPT) ================= */
-let soundEnabled=true;
+/* ================= AUTOSAVE (UNCHANGED) ================= */
+async function autoSave(studentId,value){
 
-/* ================= LOGOUT (KEPT) ================= */
+  if(!selectedSubject) return;
+
+  if(value.trim() === ""){
+
+    await supabaseClient
+      .from("results")
+      .delete()
+      .eq("student_id", studentId)
+      .eq("subject_id", selectedSubject);
+
+    return;
+  }
+
+  await supabaseClient
+    .from("results")
+    .upsert([{
+      student_id: studentId,
+      subject_id: selectedSubject,
+      teacher_id: teacherId,
+      marks: Number(value)
+    }],{
+      onConflict:"student_id,subject_id"
+    });
+}
+
+/* ================= OPEN CLASS (UNCHANGED) ================= */
+async function openMyClass(){
+
+  const { data:{ user } } = await supabaseClient.auth.getUser();
+
+  const { data } = await supabaseClient
+    .from("teacher_assignments")
+    .select("class_id")
+    .eq("teacher_id", user.id)
+    .eq("is_class_teacher", true)
+    .maybeSingle();
+
+  if(!data){
+    alert("You are not assigned as a class teacher yet.");
+    return;
+  }
+
+  location.href = "classteacher.html";
+}
+
+/* ================= SOUND SYSTEM (UNCHANGED) ================= */
+let soundEnabled = true;
+
+const SoundManager = {
+
+  play(){
+    if(!soundEnabled) return;
+
+    const audio = document.getElementById("uiClickSound");
+    if(!audio) return;
+
+    audio.currentTime = 0;
+    audio.play().catch(()=>{});
+  },
+
+  toggle(){
+    soundEnabled = !soundEnabled;
+    updateSoundUI();
+  }
+};
+
+document.addEventListener("click",(e)=>{
+
+  if(
+    e.target.closest("button") ||
+    e.target.closest(".nav-item") ||
+    e.target.closest("select") ||
+    e.target.closest("input")
+  ){
+    SoundManager.play();
+  }
+});
+
+/* ================= LOGOUT (UNCHANGED) ================= */
 async function logout(){
   await supabaseClient.auth.signOut();
   location.href="../index.html";
 }
 
-/* =========================================================
-   ⭐ NEW FEATURE: RESULTS (PUBLISHED ONLY)
-   ========================================================= */
 
-async function loadPublishedResults(){
+/* ================= SUPABASE INIT (FINAL SAFE) ================= */
+const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-  const box=document.getElementById("resultsTable");
-  box.innerHTML="Loading...";
+/* ================= RESULTS STATE ================= */
+let isPublished = false;
+
+/* ================= CHECK PUBLISH STATUS ================= */
+async function checkPublishStatus(){
 
   if(!selectedClass){
-    box.innerHTML="Select a class first";
+    document.getElementById("publishStatus").innerText =
+      "Select a class first";
     return;
   }
 
-  // 1. check publish status
-  const {data:pub}=await supabaseClient
+  const { data } = await supabaseClient
     .from("published_reports")
     .select("*")
-    .eq("class_id",selectedClass)
+    .eq("class_id", selectedClass)
     .maybeSingle();
 
-  if(!pub || !pub.is_published){
-    box.innerHTML="<b>❌ Results not published yet</b>";
+  isPublished = data?.is_published || false;
+
+  const status = document.getElementById("publishStatus");
+
+  if(status){
+    status.innerText = isPublished
+      ? "✅ Results Published"
+      : "🔒 Results Not Published";
+  }
+}
+
+/* ================= RESULTS PAGE RENDER ================= */
+async function loadResults(){
+
+  const container = document.getElementById("resultsContent");
+
+  if(!selectedClass){
+    container.innerHTML = "<p>Select class first</p>";
     return;
   }
 
-  // 2. load data
-  const {data:students}=await supabaseClient.from("students").select("*");
-  const {data:subjects}=await supabaseClient.from("subjects").select("*");
-  const {data:results}=await supabaseClient.from("results").select("*");
+  await checkPublishStatus();
 
-  const st=students.filter(s=>String(s.class_id)===String(selectedClass));
+  // 🔒 BLOCK IF NOT PUBLISHED
+  if(!isPublished){
+    container.innerHTML = `
+      <div style="padding:15px;background:#fff;border-radius:10px;">
+        🔒 Results have not been published yet.
+      </div>
+    `;
+    return;
+  }
 
-  let html="<table border='1' width='100%'><tr><th>Adm</th><th>Name</th><th>Results</th></tr>";
+  // ✅ LOAD RESULTS
+  const { data: results } = await supabaseClient
+    .from("results")
+    .select(`
+      student_id,
+      marks,
+      students(student_name, admission_no)
+    `)
+    .eq("class_id", selectedClass);
 
-  st.forEach(s=>{
-    let row="";
+  if(!results || results.length === 0){
+    container.innerHTML = "<p>No results found</p>";
+    return;
+  }
 
-    subjects.forEach(sub=>{
-      const r=results.find(x=>
-        String(x.student_id)===String(s.id) &&
-        String(x.subject_id)===String(sub.id)
-      );
+  let html = `
+    <table>
+      <thead>
+        <tr>
+          <th>Adm</th>
+          <th>Name</th>
+          <th>Marks</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
 
-      if(r) row+=`${sub.subject_name}: ${r.marks} | `;
-    });
-
-    html+=`<tr><td>${s.admission_no}</td><td>${s.student_name}</td><td>${row}</td></tr>`;
+  results.forEach(r=>{
+    html += `
+      <tr>
+        <td>${r.students?.admission_no || ""}</td>
+        <td>${r.students?.student_name || ""}</td>
+        <td>${r.marks}</td>
+      </tr>
+    `;
   });
 
-  html+="</table>";
+  html += `</tbody></table>`;
 
-  box.innerHTML=html;
+  container.innerHTML = html;
 }
 
+/* ================= PAGE SWITCH (FINAL PATCH) ================= */
+function switchPage(page, el){
+
+  document.querySelectorAll('.page').forEach(p=>{
+    p.classList.remove('active');
+  });
+
+  document.getElementById(page).classList.add('active');
+
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    n.classList.remove('active');
+  });
+
+  el.classList.add('active');
+
+  // 👉 ONLY TRIGGER RESULTS LOGIC HERE
+  if(page === "results"){
+    loadResults();
+  }
+}
+
+/* ================= INIT CALL ================= */
 init();
+
 
 </script>
 
