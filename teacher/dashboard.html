@@ -258,8 +258,24 @@ th,td{
 <!-- PROFILE -->
 <div id="profile" class="page">
   <div class="card">
-  <h3>Profile</h3>
-  <p>Teacher profile settings</p>
+    <h3>Profile</h3>
+    <p>Teacher profile settings</p>
+  </div>
+
+  <div class="card">
+    <h3>Sound Settings</h3>
+
+    <button id="soundBtn" onclick="SoundManager.toggle()" style="
+      width:100%;
+      padding:10px;
+      border:none;
+      border-radius:8px;
+      background:#1e3a8a;
+      color:#fff;
+      cursor:pointer;
+    ">
+      🔊 Sound: ON
+    </button>
 
   <button onclick="logout()" style="
     margin-top:10px;
@@ -565,7 +581,42 @@ async function openMyClass(){
   }
 
 });
-  
+  let soundEnabled = true;
+
+const SoundManager = {
+
+  play(){
+    if(!soundEnabled) return;
+
+    const audio = document.getElementById("uiClickSound");
+    if(!audio) return;
+
+    audio.currentTime = 0;
+    audio.play().catch(()=>{});
+  },
+
+  toggle(){
+    soundEnabled = !soundEnabled;
+    updateSoundUI();
+  },
+
+  isEnabled(){
+    return soundEnabled;
+  }
+};
+
+  document.addEventListener("click",(e)=>{
+
+  if(
+    e.target.closest("button") ||
+    e.target.closest(".nav-item") ||
+    e.target.closest("select") ||
+    e.target.closest("input")
+  ){
+    SoundManager.play();
+  }
+
+});
 function showSubject(){
   document.getElementById("subject").classList.remove("hidden");
   document.getElementById("subjectLabel").classList.remove("hidden");
@@ -574,12 +625,28 @@ async function logout(){
   await supabaseClient.auth.signOut();
   location.href="../index.html";
 }
+
+  function updateSoundUI(){
+
+  const btn = document.getElementById("soundBtn");
+  if(!btn) return;
+
+  btn.innerHTML = soundEnabled
+    ? "🔊 Sound: ON"
+    : "🔇 Sound: OFF";
+}
+
+updateSoundUI();
+  
 init();
 
 </script>
 <audio id="clickSound" preload="auto">
   <source src="https://bslofdobcvxkjphbjyzb.supabase.co/storage/v1/object/public/sounds/click.mp3" type="audio/mpeg">
 </audio>
-  
+
+  <audio id="uiClickSound" preload="auto">
+  <source src="https://bslofdobcvxkjphbjyzb.supabase.co/storage/v1/object/public/sounds/click.mp3" type="audio/mpeg">
+  </audio>
 </body>
 </html>
