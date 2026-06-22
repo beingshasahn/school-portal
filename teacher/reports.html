@@ -482,34 +482,7 @@ detail.push(subName + "-" + grade(m));
     </tr>
   `).join("");
 
-  let i = 1;
-
-document.getElementById("subtbody").innerHTML =
-subjectStats.map(sub => {
-
-  let g = grade(sub.avg);
-
-  return `
-    <tr>
-      <td>${i++}</td>
-      <td>${sub.name}</td>
-      <td>${sub.sat}</td>
-      <td>${sub.sat}</td>
-      <td>${sub.passed}</td>
-      <td>${sub.avg.toFixed(1)}</td>
-      <td class="grade${g}">
-  ${g} (${
-    g === "A" ? "Excellent" :
-    g === "B" ? "Very Good" :
-    g === "C" ? "Good" :
-    g === "D" ? "Satisfactory" :
-    "Unsatisfactory"
-  })
-</td>
-    </tr>
-  `;
-}).join("");
-    let subjectStats = subjects.map(sub => {
+  let subjectStats = subjects.map(sub => {
 
   let st = results.filter(r => r.subject_id === sub.id);
 
@@ -526,14 +499,35 @@ subjectStats.map(sub => {
   };
 
 }).filter(Boolean);
-    
-  }).join("");
 
-  setTimeout(()=>{
-    autoFitTable("gradePerf");
-    autoFitTable("tbody");
-    autoFitTable("subtbody");
-  },50);
+let i = 1;
+
+document.getElementById("subtbody").innerHTML =
+subjectStats.map(sub => {
+
+  let g = grade(sub.avg);
+
+  return `
+    <tr>
+      <td>${i++}</td>
+      <td>${sub.name}</td>
+      <td>${sub.sat}</td>
+      <td>${sub.sat}</td>
+      <td>${sub.passed}</td>
+      <td>${sub.avg.toFixed(1)}</td>
+      <td class="grade${g}">
+        ${g} (${
+          g==="A" ? "Excellent" :
+          g==="B" ? "Very Good" :
+          g==="C" ? "Good" :
+          g==="D" ? "Satisfactory" :
+          "Unsatisfactory"
+        })
+      </td>
+    </tr>
+  `;
+}).join("");
+
 }
 
 initFromLink();
