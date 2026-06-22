@@ -38,7 +38,7 @@ table{
   border-collapse: collapse;
   width: 100%;
   font-size: 12px;
-  min-width: 700px;
+  min-width: 750px;
 }
 
 th, td{
@@ -289,43 +289,6 @@ async function loadReport(){
     `).join("");
 
   /* ================= TABLE 3 (SUBJECT PERF) ================= */
-  /* ================= TABLE 3 (SUBJECT PERF FIXED) ================= */
-
-let subjectRows = [];
-
-let i = 1;
-
-subjects.forEach(sub => {
-
-  const st = results.filter(r => {
-    return String(r.subject_id) === String(sub.id) &&
-           filtered.some(s => String(s.id) === String(r.student_id));
-  });
-
-  if (st.length === 0) return; // 🚨 IMPORTANT: skip completely
-
-  let total = st.reduce((a,b)=>a + Number(b.marks), 0);
-  let avg = total / st.length;
-
-  subjectRows.push(`
-    <tr>
-      <td>${i++}</td>
-      <td>${sub.subject_name}</td>
-      <td>${st.length}</td>
-      <td>${st.length}</td>
-      <td>${st.filter(x => x.marks >= 41).length}</td>
-      <td>${avg.toFixed(1)}</td>
-      <td>${gpa(grade(avg))}</td>
-    </tr>
-  `);
-});
-
-document.getElementById("subtbody").innerHTML =
-  subjectRows.length
-    ? subjectRows.join("")
-    : `<tr><td colspan="7" style="text-align:center;">
-        NO SUBJECT PERFORMANCE DATA
-      </td></tr>`;
 
       let subjectRows = [];
 let i = 1;
