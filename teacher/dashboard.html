@@ -387,7 +387,8 @@ th,td{
 
 /* PAGE SWITCHER */
 function switchPage(page, el){
-
+selectedClass = null;
+selectedSubject = null;
   document.querySelectorAll('.page')
     .forEach(p=>{
       p.style.opacity = "0";
@@ -484,6 +485,7 @@ async function init(){
     `${greeting}, ${name}`;
 
   await loadAssignments();
+  updateSoundUI();
 }
 
 function handleClassChange(){
@@ -602,19 +604,23 @@ async function loadStudents(class_id){
     return;
   }
 
-  // 🔥 FIX #3 INAKAA HAPA HAPA
-  const { data: pub } = await supabaseClient
-    .from("published_reports")
-    .select("is_published")
-    .eq("class_id", selectedClass)
-    .maybeSingle();
+  const { data, error } = await supabaseClient
+    .from("results")
+    .select(`
+      marks,
+      students(admission_no, student_name)
+    `)
+    .eq("class_id", selectedClass);
 
-  if(!pub || pub.is_published !== true){
-    container.innerHTML = "<p>Results not published yet</p>";
+  if(error){
+    container.innerHTML = "<p>Error loading results</p>";
     return;
   }
 
-  // 👇 baada ya hapa ndio results zako zinaanza
+  if(!data || data.length === 0){
+    container.innerHTML = "<p>No results found</p>";
+    return;
+  }
 
   let html = `
     <table>
@@ -775,7 +781,10 @@ async function logout(){
 
   let html = `<select id="publishedClassSelect">
     <option value="">Choose class</option>`;
-
+if(!selectedClass){
+  status.innerText = "Please select a class first";
+  return;
+}
   data.forEach(c=>{
     html += `<option value="${c.class_id}">${c.class_id}</option>`;
   });
@@ -797,7 +806,7 @@ async function logout(){
   });
   
 init();
-
+    
 </script>
 
   <audio id="uiClickSound" preload="auto">
