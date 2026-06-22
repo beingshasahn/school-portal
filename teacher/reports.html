@@ -186,6 +186,7 @@ const client = supabase.createClient(
 );
 
 /* ================= ROLE ================= */
+let role = localStorage.getItem("role") || "teacher";
 let role = "admin";
 
 function isPublic(){
@@ -263,29 +264,36 @@ async function initFromLink(){
 
   await loadClasses();
 
+  // 🔒 ONLY ADMIN CAN USE DROPDOWN
+  if(role !== "admin"){
+    document.getElementById("class").disabled = true;
+    document.getElementById("class").style.display = "none";
+  }
+
   if(urlClass){
     currentClass = urlClass;
+
     document.getElementById("class").value = urlClass;
-    document.getElementById("class").disabled = true;
     document.getElementById("publishBar").style.display = "none";
+
     await checkPublishStatus();
     await loadReport();
   }
-}
+  }
 
 async function onClassChange(){
 
-  if(document.getElementById("class").disabled) return;
+  // 🔒 BLOCK NON-ADMIN FROM USING DROPDOWN
+  if(role !== "admin") return;
 
   currentClass = document.getElementById("class").value;
   if(!currentClass) return;
 
-  document.getElementById("publishBar").style.display =
-    role==="admin" ? "block":"none";
+  document.getElementById("publishBar").style.display = "block";
 
   await checkPublishStatus();
 
-  if(isPublic() && !isPublished){
+  if(!isPublished){
     document.getElementById("tbody").innerHTML =
       "<tr><td colspan='4'>RESULTS NOT PUBLISHED</td></tr>";
     return;
@@ -319,16 +327,36 @@ async function togglePublish(){
     .eq("class_id", currentClass)
     .maybeSingle();
 
+  let newStatus = true;
+
   if(data){
+    newStatus = !data.is_published;
+
     await client.from("published_reports")
-      .update({ is_published: !data.is_published })
+      .update({ is_published: newStatus })
       .eq("class_id", currentClass);
+
   } else {
     await client.from("published_reports")
       .insert([{ class_id: currentClass, is_published: true }]);
   }
 
   await checkPublishStatus();
+
+  // 🔗 AUTO SHARE LINK
+  if(newStatus){
+    const link =
+      window.location.origin +
+      "/dashboard.html?class=" + currentClass;
+
+    await client.from("shared_links").insert([{
+      class_id: currentClass,
+      link: link,
+      created_at: new Date()
+    }]);
+
+    alert("Class published!\nLink:\n" + link);
+  }
 }
 
 function copyLink(){
