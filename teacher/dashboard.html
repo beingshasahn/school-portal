@@ -603,6 +603,9 @@ async function loadStudents(class_id){
 
   async function checkPublishStatus(){
 
+  console.log("Selected class:", selectedClass);
+  console.log("Converted class:", Number(selectedClass));
+
   if(!selectedClass){
     document.getElementById("publishStatus").innerText =
       "Select a class first";
@@ -612,9 +615,10 @@ async function loadStudents(class_id){
   const { data } = await supabaseClient
     .from("published_reports")
     .select("*")
-    .eq("class_id", selectedClass)
+    .eq("class_id", Number(selectedClass))
     .maybeSingle();
-
+console.log("Publish data from DB:", data);
+    
   isPublished = data?.is_published || false;
 
   document.getElementById("publishStatus").innerText =
