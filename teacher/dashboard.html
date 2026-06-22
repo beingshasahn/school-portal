@@ -266,15 +266,14 @@ th,td{
     <h3>Sound Settings</h3>
 
     <button id="soundBtn" onclick="SoundManager.toggle()" style="
-      width:100%;
-      padding:10px;
-      border:none;
-      border-radius:8px;
-      background:#1e3a8a;
-      color:#fff;
-      cursor:pointer;
-    ">
-      🔊 Sound: ON
+  width:100%;
+  padding:10px;
+  border:none;
+  border-radius:8px;
+  background:#1e3a8a;
+  color:#fff;
+">
+  🔊 Sound: ON
     </button>
 
   <button onclick="logout()" style="
@@ -560,27 +559,7 @@ async function openMyClass(){
   location.href = "classteacher.html";
 }
 
-  function playClickSound(){
 
-  const sound = document.getElementById("clickSound");
-
-  sound.currentTime = 0;
-
-  sound.play().catch(()=>{
-    // browser inaweza kuzuia autoplay katika baadhi ya mazingira
-  });
-
-  }
-  document.addEventListener("click",(e)=>{
-
-  if(
-    e.target.closest("button") ||
-    e.target.closest(".nav-item")
-  ){
-    playClickSound();
-  }
-
-});
   let soundEnabled = true;
 
 const SoundManager = {
@@ -607,6 +586,9 @@ const SoundManager = {
 
   document.addEventListener("click",(e)=>{
 
+  // IMPORTANT: check toggle FIRST
+  if(!soundEnabled) return;
+
   if(
     e.target.closest("button") ||
     e.target.closest(".nav-item") ||
@@ -617,6 +599,7 @@ const SoundManager = {
   }
 
 });
+  
 function showSubject(){
   document.getElementById("subject").classList.remove("hidden");
   document.getElementById("subjectLabel").classList.remove("hidden");
@@ -641,9 +624,6 @@ updateSoundUI();
 init();
 
 </script>
-<audio id="clickSound" preload="auto">
-  <source src="https://bslofdobcvxkjphbjyzb.supabase.co/storage/v1/object/public/sounds/click.mp3" type="audio/mpeg">
-</audio>
 
   <audio id="uiClickSound" preload="auto">
   <source src="https://bslofdobcvxkjphbjyzb.supabase.co/storage/v1/object/public/sounds/click.mp3" type="audio/mpeg">
