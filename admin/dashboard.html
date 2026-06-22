@@ -251,32 +251,26 @@ async function protect(){
   }
 
   if(profile?.role !== "admin"){
-    document.getElementById("welcome").innerText =
-      "Access denied (not admin)";
-    return;
-  }
-
-  /* FETCH PROFILE NAME */
-  const { data: profile } = await supabaseClient
-    .from("profiles")
-    .select("full_name")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  const name = profile?.full_name || "Teacher";
-
-  const hour = new Date().getHours();
-
-  let greeting = "Good morning";
-  if(hour >= 12 && hour < 17){
-    greeting = "Good afternoon";
-  }else if(hour >= 17){
-    greeting = "Good evening";
-  }
-
   document.getElementById("welcome").innerText =
-    `${greeting}, ${name}`;
+    "Access denied (not admin)";
+  return;
 }
+
+const name = profile?.full_name || "Teacher";
+
+const hour = new Date().getHours();
+
+let greeting = "Good morning";
+
+if(hour >= 12 && hour < 17){
+  greeting = "Good afternoon";
+}else if(hour >= 17){
+  greeting = "Good evening";
+}
+
+document.getElementById("welcome").innerText =
+  `${greeting}, ${name}`;
+  }
   
 /* LOAD TEACHERS SAFE */
 async function loadTeachers(){
