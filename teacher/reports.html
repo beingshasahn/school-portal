@@ -313,20 +313,28 @@ async function checkPublishStatus(){
 
 async function togglePublish(){
 
-  const { data } = await client
+  const { data, error } = await client
     .from("published_reports")
     .select("*")
     .eq("class_id", currentClass)
     .maybeSingle();
 
-  if(data){
-    await client.from("published_reports")
-      .update({ is_published: !data.is_published })
-      .eq("class_id", currentClass);
-  } else {
-    await client.from("published_reports")
-      .insert([{ class_id: currentClass, is_published: true }]);
-  }
+  // 👇 BONUS CHECK hapa
+  console.log("CURRENT CLASS:", currentClass);
+  console.log("EXISTING ROW:", data);
+  console.log("SELECT ERROR:", error);
+
+  const newState = !(data?.is_published || false);
+
+  const { error: upsertError } = await client
+    .from("published_reports")
+    .upsert({
+      class_id: currentClass,
+      is_published: newState
+    }, { onConflict: "class_id" });
+
+  // 👇 BONUS CHECK hapa pia
+  console.log("UPSERT ERROR:", upsertError);
 
   await checkPublishStatus();
 }
