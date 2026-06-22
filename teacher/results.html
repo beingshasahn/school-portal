@@ -287,47 +287,43 @@ async function loadReport(){
     `).join("");
 
   /* ================= TABLE 3 (SUBJECT PERF) ================= */
-  let i = 1;
+  /* ================= TABLE 3 (SUBJECT PERF FIXED) ================= */
 
-  if(subjects.length === 0){
-  document.getElementById("subtbody").innerHTML =
-    `<tr><td colspan="7" style="text-align:center;">
-      NO SUBJECT DATA AVAILABLE
-    </td></tr>`;
-} else {
+let subjectRows = [];
 
-  let i = 1;
+let i = 1;
 
-  document.getElementById("subtbody").innerHTML =
-    subjects.map(sub => {
+subjects.forEach(sub => {
 
-      let st = results.filter(r => {
+  const st = results.filter(r => {
+    return String(r.subject_id) === String(sub.id) &&
+           filtered.some(s => String(s.id) === String(r.student_id));
+  });
 
-        if (String(r.subject_id) !== String(sub.id)) return false;
+  if (st.length === 0) return; // 🚨 IMPORTANT: skip completely
 
-        return filtered.some(s =>
-          String(s.id) === String(r.student_id)
-        );
-      });
+  let total = st.reduce((a,b)=>a + Number(b.marks), 0);
+  let avg = total / st.length;
 
-      if(st.length === 0) return "";
+  subjectRows.push(`
+    <tr>
+      <td>${i++}</td>
+      <td>${sub.subject_name}</td>
+      <td>${st.length}</td>
+      <td>${st.length}</td>
+      <td>${st.filter(x => x.marks >= 41).length}</td>
+      <td>${avg.toFixed(1)}</td>
+      <td>${gpa(grade(avg))}</td>
+    </tr>
+  `);
+});
 
-      let total = st.reduce((a,b)=>a + Number(b.marks),0);
-      let avg = total / st.length;
-
-      return `
-        <tr>
-          <td>${i++}</td>
-          <td>${sub.subject_name}</td>
-          <td>${st.length}</td>
-          <td>${st.length}</td>
-          <td>${st.filter(x => x.marks >= 41).length}</td>
-          <td>${avg.toFixed(1)}</td>
-          <td>${gpa(grade(avg))}</td>
-        </tr>
-      `;
-    }).join("");
-  }
+document.getElementById("subtbody").innerHTML =
+  subjectRows.length
+    ? subjectRows.join("")
+    : `<tr><td colspan="7" style="text-align:center;">
+        NO SUBJECT PERFORMANCE DATA
+      </td></tr>`;
 
       let st = results.filter(r => {
 
