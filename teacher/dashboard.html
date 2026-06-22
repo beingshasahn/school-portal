@@ -8,10 +8,11 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-/* ===== KEEP YOUR ORIGINAL CSS ===== */
 *{box-sizing:border-box;font-family:Segoe UI, Arial;}
+
 body{margin:0;background:#f5f6fa;}
 
+/* TOP BAR */
 .topbar{
   background:#fff;
   padding:12px 15px;
@@ -26,7 +27,8 @@ body{margin:0;background:#f5f6fa;}
 .user{
   background:#a78bfa;
   color:#fff;
-  width:35px;height:35px;
+  width:35px;
+  height:35px;
   border-radius:50%;
   display:flex;
   align-items:center;
@@ -34,7 +36,13 @@ body{margin:0;background:#f5f6fa;}
   font-weight:bold;
 }
 
-.page{display:none;padding:15px;animation:fade 0.3s ease-in-out;}
+/* PAGE SYSTEM */
+.page{
+  display:none;
+  padding:15px;
+  animation:fade 0.3s ease-in-out;
+}
+
 .page.active{display:block;}
 
 @keyframes fade{
@@ -42,6 +50,7 @@ body{margin:0;background:#f5f6fa;}
   to{opacity:1;transform:translateY(0)}
 }
 
+/* CARD */
 .card{
   background:#fff;
   padding:15px;
@@ -50,6 +59,7 @@ body{margin:0;background:#f5f6fa;}
   box-shadow:0 2px 8px rgba(0,0,0,0.06);
 }
 
+/* INPUTS */
 input,select{
   width:100%;
   padding:10px;
@@ -58,6 +68,7 @@ input,select{
   border-radius:8px;
 }
 
+/* TABLE */
 table{
   width:100%;
   border-collapse:collapse;
@@ -66,8 +77,10 @@ table{
 th,td{
   padding:10px;
   border-bottom:1px solid #eee;
+  text-align:left;
 }
 
+/* NAV */
 .bottom-nav{
   position:fixed;
   bottom:0;
@@ -88,7 +101,7 @@ th,td{
   cursor:pointer;
 }
 
-.nav-item span{display:block;font-size:18px;}
+.nav-item.active{color:#f59e0b;font-weight:bold;}
 
 .hidden{display:none;}
 </style>
@@ -96,7 +109,7 @@ th,td{
 
 <body>
 
-<!-- TOP BAR -->
+<!-- TOP -->
 <div class="topbar">
   <div class="brand">KempsPortal</div>
   <div class="user" id="userInitials">SM</div>
@@ -133,15 +146,17 @@ th,td{
     </table>
   </div>
 </div>
+
 <!-- RESULTS -->
 <div id="results" class="page">
   <div class="card">
     <h3>Results</h3>
-    <p id="publishStatus"></p>
+    <p id="publishStatus">Checking publication...</p>
     <div id="resultsContent"></div>
   </div>
 </div>
 
+<!-- OTHER PAGES -->
 <div id="chat" class="page"><div class="card"><h3>Chat</h3></div></div>
 <div id="notices" class="page"><div class="card"><h3>Notices</h3></div></div>
 <div id="profile" class="page"><div class="card"><h3>Profile</h3></div></div>
@@ -157,20 +172,21 @@ th,td{
 
 <script>
 
-/* SUPABASE (ONLY ONCE!) */
+/* ================= SUPABASE ================= */
 const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
-const supabaseKey = "PASTE_YOUR_KEY";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-/* STATE */
+/* ================= STATE ================= */
 let teacherId = null;
 let assignments = [];
 let selectedClass = null;
 let selectedSubject = null;
 let isPublished = false;
 
-/* PAGE SWITCH */
+/* ================= SWITCH PAGE ================= */
 function switchPage(page, el){
+
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById(page).classList.add('active');
 
@@ -178,12 +194,13 @@ function switchPage(page, el){
   el.classList.add('active');
 
   if(page === "results"){
-    checkPublishStatus();
+    loadResults();
   }
 }
 
-  /* AUTH */
+/* ================= AUTH ================= */
 async function protect(roleRequired){
+
   const { data:{ user } } = await supabaseClient.auth.getUser();
 
   if(!user){
@@ -206,8 +223,9 @@ async function protect(roleRequired){
   return true;
 }
 
-/* INIT */
+/* ================= INIT ================= */
 async function init(){
+
   const ok = await protect("teacher");
   if(!ok) return;
 
@@ -226,7 +244,7 @@ async function init(){
   await loadAssignments();
 }
 
-/* CLASS */
+/* ================= CLASS CHANGE ================= */
 function handleClassChange(){
   selectedClass = document.getElementById("class").value;
   selectedSubject = null;
@@ -234,37 +252,42 @@ function handleClassChange(){
   if(selectedClass) loadSubjects(selectedClass);
 }
 
-/* SUBJECT */
+/* ================= SUBJECT CHANGE ================= */
 function handleSubjectChange(){
   selectedSubject = document.getElementById("subject").value;
-  if(selectedClass && selectedSubject) loadStudents(selectedClass);
+  loadStudents(selectedClass);
 }
 
-/* LOAD SUBJECTS */
+/* ================= SUBJECTS ================= */
 function loadSubjects(class_id){
+
   const sub = document.getElementById("subject");
   sub.innerHTML = `<option value="">Select Subject</option>`;
 
   assignments.forEach(a=>{
     const cid = a.classes?.id || a.class_id;
 
-    if(String(cid) === String(class_id) && a.subjects){
-      sub.innerHTML += `<option value="${a.subjects.id}">${a.subjects.subject_name}</option>`;
+    if(String(cid) === String(class_id)){
+      sub.innerHTML += `<option value="${a.subjects.id}">
+        ${a.subjects.subject_name}
+      </option>`;
     }
   });
 
-  sub.classList.remove("hidden");
+  document.getElementById("subject").classList.remove("hidden");
   document.getElementById("subjectLabel").classList.remove("hidden");
 }
 
-/* LOAD STUDENTS */
+/* ================= STUDENTS ================= */
 async function loadStudents(class_id){
+
   if(!selectedSubject) return;
 
   const { data: students } = await supabaseClient
     .from("students")
     .select("*")
-    .eq("class_id", class_id);
+    .eq("class_id", class_id)
+    .order("admission_no");
 
   const { data: marksData } = await supabaseClient
     .from("results")
@@ -272,27 +295,53 @@ async function loadStudents(class_id){
     .eq("subject_id", selectedSubject);
 
   const map = {};
-  (marksData||[]).forEach(r=>map[r.student_id]=r.marks);
+  (marksData || []).forEach(r=>map[r.student_id]=r.marks);
 
   const tbody = document.getElementById("students");
   tbody.innerHTML = "";
 
-  (students||[]).forEach(s=>{
+  (students || []).forEach(s=>{
     tbody.innerHTML += `
       <tr>
         <td>${s.admission_no}</td>
         <td>${s.student_name}</td>
         <td>
           <input type="number"
-            value="${map[s.id] ?? ''}"
-            oninput="autoSave('${s.id}',this.value)">
+          value="${map[s.id] ?? ''}"
+          oninput="autoSave('${s.id}',this.value)">
         </td>
       </tr>`;
   });
 }
 
-/* AUTO SAVE */
+/* ================= ASSIGNMENTS ================= */
+async function loadAssignments(){
+
+  const { data } = await supabaseClient
+    .from("teacher_assignments")
+    .select(`class_id,subject_id,classes(id,class_name),subjects(id,subject_name)`)
+    .eq("teacher_id", teacherId);
+
+  assignments = data || [];
+
+  const sel = document.getElementById("class");
+  sel.innerHTML = `<option value="">Select Class</option>`;
+
+  const seen = new Set();
+
+  assignments.forEach(a=>{
+    if(a.classes && !seen.has(a.classes.id)){
+      seen.add(a.classes.id);
+      sel.innerHTML += `<option value="${a.classes.id}">
+        ${a.classes.class_name}
+      </option>`;
+    }
+  });
+}
+
+/* ================= AUTOSAVE ================= */
 async function autoSave(studentId,value){
+
   if(!selectedSubject) return;
 
   if(value.trim()===""){
@@ -311,8 +360,60 @@ async function autoSave(studentId,value){
   }],{onConflict:"student_id,subject_id"});
 }
 
-/* OPEN CLASS */
+/* ================= RESULTS FEATURE ================= */
+async function checkPublishStatus(){
+
+  const { data } = await supabaseClient
+    .from("published_reports")
+    .select("*")
+    .eq("class_id", selectedClass)
+    .maybeSingle();
+
+  isPublished = data?.is_published || false;
+
+  document.getElementById("publishStatus").innerText =
+    isPublished ? "Results Published" : "Results Not Published";
+}
+
+/* ================= LOAD RESULTS ================= */
+async function loadResults(){
+
+  const container = document.getElementById("resultsContent");
+
+  if(!selectedClass){
+    container.innerHTML = "Select class first";
+    return;
+  }
+
+  await checkPublishStatus();
+
+  if(!isPublished){
+    container.innerHTML = "Results have not been published yet";
+    return;
+  }
+
+  const { data } = await supabaseClient
+    .from("results")
+    .select(`marks,students(student_name,admission_no)`)
+    .eq("class_id", selectedClass);
+
+  let html = `<table><tr><th>Adm</th><th>Name</th><th>Marks</th></tr>`;
+
+  (data||[]).forEach(r=>{
+    html += `<tr>
+      <td>${r.students?.admission_no||""}</td>
+      <td>${r.students?.student_name||""}</td>
+      <td>${r.marks}</td>
+    </tr>`;
+  });
+
+  html += `</table>`;
+  container.innerHTML = html;
+}
+
+/* ================= OPEN CLASS ================= */
 async function openMyClass(){
+
   const { data:{ user } } = await supabaseClient.auth.getUser();
 
   const { data } = await supabaseClient
@@ -323,30 +424,14 @@ async function openMyClass(){
     .maybeSingle();
 
   if(!data){
-    alert("Not assigned");
+    alert("You are not class teacher yet.");
     return;
   }
 
   location.href="classteacher.html";
 }
 
-/* PUBLISH CHECK */
-async function checkPublishStatus(){
-  if(!selectedClass) return;
-
-  const { data } = await supabaseClient
-    .from("published_reports")
-    .select("*")
-    .eq("class_id", selectedClass)
-    .maybeSingle();
-
-  isPublished = !!data?.is_published;
-
-  document.getElementById("publishStatus").innerText =
-    isPublished ? "Published" : "Not Published";
-}
-
-/* INIT CALL */
+/* ================= INIT ================= */
 init();
 
 </script>
