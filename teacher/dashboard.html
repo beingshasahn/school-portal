@@ -485,7 +485,6 @@ async function init(){
 
   await loadAssignments();
 }
-let userRole = "teacher";
   
 function handleClassChange(){
   selectedClass = document.getElementById("class").value;
@@ -702,16 +701,16 @@ async function logout(){
     const el = document.querySelector('.nav-item:nth-child(2)');
     switchPage('results', el);
 
-    document.getElementById("reportClass").value = classId;
-    reportClass = classId;
+    document.getElementById("class").value = classId;
+    selectedClass = classId;
 
-    checkPublishStatus();
-    loadReport();
+    handleClassChange();
   }
   }
   
-init();
-autoOpenFromLink();
+init().then(()=>{
+  autoOpenFromLink();
+});
 </script>
 
   <audio id="uiClickSound" preload="auto">
