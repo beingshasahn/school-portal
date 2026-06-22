@@ -382,6 +382,13 @@ th,td{
 
 <script>
 
+  function getURLParams(){
+  const p = new URLSearchParams(window.location.search);
+  return {
+    view: p.get("view"),
+    classId: p.get("class")
+  };
+  }
 /* PAGE SWITCHER */
 function switchPage(page, el){
 
@@ -478,7 +485,8 @@ async function init(){
 
   await loadAssignments();
 }
-
+let userRole = "teacher";
+  
 function handleClassChange(){
   selectedClass = document.getElementById("class").value;
   selectedSubject = null;
@@ -684,9 +692,26 @@ async function logout(){
     icon.style.background = "#6b7280";
   }
   }
+
+  function autoOpenFromLink(){
+
+  const { view, classId } = getURLParams();
+
+  if(view === "results" && classId){
+
+    const el = document.querySelector('.nav-item:nth-child(2)');
+    switchPage('results', el);
+
+    document.getElementById("reportClass").value = classId;
+    reportClass = classId;
+
+    checkPublishStatus();
+    loadReport();
+  }
+  }
   
 init();
-
+autoOpenFromLink();
 </script>
 
   <audio id="uiClickSound" preload="auto">
