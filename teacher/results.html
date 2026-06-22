@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RESULTS DASHBOARD</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+  font-family: Arial;
+  margin: 0;
+  background: #f5f6fa;
+}
+
+.header{
+  padding: 10px;
+  font-weight: bold;
+  text-transform: uppercase;
+  background: #c7e3ee;
+}
+
+select{
+  margin: 10px;
+  padding: 8px;
+}
+
+.table-wrap{
+  margin: 10px;
+  overflow-x: auto;
+  background: #fff;
+  border: 1px solid #ccc;
+}
+
+table{
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 12px;
+}
+
+th, td{
+  border: 1px solid #ccc;
+  padding: 6px;
+  white-space: nowrap;
+}
+
+th{
+  background: #eee;
+}
+
+#status{
+  margin: 10px;
+  font-weight: bold;
+  color: red;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">RESULTS DASHBOARD (VIEW ONLY)</div>
+
+<select id="class" onchange="onClassChange()">
+  <option value="">Select Class</option>
+</select>
+
+<div id="status"></div>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+  <th>CAND NO</th>
+  <th>PREM NO</th>
+  <th>NAME</th>
+  <th>SEX</th>
+  <th>SUBJECTS</th>
+</tr>
+</thead>
+
+<tbody id="tbody"></tbody>
+</table>
+</div>
+
+<script>
+const client = supabase.createClient(
+  "https://bslofdobcvxkjphbjyzb.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s"
+);
+
+let currentClass = null;
+let isPublished = false;
+
+/* ================= LOAD CLASSES ================= */
+async function loadClasses(){
+  const { data } = await client.from("classes").select("*");
+
+  const el = document.getElementById("class");
+  el.innerHTML = `<option value="">Select Class</option>`;
+
+  data.forEach(c=>{
+    el.innerHTML += `<option value="${c.id}">${c.class_name}</option>`;
+  });
+}
+
+/* ================= CHECK PUBLISH STATUS ================= */
+async function checkPublishStatus(){
+
+  const { data } = await client
+    .from("published_reports")
+    .select("*")
+    .eq("class_id", currentClass)
+    .maybeSingle();
+
+  isPublished = data?.is_published || false;
+
+  if(!isPublished){
+    document.getElementById("status").innerText =
+      "⚠ RESULTS NOT PUBLISHED";
+    return false;
+  } else {
+    document.getElementById("status").innerText = "";
+    return true;
+  }
+}
+
+/* ================= CLASS CHANGE ================= */
+async function onClassChange(){
+
+  currentClass = document.getElementById("class").value;
+  if(!currentClass) return;
+
+  const ok = await checkPublishStatus();
+
+  if(!ok){
+    document.getElementById("tbody").innerHTML = "";
+    return;
+  }
+
+  loadReport();
+}
+
+/* ================= LOAD REPORT ================= */
+async function loadReport(){
+
+  const { data:students } = await client.from("students").select("*");
+  const { data:subjects } = await client.from("subjects").select("*");
+  const { data:results } = await client.from("results").select("*");
+
+  let filtered = students.filter(s =>
+    String(s.class_id) === String(currentClass)
+  );
+
+  let final = [];
+
+  filtered.forEach(stu=>{
+
+    let detail = [];
+
+    subjects.forEach(sub=>{
+      let r = results.find(x =>
+        String(x.student_id) === String(stu.id) &&
+        String(x.subject_id) === String(sub.id)
+      );
+
+      if(!r) return;
+
+      detail.push(sub.subject_name + "-" + r.marks);
+    });
+
+    if(detail.length === 0) return;
+
+    final.push({
+      adm: stu.admission_no,
+      prem: stu.prem_no,
+      name: stu.name || stu.full_name || "-",
+      sex: stu.gender === "Female" ? "F" : "M",
+      detail: detail.join(" ")
+    });
+  });
+
+  document.getElementById("tbody").innerHTML =
+    final.map(r=>`
+      <tr>
+        <td>${r.adm}</td>
+        <td>${r.prem}</td>
+        <td>${r.name}</td>
+        <td>${r.sex}</td>
+        <td>${r.detail}</td>
+      </tr>
+    `).join("");
+}
+
+/* ================= INIT ================= */
+loadClasses();
+</script>
+
+</body>
+</html>
