@@ -53,7 +53,36 @@ button{cursor:pointer;}
   overflow-x:auto;
 }
 
+.gradeA{
+  background:#006400;
+  color:white;
+  font-weight:bold;
+}
 
+.gradeB{
+  background:#90EE90;
+  color:black;
+  font-weight:bold;
+}
+
+.gradeC{
+  background:#FFFF66;
+  color:black;
+  font-weight:bold;
+}
+
+.gradeD{
+  background:#FFB6B6;
+  color:black;
+  font-weight:bold;
+}
+
+.gradeE{
+  background:#FF0000;
+  color:white;
+  font-weight:bold;
+}
+  
 table{
   width:auto;
   border-collapse:collapse;
@@ -468,13 +497,15 @@ subjectStats.map(sub => {
       <td>${sub.sat}</td>
       <td>${sub.passed}</td>
       <td>${sub.avg.toFixed(1)}</td>
-      <td>${g} (${
-  g === "A" ? "Excellent" :
-  g === "B" ? "Very Good" :
-  g === "C" ? "Good" :
-  g === "D" ? "Satisfactory" :
-  "Unsatisfactory"
-})</td>
+      <td class="grade${g}">
+  ${g} (${
+    g === "A" ? "Excellent" :
+    g === "B" ? "Very Good" :
+    g === "C" ? "Good" :
+    g === "D" ? "Satisfactory" :
+    "Unsatisfactory"
+  })
+</td>
     </tr>
   `;
 }).join("");
