@@ -414,7 +414,14 @@ function switchPage(page, el){
 
   // ✅ HII NDIO STEP 5
   if(page === "results"){
-    loadResults();
+  if(!selectedClass){
+    document.getElementById("publishStatus").innerText =
+      "Please select a class from Home page first";
+    document.getElementById("resultsContent").innerHTML = "";
+    return;
+  }
+
+  loadResults();
   }
 }
 
@@ -489,10 +496,16 @@ async function init(){
 
 function handleClassChange(){
   selectedClass = document.getElementById("class").value;
-  selectedSubject = null;
+
   document.getElementById("students").innerHTML = "";
 
-  if(selectedClass) loadSubjects(selectedClass);
+  // 🔥 ADD THIS
+  document.getElementById("resultsContent").innerHTML = "";
+  document.getElementById("publishStatus").innerText = "";
+
+  if(selectedClass){
+    loadSubjects(selectedClass);
+  }
 }
 
 function handleSubjectChange(){
