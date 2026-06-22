@@ -199,9 +199,18 @@ async function loadReport(){
   const { data:subjects } = await client.from("subjects").select("*");
   const { data:results } = await client.from("results").select("*");
 
-  let filtered = students.filter(s =>
+  let filtered = students
+  .filter(s =>
     String(s.class_id) === String(currentClass)
-  );
+  )
+  .sort((a, b) => {
+
+    if ((a.gender || "Male") !== (b.gender || "Male")) {
+      return (a.gender === "Female") ? 1 : -1;
+    }
+
+    return (a.admission_no || "").localeCompare(b.admission_no || "");
+  });
 
   let final = [];
 
@@ -280,10 +289,56 @@ async function loadReport(){
   /* ================= TABLE 3 (SUBJECT PERF) ================= */
   let i = 1;
 
+  if(subjects.length === 0){
   document.getElementById("subtbody").innerHTML =
-    subjects.map(sub=>{
+    `<tr><td colspan="7" style="text-align:center;">
+      NO SUBJECT DATA AVAILABLE
+    </td></tr>`;
+} else {
 
-      let st = results.filter(r => r.subject_id === sub.id);
+  let i = 1;
+
+  document.getElementById("subtbody").innerHTML =
+    subjects.map(sub => {
+
+      let st = results.filter(r => {
+
+        if (String(r.subject_id) !== String(sub.id)) return false;
+
+        return filtered.some(s =>
+          String(s.id) === String(r.student_id)
+        );
+      });
+
+      if(st.length === 0) return "";
+
+      let total = st.reduce((a,b)=>a + Number(b.marks),0);
+      let avg = total / st.length;
+
+      return `
+        <tr>
+          <td>${i++}</td>
+          <td>${sub.subject_name}</td>
+          <td>${st.length}</td>
+          <td>${st.length}</td>
+          <td>${st.filter(x => x.marks >= 41).length}</td>
+          <td>${avg.toFixed(1)}</td>
+          <td>${gpa(grade(avg))}</td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+      let st = results.filter(r => {
+
+  if (String(r.subject_id) !== String(sub.id)) return false;
+
+  const stu = filtered.find(s =>
+    String(s.id) === String(r.student_id)
+  );
+
+  return !!stu;
+});
       let sat = st.length;
 
       if(!sat) return "";
