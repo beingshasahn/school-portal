@@ -304,9 +304,58 @@ async function loadReport(){
       `;
     }).join("");
 }
+function startRealtime(){
 
+  client
+    .channel('results-changes')
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'results'
+      },
+      (payload) => {
+        console.log("Results changed:", payload);
+
+        if(currentClass){
+          loadReport(); // refresh automatically
+        }
+      }
+    )
+    .subscribe();
+
+
+  client
+    .channel('students-changes')
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'students'
+      },
+      () => {
+        if(currentClass){
+          loadReport();
+          setInterval(() => {
+  if(currentClass){
+    loadReport();
+  }
+}, 5000); // kila sekunde 5
+        }
+      }
+    )
+    .subscribe();
+
+}
 /* ================= INIT ================= */
-loadClasses();
+async function init(){
+  await loadClasses();
+  startRealtime();
+}
+
+init();
 
 </script>
 
