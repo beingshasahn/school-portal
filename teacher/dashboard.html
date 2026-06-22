@@ -18,109 +18,28 @@ body{
   background:#f4f6f9;
 }
 
-/* ===== TOP HEADER (LIKE IMAGE) ===== */
-.appHeader{
+/* KEEP YOUR ORIGINAL HEADER (NO NEW TOPBAR) */
+.header{
   background:#f59e0b;
-  padding:12px 14px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
   color:#111;
+  padding:12px;
+  text-align:left;
 }
 
-.brand{
-  display:flex;
-  flex-direction:column;
-  line-height:1.2;
-}
-
-.brand b{
-  font-size:16px;
-}
-
-.brand small{
-  font-size:12px;
-  opacity:.8;
-}
-
-.headerRight{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-.statusDot{
-  width:10px;height:10px;
-  background:#22c55e;
-  border-radius:50%;
-}
-
-.moon{
-  font-size:18px;
-  background:#fff3;
-  padding:6px 8px;
-  border-radius:8px;
-}
-
-.avatar{
-  width:34px;height:34px;
-  border-radius:50%;
-  background:#7c3aed;
-  color:white;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:bold;
-}
-
-.logoutPill{
-  background:#fff;
-  border:none;
-  padding:6px 10px;
-  border-radius:20px;
-  cursor:pointer;
-  font-weight:bold;
-}
-
-/* ===== NAV MENU (LIKE ICON TABS) ===== */
-.menu{
-  display:flex;
-  gap:14px;
-  padding:10px 10px;
-  background:#fff;
-  overflow-x:auto;
-  border-bottom:1px solid #eee;
-}
-
-.menu button{
-  flex:0 0 auto;
-  background:transparent;
-  border:none;
-  padding:8px 10px;
-  border-radius:12px;
-  font-size:13px;
-  cursor:pointer;
-  color:#444;
-}
-
-.menu button:hover{
-  background:#f3f4f6;
-}
-
-/* ===== T.O.D BAR ===== */
+/* T.O.D (UNCHANGED BUT STYLED LIKE IMAGE) */
 .tod-wrapper{
   background:#111;
   overflow:hidden;
 }
 
 .tod-scroll{
-  white-space:nowrap;
   display:inline-block;
+  white-space:nowrap;
   animation:scrollLeft 14s linear infinite;
-  color:#22c55e;
-  padding:8px;
-  font-weight:bold;
   font-size:13px;
+  color:#22c55e;
+  font-weight:bold;
+  padding:8px;
 }
 
 @keyframes scrollLeft{
@@ -128,18 +47,65 @@ body{
   100%{transform:translateX(-100%)}
 }
 
-/* ===== CONTENT ===== */
+/* KEEP ORIGINAL TOPBAR STRUCTURE */
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px 15px;
+  background:#fff;
+  border-bottom:1px solid #eee;
+}
+
+#teacherInfo{
+  font-weight:600;
+  color:#333;
+}
+
+.logout{
+  width:auto;
+  padding:6px 12px;
+  border-radius:20px;
+  background:#ef4444;
+  color:#fff;
+  border:none;
+}
+
+/* MENU (MATCH IMAGE STYLE) */
+.menu{
+  display:flex;
+  gap:8px;
+  padding:10px;
+  background:#fff;
+  overflow-x:auto;
+}
+
+.menu button{
+  flex:0 0 auto;
+  border:none;
+  background:#f3f4f6;
+  padding:8px 12px;
+  border-radius:20px;
+  font-size:13px;
+}
+
+/* ACTIVE LOOK */
+.menu button:active{
+  background:#e5e7eb;
+}
+
+/* CONTAINER */
 .container{
   padding:12px;
 }
 
-/* CARD (MODERN LIKE IMAGE) */
+/* CARDS (LIKE APP UI) */
 .card{
   background:#fff;
   border-radius:16px;
   padding:14px;
-  margin-bottom:14px;
-  box-shadow:0 2px 12px rgba(0,0,0,0.06);
+  margin-bottom:12px;
+  box-shadow:0 2px 10px rgba(0,0,0,0.06);
 }
 
 /* INPUTS */
@@ -149,10 +115,9 @@ select,input{
   margin-top:6px;
   border:1px solid #ddd;
   border-radius:10px;
-  outline:none;
 }
 
-/* TABLE */
+/* TABLE CLEAN LOOK */
 table{
   width:100%;
   border-collapse:collapse;
@@ -162,16 +127,18 @@ th,td{
   padding:10px;
   border-bottom:1px solid #eee;
   font-size:14px;
+  text-align:left;
 }
 
-/* EMPTY STATE LIKE IMAGE */
+/* HIDDEN */
+.hidden{display:none}
+
+/* EMPTY STATE LIKE SCREENSHOT */
 .emptyState{
   text-align:center;
-  padding:30px 10px;
-  color:#666;
+  padding:25px;
+  color:#888;
 }
-
-.hidden{display:none}
 
 </style>
 </head>
