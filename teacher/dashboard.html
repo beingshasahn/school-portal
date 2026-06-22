@@ -8,16 +8,9 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-/* ===== YOUR ORIGINAL CSS (UNCHANGED) ===== */
-*{
-  box-sizing:border-box;
-  font-family:Segoe UI, Arial;
-}
-
-body{
-  margin:0;
-  background:#f5f6fa;
-}
+/* ===== KEEP YOUR ORIGINAL CSS ===== */
+*{box-sizing:border-box;font-family:Segoe UI, Arial;}
+body{margin:0;background:#f5f6fa;}
 
 .topbar{
   background:#fff;
@@ -33,8 +26,7 @@ body{
 .user{
   background:#a78bfa;
   color:#fff;
-  width:35px;
-  height:35px;
+  width:35px;height:35px;
   border-radius:50%;
   display:flex;
   align-items:center;
@@ -43,12 +35,11 @@ body{
 }
 
 .page{display:none;padding:15px;animation:fade 0.3s ease-in-out;}
-
 .page.active{display:block;}
 
 @keyframes fade{
-  from{opacity:0; transform:translateY(10px)}
-  to{opacity:1; transform:translateY(0)}
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:translateY(0)}
 }
 
 .card{
@@ -107,10 +98,7 @@ th,td{
 
 <!-- TOP BAR -->
 <div class="topbar">
-  <div class="brand">
-    KempsPortal
-  </div>
-
+  <div class="brand">KempsPortal</div>
   <div class="user" id="userInitials">SM</div>
 </div>
 
@@ -145,21 +133,15 @@ th,td{
     </table>
   </div>
 </div>
-
-<!-- RESULTS (ENHANCED LATER) -->
+<!-- RESULTS -->
 <div id="results" class="page">
   <div class="card">
     <h3>Results</h3>
-
-    <!-- NEW: publish lock status UI -->
-    <p id="publishStatus">Checking publication...</p>
-
-    <!-- results content -->
+    <p id="publishStatus"></p>
     <div id="resultsContent"></div>
   </div>
 </div>
 
-<!-- OTHER PAGES -->
 <div id="chat" class="page"><div class="card"><h3>Chat</h3></div></div>
 <div id="notices" class="page"><div class="card"><h3>Notices</h3></div></div>
 <div id="profile" class="page"><div class="card"><h3>Profile</h3></div></div>
@@ -175,77 +157,33 @@ th,td{
 
 <script>
 
-/* ================= SUPABASE ================= */
+/* SUPABASE (ONLY ONCE!) */
 const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
-const supabaseKey = "YOUR_KEY_HERE";
+const supabaseKey = "PASTE_YOUR_KEY";
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-/* ================= STATE (YOUR ORIGINAL + NEW) ================= */
+/* STATE */
 let teacherId = null;
 let assignments = [];
 let selectedClass = null;
 let selectedSubject = null;
-
-/* NEW: publication state */
 let isPublished = false;
 
-/* ================= PAGE SWITCH (YOUR ORIGINAL) ================= */
+/* PAGE SWITCH */
 function switchPage(page, el){
-
-  document.querySelectorAll('.page').forEach(p=>{
-    p.classList.remove('active');
-  });
-
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById(page).classList.add('active');
 
-  document.querySelectorAll('.nav-item').forEach(n=>{
-    n.classList.remove('active');
-  });
-
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   el.classList.add('active');
 
-  // NEW: trigger results check ONLY
   if(page === "results"){
     checkPublishStatus();
   }
 }
 
-/* ================= NEW: CHECK PUBLICATION ================= */
-async function checkPublishStatus(){
-
-  if(!selectedClass){
-    document.getElementById("publishStatus").innerText =
-      "Select a class first";
-    return;
-  }
-
-  const { data } = await supabaseClient
-    .from("published_reports")
-    .select("*")
-    .eq("class_id", selectedClass)
-    .maybeSingle();
-
-  isPublished = data?.is_published || false;
-
-  document.getElementById("publishStatus").innerText =
-    isPublished ? "✅ Results Published" : "🔒 Not Published";
-
-  document.getElementById("resultsContent").innerHTML =
-    isPublished ? "Loading results..." : "";
-}
-
-<script>
-
-/* ================= STATE (from PART 1) ================= */
-let teacherId = null;
-let assignments = [];
-let selectedClass = null;
-let selectedSubject = null;
-let isPublished = false;
-
-/* ================= AUTH (UNCHANGED LOGIC) ================= */
+  /* AUTH */
 async function protect(roleRequired){
-
   const { data:{ user } } = await supabaseClient.auth.getUser();
 
   if(!user){
@@ -268,9 +206,8 @@ async function protect(roleRequired){
   return true;
 }
 
-/* ================= INIT (UNCHANGED) ================= */
+/* INIT */
 async function init(){
-
   const ok = await protect("teacher");
   if(!ok) return;
 
@@ -283,166 +220,99 @@ async function init(){
     .eq("id", user.id)
     .maybeSingle();
 
-  const name = profile?.full_name || "Teacher";
-
   document.getElementById("teacherInfo").innerText =
-    "Welcome " + name;
+    "Welcome " + (profile?.full_name || "Teacher");
 
   await loadAssignments();
 }
 
-/* ================= CLASS CHANGE (UNCHANGED) ================= */
+/* CLASS */
 function handleClassChange(){
-
   selectedClass = document.getElementById("class").value;
   selectedSubject = null;
-
   document.getElementById("students").innerHTML = "";
-
-  if(selectedClass){
-    loadSubjects(selectedClass);
-  }
+  if(selectedClass) loadSubjects(selectedClass);
 }
 
-/* ================= SUBJECT CHANGE (UNCHANGED) ================= */
+/* SUBJECT */
 function handleSubjectChange(){
-
   selectedSubject = document.getElementById("subject").value;
-
-  if(selectedClass && selectedSubject){
-    loadStudents(selectedClass);
-  }
+  if(selectedClass && selectedSubject) loadStudents(selectedClass);
 }
 
-/* ================= LOAD SUBJECTS (UNCHANGED) ================= */
+/* LOAD SUBJECTS */
 function loadSubjects(class_id){
-
   const sub = document.getElementById("subject");
   sub.innerHTML = `<option value="">Select Subject</option>`;
 
   assignments.forEach(a=>{
-
     const cid = a.classes?.id || a.class_id;
 
     if(String(cid) === String(class_id) && a.subjects){
-
-      sub.innerHTML += `
-        <option value="${a.subjects.id}">
-          ${a.subjects.subject_name}
-        </option>
-      `;
+      sub.innerHTML += `<option value="${a.subjects.id}">${a.subjects.subject_name}</option>`;
     }
   });
 
-  document.getElementById("subject").classList.remove("hidden");
+  sub.classList.remove("hidden");
   document.getElementById("subjectLabel").classList.remove("hidden");
 }
 
-/* ================= LOAD STUDENTS (UNCHANGED CORE LOGIC) ================= */
+/* LOAD STUDENTS */
 async function loadStudents(class_id){
-
   if(!selectedSubject) return;
 
   const { data: students } = await supabaseClient
     .from("students")
     .select("*")
-    .eq("class_id", class_id)
-    .order("admission_no");
+    .eq("class_id", class_id);
 
   const { data: marksData } = await supabaseClient
     .from("results")
     .select("student_id, marks")
     .eq("subject_id", selectedSubject);
 
-  const marksMap = {};
-
-  (marksData || []).forEach(r=>{
-    marksMap[r.student_id] = r.marks;
-  });
+  const map = {};
+  (marksData||[]).forEach(r=>map[r.student_id]=r.marks);
 
   const tbody = document.getElementById("students");
   tbody.innerHTML = "";
 
-  (students || []).forEach(s=>{
-
+  (students||[]).forEach(s=>{
     tbody.innerHTML += `
       <tr>
         <td>${s.admission_no}</td>
         <td>${s.student_name}</td>
         <td>
           <input type="number"
-            value="${marksMap[s.id] ?? ''}"
+            value="${map[s.id] ?? ''}"
             oninput="autoSave('${s.id}',this.value)">
         </td>
-      </tr>
-    `;
+      </tr>`;
   });
 }
 
-/* ================= LOAD ASSIGNMENTS (UNCHANGED) ================= */
-async function loadAssignments(){
-
-  const { data } = await supabaseClient
-    .from("teacher_assignments")
-    .select(`
-      class_id,
-      subject_id,
-      classes(id,class_name),
-      subjects(id,subject_name)
-    `)
-    .eq("teacher_id", teacherId);
-
-  assignments = data || [];
-
-  const sel = document.getElementById("class");
-  sel.innerHTML = `<option value="">Select Class</option>`;
-
-  const seen = new Set();
-
-  assignments.forEach(a=>{
-    if(a.classes && !seen.has(a.classes.id)){
-      seen.add(a.classes.id);
-
-      sel.innerHTML += `
-        <option value="${a.classes.id}">
-          ${a.classes.class_name}
-        </option>
-      `;
-    }
-  });
-}
-
-/* ================= AUTOSAVE (UNCHANGED) ================= */
+/* AUTO SAVE */
 async function autoSave(studentId,value){
-
   if(!selectedSubject) return;
 
-  if(value.trim() === ""){
-
-    await supabaseClient
-      .from("results")
+  if(value.trim()===""){
+    await supabaseClient.from("results")
       .delete()
-      .eq("student_id", studentId)
-      .eq("subject_id", selectedSubject);
-
+      .eq("student_id",studentId)
+      .eq("subject_id",selectedSubject);
     return;
   }
 
-  await supabaseClient
-    .from("results")
-    .upsert([{
-      student_id: studentId,
-      subject_id: selectedSubject,
-      teacher_id: teacherId,
-      marks: Number(value)
-    }],{
-      onConflict:"student_id,subject_id"
-    });
+  await supabaseClient.from("results").upsert([{
+    student_id:studentId,
+    subject_id:selectedSubject,
+    teacher_id:teacherId,
+    marks:Number(value)
+  }],{onConflict:"student_id,subject_id"});
 }
 
-/* ================= OPEN CLASS (UNCHANGED) ================= */
+/* OPEN CLASS */
 async function openMyClass(){
-
   const { data:{ user } } = await supabaseClient.auth.getUser();
 
   const { data } = await supabaseClient
@@ -453,69 +323,16 @@ async function openMyClass(){
     .maybeSingle();
 
   if(!data){
-    alert("You are not assigned as a class teacher yet.");
+    alert("Not assigned");
     return;
   }
 
-  location.href = "classteacher.html";
+  location.href="classteacher.html";
 }
 
-/* ================= SOUND SYSTEM (UNCHANGED) ================= */
-let soundEnabled = true;
-
-const SoundManager = {
-
-  play(){
-    if(!soundEnabled) return;
-
-    const audio = document.getElementById("uiClickSound");
-    if(!audio) return;
-
-    audio.currentTime = 0;
-    audio.play().catch(()=>{});
-  },
-
-  toggle(){
-    soundEnabled = !soundEnabled;
-    updateSoundUI();
-  }
-};
-
-document.addEventListener("click",(e)=>{
-
-  if(
-    e.target.closest("button") ||
-    e.target.closest(".nav-item") ||
-    e.target.closest("select") ||
-    e.target.closest("input")
-  ){
-    SoundManager.play();
-  }
-});
-
-/* ================= LOGOUT (UNCHANGED) ================= */
-async function logout(){
-  await supabaseClient.auth.signOut();
-  location.href="../index.html";
-}
-
-
-/* ================= SUPABASE INIT (FINAL SAFE) ================= */
-const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
-const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-
-/* ================= RESULTS STATE ================= */
-let isPublished = false;
-
-/* ================= CHECK PUBLISH STATUS ================= */
+/* PUBLISH CHECK */
 async function checkPublishStatus(){
-
-  if(!selectedClass){
-    document.getElementById("publishStatus").innerText =
-      "Select a class first";
-    return;
-  }
+  if(!selectedClass) return;
 
   const { data } = await supabaseClient
     .from("published_reports")
@@ -523,105 +340,14 @@ async function checkPublishStatus(){
     .eq("class_id", selectedClass)
     .maybeSingle();
 
-  isPublished = data?.is_published || false;
+  isPublished = !!data?.is_published;
 
-  const status = document.getElementById("publishStatus");
-
-  if(status){
-    status.innerText = isPublished
-      ? "✅ Results Published"
-      : "🔒 Results Not Published";
-  }
+  document.getElementById("publishStatus").innerText =
+    isPublished ? "Published" : "Not Published";
 }
 
-/* ================= RESULTS PAGE RENDER ================= */
-async function loadResults(){
-
-  const container = document.getElementById("resultsContent");
-
-  if(!selectedClass){
-    container.innerHTML = "<p>Select class first</p>";
-    return;
-  }
-
-  await checkPublishStatus();
-
-  // 🔒 BLOCK IF NOT PUBLISHED
-  if(!isPublished){
-    container.innerHTML = `
-      <div style="padding:15px;background:#fff;border-radius:10px;">
-        🔒 Results have not been published yet.
-      </div>
-    `;
-    return;
-  }
-
-  // ✅ LOAD RESULTS
-  const { data: results } = await supabaseClient
-    .from("results")
-    .select(`
-      student_id,
-      marks,
-      students(student_name, admission_no)
-    `)
-    .eq("class_id", selectedClass);
-
-  if(!results || results.length === 0){
-    container.innerHTML = "<p>No results found</p>";
-    return;
-  }
-
-  let html = `
-    <table>
-      <thead>
-        <tr>
-          <th>Adm</th>
-          <th>Name</th>
-          <th>Marks</th>
-        </tr>
-      </thead>
-      <tbody>
-  `;
-
-  results.forEach(r=>{
-    html += `
-      <tr>
-        <td>${r.students?.admission_no || ""}</td>
-        <td>${r.students?.student_name || ""}</td>
-        <td>${r.marks}</td>
-      </tr>
-    `;
-  });
-
-  html += `</tbody></table>`;
-
-  container.innerHTML = html;
-}
-
-/* ================= PAGE SWITCH (FINAL PATCH) ================= */
-function switchPage(page, el){
-
-  document.querySelectorAll('.page').forEach(p=>{
-    p.classList.remove('active');
-  });
-
-  document.getElementById(page).classList.add('active');
-
-  document.querySelectorAll('.nav-item').forEach(n=>{
-    n.classList.remove('active');
-  });
-
-  el.classList.add('active');
-
-  // 👉 ONLY TRIGGER RESULTS LOGIC HERE
-  if(page === "results"){
-    loadResults();
-  }
-}
-
-/* ================= INIT CALL ================= */
+/* INIT CALL */
 init();
-
 
 </script>
 
