@@ -8,9 +8,15 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-*{box-sizing:border-box;font-family:Segoe UI, Arial;}
+*{
+  box-sizing:border-box;
+  font-family:Segoe UI, Arial;
+}
 
-body{margin:0;background:#f5f6fa;}
+body{
+  margin:0;
+  background:#f5f6fa;
+}
 
 /* TOP BAR */
 .topbar{
@@ -22,7 +28,10 @@ body{margin:0;background:#f5f6fa;}
   border-bottom:1px solid #eee;
 }
 
-.brand{font-weight:bold;color:#111;}
+.brand{
+  font-weight:bold;
+  color:#111;
+}
 
 .user{
   background:#a78bfa;
@@ -43,11 +52,13 @@ body{margin:0;background:#f5f6fa;}
   animation:fade 0.3s ease-in-out;
 }
 
-.page.active{display:block;}
+.page.active{
+  display:block;
+}
 
 @keyframes fade{
-  from{opacity:0;transform:translateY(10px)}
-  to{opacity:1;transform:translateY(0)}
+  from{opacity:0; transform:translateY(10px)}
+  to{opacity:1; transform:translateY(0)}
 }
 
 /* CARD */
@@ -57,6 +68,13 @@ body{margin:0;background:#f5f6fa;}
   border-radius:12px;
   margin-bottom:12px;
   box-shadow:0 2px 8px rgba(0,0,0,0.06);
+}
+
+/* EMPTY */
+.empty{
+  text-align:center;
+  padding:40px 10px;
+  color:#888;
 }
 
 /* INPUTS */
@@ -80,7 +98,7 @@ th,td{
   text-align:left;
 }
 
-/* NAV */
+/* BOTTOM NAV */
 .bottom-nav{
   position:fixed;
   bottom:0;
@@ -101,9 +119,100 @@ th,td{
   cursor:pointer;
 }
 
-.nav-item.active{color:#f59e0b;font-weight:bold;}
+.nav-item span{
+  display:block;
+  font-size:18px;
+}
 
-.hidden{display:none;}
+  .page{
+  opacity:0;
+  transform:translateY(12px) scale(0.98);
+  transition:all 0.35s ease-in-out;
+  display:none;
+}
+
+.page.active{
+  display:block;
+  opacity:1;
+  transform:translateY(0) scale(1);
+}
+
+/* CLASSIC SMOOTH NAV ANIMATION */
+.nav-item{
+  transition:all 0.25s ease;
+}
+
+.nav-item:active{
+  transform:scale(0.92);
+}
+
+/* CARD ANIMATION (AUTO ENTRY) */
+.card{
+  animation:cardIn 0.4s ease;
+}
+
+@keyframes cardIn{
+  from{
+    opacity:0;
+    transform:translateY(15px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+  @keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(30, 58, 138, 0.6);
+  }
+  70% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 10px rgba(30, 58, 138, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(30, 58, 138, 0);
+  }
+}
+
+.sound-active {
+  animation: pulse 1.2s infinite;
+}
+  
+.nav-item.active{
+  color:#f59e0b;
+  font-weight:bold;
+}
+
+    .brand{
+  font-weight:bold;
+  color:#111;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  position:relative;
+}
+
+/* SCHOOL LOGO BACKGROUND */
+.brand-logo{
+  width:30px;
+  height:30px;
+  background-image:url("https://bslofdobcvxkjphbjyzb.supabase.co/storage/v1/object/public/logos/school.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  border-radius:8px;
+  background-color:white;
+  padding:2px;
+    }
+
+/* FIX: hidden class */
+.hidden{
+  display:none;
+}
+
 </style>
 </head>
 
@@ -111,20 +220,56 @@ th,td{
 
 <!-- TOP -->
 <div class="topbar">
-  <div class="brand">KempsPortal</div>
-  <div class="user" id="userInitials">SM</div>
+  <div class="brand">
+  <span class="brand-logo"></span>
+  KempsPortal
+  </div>
+
+  <div style="display:flex;align-items:center;gap:10px;">
+
+    <!-- SOUND ICON -->
+    <div id="soundIcon" onclick="SoundManager.toggle()" style="
+      width:30px;
+      height:30px;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#1e3a8a;
+      color:#fff;
+      font-size:14px;
+      cursor:pointer;
+    ">
+      🔊
+    </div>
+
+    <!-- USER INITIALS -->
+    <div class="user" id="userInitials">SM</div>
+
+  </div>
 </div>
 
 <!-- HOME -->
 <div id="home" class="page active">
+
   <div class="card">
     <h3 id="teacherInfo">Welcome Teacher</h3>
+    <p>Manage your classes and students easily</p>
   </div>
-
-  <div class="card">
-    <button onclick="openMyClass()">Open Class Teacher Panel</button>
-  </div>
-
+<div class="card">
+  <button onclick="openMyClass()" style="
+    width:100%;
+    padding:10px;
+    border:none;
+    background:#1e3a8a;
+    color:#fff;
+    border-radius:8px;
+    cursor:pointer;
+    margin-top:10px;
+  ">
+    Open Class Teacher Panel
+  </button>
+</div>
   <div class="card">
     <h4>Select Class</h4>
     <select id="class" onchange="handleClassChange()"></select>
@@ -134,6 +279,7 @@ th,td{
   </div>
 
   <div class="card">
+    <h3>Students</h3>
     <table>
       <thead>
         <tr>
@@ -145,60 +291,138 @@ th,td{
       <tbody id="students"></tbody>
     </table>
   </div>
+
 </div>
 
 <!-- RESULTS -->
 <div id="results" class="page">
   <div class="card">
     <h3>Results</h3>
-    <p id="publishStatus">Checking publication...</p>
-    <div id="resultsContent"></div>
+    <p>View and manage results here</p>
   </div>
 </div>
 
-<!-- OTHER PAGES -->
-<div id="chat" class="page"><div class="card"><h3>Chat</h3></div></div>
-<div id="notices" class="page"><div class="card"><h3>Notices</h3></div></div>
-<div id="profile" class="page"><div class="card"><h3>Profile</h3></div></div>
+<!-- CHAT -->
+<div id="chat" class="page">
+  <div class="card">
+    <h3>Chat</h3>
+    <p>Chat system coming soon...</p>
+  </div>
+</div>
 
-<!-- NAV -->
+<!-- NOTICES -->
+<div id="notices" class="page">
+  <div class="card">
+    <div class="empty">
+      📢
+      <h3>No notices</h3>
+      <p>Check back later for updates</p>
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE -->
+<div id="profile" class="page">
+  <div class="card">
+    <h3>Profile</h3>
+    <p>Teacher profile settings</p>
+  </div>
+
+  <div class="card">
+    <h3>Sound Settings</h3>
+
+    <button id="soundBtn" onclick="SoundManager.toggle()" style="
+  width:100%;
+  padding:10px;
+  border:none;
+  border-radius:8px;
+  background:#1e3a8a;
+  color:#fff;
+">
+  🔊 Sound: ON
+    </button>
+
+  <button onclick="logout()" style="
+    margin-top:10px;
+    width:100%;
+    padding:10px;
+    border:none;
+    background:#ef4444;
+    color:#fff;
+    border-radius:8px;
+    cursor:pointer;
+  ">
+    Logout
+  </button>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
 <div class="bottom-nav">
-  <div class="nav-item" onclick="switchPage('home',this)">🏠</div>
-  <div class="nav-item" onclick="switchPage('results',this)">📊</div>
-  <div class="nav-item" onclick="switchPage('chat',this)">💬</div>
-  <div class="nav-item" onclick="switchPage('notices',this)">📢</div>
-  <div class="nav-item" onclick="switchPage('profile',this)">👤</div>
+  <div class="nav-item active" onclick="switchPage('home',this)">
+    <span>🏠</span>Home
+  </div>
+
+  <div class="nav-item" onclick="switchPage('results',this)">
+    <span>📊</span>Results
+  </div>
+
+  <div class="nav-item" onclick="switchPage('chat',this)">
+    <span>💬</span>Chat
+  </div>
+
+  <div class="nav-item" onclick="switchPage('notices',this)">
+    <span>📢</span>Notices
+  </div>
+
+  <div class="nav-item" onclick="switchPage('profile',this)">
+    <span>👤</span>Profile
+  </div>
 </div>
 
 <script>
 
-/* ================= SUPABASE ================= */
-const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
-const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+/* PAGE SWITCHER */
+function switchPage(page, el){
 
-/* ================= STATE ================= */
+  // fade out first
+  document.querySelectorAll('.page')
+    .forEach(p=>{
+      p.style.opacity = "0";
+      p.style.transform = "translateY(10px) scale(0.98)";
+      setTimeout(()=>p.classList.remove('active'), 150);
+    });
+
+  setTimeout(()=>{
+
+    document.getElementById(page).classList.add('active');
+
+    setTimeout(()=>{
+      document.getElementById(page).style.opacity = "1";
+      document.getElementById(page).style.transform = "translateY(0) scale(1)";
+    }, 50);
+
+  }, 150);
+
+  document.querySelectorAll('.nav-item')
+    .forEach(n=>n.classList.remove('active'));
+
+  el.classList.add('active');
+}
+
+/* FIXED: removed duplicate variables */
 let teacherId = null;
 let assignments = [];
 let selectedClass = null;
 let selectedSubject = null;
-let isPublished = false;
 
-/* ================= SWITCH PAGE ================= */
-function switchPage(page, el){
+/* SUPABASE */
+const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
 
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById(page).classList.add('active');
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  el.classList.add('active');
-
-  if(page === "results"){
-    loadResults();
-  }
-}
-
-/* ================= AUTH ================= */
+/* AUTH */
 async function protect(roleRequired){
 
   const { data:{ user } } = await supabaseClient.auth.getUser();
@@ -223,7 +447,7 @@ async function protect(roleRequired){
   return true;
 }
 
-/* ================= INIT ================= */
+/* INIT */
 async function init(){
 
   const ok = await protect("teacher");
@@ -238,27 +462,36 @@ async function init(){
     .eq("id", user.id)
     .maybeSingle();
 
+  const name = profile?.full_name || "Teacher";
+
+  const hour = new Date().getHours();
+
+  let greeting = "Good morning";
+  if(hour >= 12 && hour < 17){
+    greeting = "Good afternoon";
+  }else if(hour >= 17){
+    greeting = "Good evening";
+  }
+
   document.getElementById("teacherInfo").innerText =
-    "Welcome " + (profile?.full_name || "Teacher");
+    `${greeting}, ${name}`;
 
   await loadAssignments();
 }
 
-/* ================= CLASS CHANGE ================= */
 function handleClassChange(){
   selectedClass = document.getElementById("class").value;
   selectedSubject = null;
   document.getElementById("students").innerHTML = "";
+
   if(selectedClass) loadSubjects(selectedClass);
 }
 
-/* ================= SUBJECT CHANGE ================= */
 function handleSubjectChange(){
   selectedSubject = document.getElementById("subject").value;
   loadStudents(selectedClass);
 }
 
-/* ================= SUBJECTS ================= */
 function loadSubjects(class_id){
 
   const sub = document.getElementById("subject");
@@ -267,18 +500,17 @@ function loadSubjects(class_id){
   assignments.forEach(a=>{
     const cid = a.classes?.id || a.class_id;
 
-    if(String(cid) === String(class_id)){
-      sub.innerHTML += `<option value="${a.subjects.id}">
-        ${a.subjects.subject_name}
-      </option>`;
+    if(String(cid) === String(class_id) && a.subjects){
+      sub.innerHTML += `
+        <option value="${a.subjects.id}">
+          ${a.subjects.subject_name}
+        </option>`;
     }
   });
 
-  document.getElementById("subject").classList.remove("hidden");
-  document.getElementById("subjectLabel").classList.remove("hidden");
+  showSubject();
 }
 
-/* ================= STUDENTS ================= */
 async function loadStudents(class_id){
 
   if(!selectedSubject) return;
@@ -294,8 +526,10 @@ async function loadStudents(class_id){
     .select("student_id, marks")
     .eq("subject_id", selectedSubject);
 
-  const map = {};
-  (marksData || []).forEach(r=>map[r.student_id]=r.marks);
+  const marksMap = {};
+  (marksData || []).forEach(r=>{
+    marksMap[r.student_id] = r.marks;
+  });
 
   const tbody = document.getElementById("students");
   tbody.innerHTML = "";
@@ -307,19 +541,24 @@ async function loadStudents(class_id){
         <td>${s.student_name}</td>
         <td>
           <input type="number"
-          value="${map[s.id] ?? ''}"
-          oninput="autoSave('${s.id}',this.value)">
+            value="${marksMap[s.id] ?? ''}"
+            oninput="autoSave('${s.id}',this.value)">
         </td>
-      </tr>`;
+      </tr>
+    `;
   });
 }
 
-/* ================= ASSIGNMENTS ================= */
-async function loadAssignments(){
+  async function loadAssignments(){
 
   const { data } = await supabaseClient
     .from("teacher_assignments")
-    .select(`class_id,subject_id,classes(id,class_name),subjects(id,subject_name)`)
+    .select(`
+      class_id,
+      subject_id,
+      classes(id,class_name),
+      subjects(id,subject_name)
+    `)
     .eq("teacher_id", teacherId);
 
   assignments = data || [];
@@ -332,86 +571,41 @@ async function loadAssignments(){
   assignments.forEach(a=>{
     if(a.classes && !seen.has(a.classes.id)){
       seen.add(a.classes.id);
-      sel.innerHTML += `<option value="${a.classes.id}">
-        ${a.classes.class_name}
-      </option>`;
+      sel.innerHTML += `
+        <option value="${a.classes.id}">
+          ${a.classes.class_name}
+        </option>
+      `;
     }
   });
-}
-
-/* ================= AUTOSAVE ================= */
+  }
+  
 async function autoSave(studentId,value){
 
   if(!selectedSubject) return;
 
-  if(value.trim()===""){
-    await supabaseClient.from("results")
+  if(value.trim() === ""){
+
+    await supabaseClient
+      .from("results")
       .delete()
-      .eq("student_id",studentId)
-      .eq("subject_id",selectedSubject);
+      .eq("student_id", studentId)
+      .eq("subject_id", selectedSubject);
+
     return;
   }
 
-  await supabaseClient.from("results").upsert([{
-    student_id:studentId,
-    subject_id:selectedSubject,
-    teacher_id:teacherId,
-    marks:Number(value)
-  }],{onConflict:"student_id,subject_id"});
-}
-
-/* ================= RESULTS FEATURE ================= */
-async function checkPublishStatus(){
-
-  const { data } = await supabaseClient
-    .from("published_reports")
-    .select("*")
-    .eq("class_id", selectedClass)
-    .maybeSingle();
-
-  isPublished = data?.is_published || false;
-
-  document.getElementById("publishStatus").innerText =
-    isPublished ? "Results Published" : "Results Not Published";
-}
-
-/* ================= LOAD RESULTS ================= */
-async function loadResults(){
-
-  const container = document.getElementById("resultsContent");
-
-  if(!selectedClass){
-    container.innerHTML = "Select class first";
-    return;
-  }
-
-  await checkPublishStatus();
-
-  if(!isPublished){
-    container.innerHTML = "Results have not been published yet";
-    return;
-  }
-
-  const { data } = await supabaseClient
+  await supabaseClient
     .from("results")
-    .select(`marks,students(student_name,admission_no)`)
-    .eq("class_id", selectedClass);
-
-  let html = `<table><tr><th>Adm</th><th>Name</th><th>Marks</th></tr>`;
-
-  (data||[]).forEach(r=>{
-    html += `<tr>
-      <td>${r.students?.admission_no||""}</td>
-      <td>${r.students?.student_name||""}</td>
-      <td>${r.marks}</td>
-    </tr>`;
-  });
-
-  html += `</table>`;
-  container.innerHTML = html;
+    .upsert([{
+      student_id: studentId,
+      subject_id: selectedSubject,
+      teacher_id: teacherId,
+      marks: Number(value)
+    }],{
+      onConflict:"student_id,subject_id"
+    });
 }
-
-/* ================= OPEN CLASS ================= */
 async function openMyClass(){
 
   const { data:{ user } } = await supabaseClient.auth.getUser();
@@ -424,17 +618,79 @@ async function openMyClass(){
     .maybeSingle();
 
   if(!data){
-    alert("You are not class teacher yet.");
+    alert("You are not assigned as a class teacher yet.");
     return;
   }
 
-  location.href="classteacher.html";
+  location.href = "classteacher.html";
 }
 
-/* ================= INIT ================= */
+
+  let soundEnabled = true;
+
+const SoundManager = {
+
+  play(){
+    if(!soundEnabled) return;
+
+    const audio = document.getElementById("uiClickSound");
+    if(!audio) return;
+
+    audio.currentTime = 0;
+    audio.play().catch(()=>{});
+  },
+
+  toggle(){
+    soundEnabled = !soundEnabled;
+    updateSoundUI();
+  }
+};
+
+  document.addEventListener("click",(e)=>{
+
+  if(
+    e.target.closest("button") ||
+    e.target.closest(".nav-item") ||
+    e.target.closest("select") ||
+    e.target.closest("input")
+  ){
+    SoundManager.play();
+  }
+
+});
+  
+function showSubject(){
+  document.getElementById("subject").classList.remove("hidden");
+  document.getElementById("subjectLabel").classList.remove("hidden");
+}
+async function logout(){
+  await supabaseClient.auth.signOut();
+  location.href="../index.html";
+}
+
+  function updateSoundUI(){
+
+  const icon = document.getElementById("soundIcon");
+
+  if(!icon) return;
+
+  icon.innerHTML = soundEnabled ? "🔊" : "🔇";
+
+  if(soundEnabled){
+    icon.classList.add("sound-active");
+    icon.style.background = "#1e3a8a";
+  } else {
+    icon.classList.remove("sound-active");
+    icon.style.background = "#6b7280";
+  }
+  }
+  
 init();
 
 </script>
 
+  <audio id="uiClickSound" preload="auto">
+  <source src="https://bslofdobcvxkjphbjyzb.supabase.co/storage/v1/object/public/sounds/click.mp3" type="audio/mpeg">
+  </audio>
 </body>
-</html>
+    </html>
