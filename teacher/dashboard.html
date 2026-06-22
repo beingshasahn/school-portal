@@ -603,77 +603,28 @@ async function loadStudents(class_id){
   });
   }
 
-async function checkPublishStatus(){
-
-  if(!selectedClass){
-    document.getElementById("publishStatus").innerText =
-      "Select a class first";
-    return false;
-  }
-
-  const { data, error } = await supabaseClient
-    .from("published_reports")
-    .select("is_published")
-    .eq("class_id", String(selectedSubject))
-    .maybeSingle();
-
-  console.log("PUBLISH ROW:", data);
-
-  // safety check (IMPORTANT)
-  if(error){
-    console.log("ERROR:", error);
-    document.getElementById("publishStatus").innerText =
-      "Error checking publication";
-    return false;
-  }
-
-  // kama hakuna row kabisa
-  if(!data){
-    isPublished = false;
-    document.getElementById("publishStatus").innerText =
-      "Results Not Published";
-    return false;
-  }
-
-  // actual boolean check
-  isPublished = data.is_published === true;
-
-  document.getElementById("publishStatus").innerText =
-    isPublished
-      ? "Results Published"
-      : "Results Not Published";
-
-  return isPublished;
-}
-
   async function loadResults(){
 
   const container = document.getElementById("resultsContent");
 
-  if(!selectedClass || !selectedSubject){
-  container.innerHTML = "<p>Please select class and subject first</p>";
-  return;
+  if(!selectedClass){
+    container.innerHTML = "<p>Select class first</p>";
+    return;
   }
 
-  const ok = await checkPublishStatus(selectedSubject);
-
-if(!ok){
-  container.innerHTML = "<p>Results have not been published yet.</p>";
-  return;
-  
-  const { data } = await supabaseClient
-  .from("results")
-  .select(`
-    student_id,
-    marks,
-    subject_id
-  `)
-  .eq("subject_id", selectedSubject);
+  const { data, error } = await supabaseClient
+    .from("results")
+    .select(`
+      student_id,
+      marks,
+      subject_id,
+      students(admission_no, student_name)
+    `)
+    .eq("class_id", selectedClass);
 
   if(!data || data.length === 0){
     container.innerHTML = "<p>No results found</p>";
     return;
-    document.getElementById("resultsContent").innerHTML = container.innerHTML;
   }
 
   let html = `
@@ -805,28 +756,18 @@ async function logout(){
   }
   }
 
-  async function checkPublishStatus(){
-
-  const { data } = await supabaseClient
-    .from("published_reports")
-    .select("is_published")
-    .eq("class_id", selectedClass)
-    .maybeSingle();
-
-  return data?.is_published === true;
-      }
 
   async function initResultsPage(){
 
   const container = document.getElementById("resultsContent");
   const status = document.getElementById("publishStatus");
 
-  container.innerHTML = "";
   status.innerText = "Checking publication...";
+  container.innerHTML = "";
 
-  const { data, error } = await supabaseClient
+  const { data } = await supabaseClient
     .from("published_reports")
-    .select("class_id, is_published")
+    .select("class_id")
     .eq("is_published", true);
 
   if(!data || data.length === 0){
@@ -834,32 +775,23 @@ async function logout(){
     return;
   }
 
-  // kama class 1 tu
   if(data.length === 1){
     selectedClass = data[0].class_id;
-
-    status.innerText = "Loading report...";
-
+    status.innerText = "Loading results...";
     await loadResults();
     return;
   }
 
-  // kama zaidi ya 1 → show dropdown
-  status.innerText = "Select class to view results";
+  status.innerText = "Select class";
 
-  let html = `
-    <label>Select Class</label>
-    <select id="publishedClassSelect">
-      <option value="">Choose class</option>
-  `;
+  let html = `<select id="publishedClassSelect">
+    <option value="">Choose class</option>`;
 
   data.forEach(c=>{
     html += `<option value="${c.class_id}">${c.class_id}</option>`;
   });
 
-  html += `</select>
-    <div id="autoResults"></div>
-  `;
+  html += `</select><div id="autoResults"></div>`;
 
   container.innerHTML = html;
 
@@ -868,7 +800,7 @@ async function logout(){
       selectedClass = e.target.value;
       await loadResults();
     });
-     }
+    }
   
 init();
 
