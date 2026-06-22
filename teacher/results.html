@@ -67,37 +67,78 @@ th{
 
 <div id="status"></div>
 
+<!-- ================= TABLE 1: GRADE PERF ================= -->
 <div class="table-wrap">
 <table>
 <thead>
 <tr>
-  <th>CAND NO</th>
-  <th>PREM NO</th>
-  <th>NAME</th>
-  <th>SEX</th>
-  <th>SUBJECTS</th>
+<th>SEX</th>
+<th>A</th>
+<th>B</th>
+<th>C</th>
+<th>D</th>
+<th>E</th>
 </tr>
 </thead>
+<tbody id="gradePerf"></tbody>
+</table>
+</div>
 
+<!-- ================= TABLE 2: STUDENTS ================= -->
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>CAND NO</th>
+<th>PREM NO</th>
+<th>NAME</th>
+<th>SEX</th>
+<th>SUBJECTS</th>
+</tr>
+</thead>
 <tbody id="tbody"></tbody>
 </table>
 </div>
 
+<!-- ================= TABLE 3: SUBJECT PERF ================= -->
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>NO</th>
+<th>SUBJECT</th>
+<th>REGISTERED</th>
+<th>SAT</th>
+<th>PASSED</th>
+<th>AVERAGE</th>
+<th>GPA</th>
+</tr>
+</thead>
+<tbody id="subtbody"></tbody>
+</table>
+</div>
+
 <script>
+
 const client = supabase.createClient(
   "https://bslofdobcvxkjphbjyzb.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s"
 );
 
 let currentClass = null;
+let isPublished = false;
 
-/* ================= GRADE SYSTEM (SAME AS REPORTS) ================= */
+/* ================= GRADES ================= */
 function grade(m){
   if(m >= 81) return "A";
   if(m >= 61) return "B";
   if(m >= 41) return "C";
   if(m >= 21) return "D";
   return "E";
+}
+
+function gpa(g){
+  return {A:1,B:2,C:3,D:4,E:5}[g] || 5;
 }
 
 /* ================= LOAD CLASSES ================= */
@@ -121,12 +162,11 @@ async function checkPublishStatus(){
     .eq("class_id", currentClass)
     .maybeSingle();
 
-  const isPublished = data?.is_published || false;
+  isPublished = data?.is_published || false;
 
   if(!isPublished){
     document.getElementById("status").innerText =
       "⚠ RESULTS NOT PUBLISHED";
-
     return false;
   }
 
@@ -144,13 +184,15 @@ async function onClassChange(){
 
   if(!ok){
     document.getElementById("tbody").innerHTML = "";
+    document.getElementById("gradePerf").innerHTML = "";
+    document.getElementById("subtbody").innerHTML = "";
     return;
   }
 
   loadReport();
 }
 
-/* ================= REPORT (REPORTS LOGIC STYLE) ================= */
+/* ================= MAIN REPORT ================= */
 async function loadReport(){
 
   const { data:students } = await client.from("students").select("*");
@@ -163,6 +205,12 @@ async function loadReport(){
 
   let final = [];
 
+  let gradePerf = {
+    Male:{A:0,B:0,C:0,D:0,E:0},
+    Female:{A:0,B:0,C:0,D:0,E:0}
+  };
+
+  /* ================= STUDENT LOOP ================= */
   filtered.forEach(stu=>{
 
     let total = 0;
@@ -192,16 +240,19 @@ async function loadReport(){
 
     detail.push("AVERAGE-" + g);
 
+    gradePerf[stu.gender || "Male"][g]++;
+
     final.push({
       adm: stu.admission_no,
       prem: stu.prem_no,
-      name: stu.name || stu.full_name || "-",
+      name: stu.student_name || "-",
       sex: stu.gender === "Female" ? "F" : "M",
       detail: detail.join(" ")
     });
 
   });
 
+  /* ================= TABLE 2 ================= */
   document.getElementById("tbody").innerHTML =
     final.map(r=>`
       <tr>
@@ -212,10 +263,51 @@ async function loadReport(){
         <td>${r.detail}</td>
       </tr>
     `).join("");
+
+  /* ================= TABLE 1 (GRADE PERF) ================= */
+  document.getElementById("gradePerf").innerHTML =
+    Object.entries(gradePerf).map(([k,v])=>`
+      <tr>
+        <td>${k}</td>
+        <td>${v.A}</td>
+        <td>${v.B}</td>
+        <td>${v.C}</td>
+        <td>${v.D}</td>
+        <td>${v.E}</td>
+      </tr>
+    `).join("");
+
+  /* ================= TABLE 3 (SUBJECT PERF) ================= */
+  let i = 1;
+
+  document.getElementById("subtbody").innerHTML =
+    subjects.map(sub=>{
+
+      let st = results.filter(r => r.subject_id === sub.id);
+      let sat = st.length;
+
+      if(!sat) return "";
+
+      let total = st.reduce((a,b)=>a + Number(b.marks), 0);
+      let avg = total / sat;
+
+      return `
+        <tr>
+          <td>${i++}</td>
+          <td>${sub.subject_name}</td>
+          <td>${sat}</td>
+          <td>${sat}</td>
+          <td>${st.filter(x => x.marks >= 41).length}</td>
+          <td>${avg.toFixed(1)}</td>
+          <td>${gpa(grade(avg))}</td>
+        </tr>
+      `;
+    }).join("");
 }
 
 /* ================= INIT ================= */
 loadClasses();
+
 </script>
 
 </body>
