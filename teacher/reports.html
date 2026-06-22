@@ -511,7 +511,7 @@ detail.push(subName + "-" + grade(m));
   if(subjectStats.length === 0){
   document.getElementById("subtbody").innerHTML =
     `<tr><td colspan="7" style="text-align:center;">
-      NO SUBJECT PERFORMANCE AVAILABLE
+      NO SUBJECT PERFORMANCE DATA AVAILABLE
     </td></tr>`;
 } else {
     
@@ -543,6 +543,7 @@ subjectStats.map(sub => {
   `;
 }).join("");
 
+    }
 }
 
 initFromLink();
