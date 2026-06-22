@@ -28,15 +28,17 @@ select{
 
 .table-wrap{
   margin: 10px;
-  overflow-x: auto;
   background: #fff;
   border: 1px solid #ccc;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 table{
   border-collapse: collapse;
   width: 100%;
   font-size: 12px;
+  min-width: 700px;
 }
 
 th, td{
@@ -325,35 +327,40 @@ document.getElementById("subtbody").innerHTML =
         NO SUBJECT PERFORMANCE DATA
       </td></tr>`;
 
-      let st = results.filter(r => {
+      let subjectRows = [];
+let i = 1;
 
-  if (String(r.subject_id) !== String(sub.id)) return false;
+subjects.forEach(sub => {
 
-  const stu = filtered.find(s =>
-    String(s.id) === String(r.student_id)
+  const st = results.filter(r =>
+    String(r.subject_id) === String(sub.id) &&
+    filtered.some(s => String(s.id) === String(r.student_id))
   );
 
-  return !!stu;
+  if (st.length === 0) return;
+
+  let total = st.reduce((a,b)=>a + Number(b.marks), 0);
+  let avg = total / st.length;
+
+  subjectRows.push(`
+    <tr>
+      <td>${i++}</td>
+      <td>${sub.subject_name}</td>
+      <td>${st.length}</td>
+      <td>${st.length}</td>
+      <td>${st.filter(x => x.marks >= 41).length}</td>
+      <td>${avg.toFixed(1)}</td>
+      <td>${gpa(grade(avg))}</td>
+    </tr>
+  `);
 });
-      let sat = st.length;
 
-      if(!sat) return "";
-
-      let total = st.reduce((a,b)=>a + Number(b.marks), 0);
-      let avg = total / sat;
-
-      return `
-        <tr>
-          <td>${i++}</td>
-          <td>${sub.subject_name}</td>
-          <td>${sat}</td>
-          <td>${sat}</td>
-          <td>${st.filter(x => x.marks >= 41).length}</td>
-          <td>${avg.toFixed(1)}</td>
-          <td>${gpa(grade(avg))}</td>
-        </tr>
-      `;
-    }).join("");
+document.getElementById("subtbody").innerHTML =
+  subjectRows.length
+    ? subjectRows.join("")
+    : `<tr><td colspan="7" style="text-align:center;">
+        NO SUBJECT PERFORMANCE DATA
+      </td></tr>`;
 }
 function startRealtime(){
 
