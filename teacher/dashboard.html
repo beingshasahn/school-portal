@@ -414,6 +414,8 @@ function switchPage(page, el){
 
   // ✅ HII NDIO STEP 5
   if(page === "results"){
+  initResultsPage();
+  }
   if(!selectedClass){
     document.getElementById("publishStatus").innerText =
       "Please select a class from Home page first";
@@ -658,8 +660,7 @@ async function checkPublishStatus(){
 if(!ok){
   container.innerHTML = "<p>Results have not been published yet.</p>";
   return;
-}
-
+  
   const { data } = await supabaseClient
   .from("results")
   .select(`
@@ -672,6 +673,7 @@ if(!ok){
   if(!data || data.length === 0){
     container.innerHTML = "<p>No results found</p>";
     return;
+    document.getElementById("resultsContent").innerHTML = container.innerHTML;
   }
 
   let html = `
@@ -813,6 +815,60 @@ async function logout(){
 
   return data?.is_published === true;
       }
+
+  async function initResultsPage(){
+
+  const container = document.getElementById("resultsContent");
+  const status = document.getElementById("publishStatus");
+
+  container.innerHTML = "";
+  status.innerText = "Checking publication...";
+
+  const { data, error } = await supabaseClient
+    .from("published_reports")
+    .select("class_id, is_published")
+    .eq("is_published", true);
+
+  if(!data || data.length === 0){
+    status.innerText = "No published results yet";
+    return;
+  }
+
+  // kama class 1 tu
+  if(data.length === 1){
+    selectedClass = data[0].class_id;
+
+    status.innerText = "Loading report...";
+
+    await loadResults();
+    return;
+  }
+
+  // kama zaidi ya 1 → show dropdown
+  status.innerText = "Select class to view results";
+
+  let html = `
+    <label>Select Class</label>
+    <select id="publishedClassSelect">
+      <option value="">Choose class</option>
+  `;
+
+  data.forEach(c=>{
+    html += `<option value="${c.class_id}">${c.class_id}</option>`;
+  });
+
+  html += `</select>
+    <div id="autoResults"></div>
+  `;
+
+  container.innerHTML = html;
+
+  document.getElementById("publishedClassSelect")
+    .addEventListener("change", async (e)=>{
+      selectedClass = e.target.value;
+      await loadResults();
+    });
+     }
   
 init();
 
