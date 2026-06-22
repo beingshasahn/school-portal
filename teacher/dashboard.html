@@ -298,10 +298,7 @@ th,td{
 <div id="results" class="page">
   <div class="card">
     <h3>Results</h3>
-
-    <p id="publishStatus">Checking publication...</p>
-
-    <div id="resultsContent"></div>
+    <p>View and manage results here</p>
   </div>
 </div>
 
@@ -388,9 +385,7 @@ th,td{
 /* PAGE SWITCHER */
 function switchPage(page, el){
 
-  selectedSubject = null;
-document.getElementById("students").innerHTML = "";
-  
+  // fade out first
   document.querySelectorAll('.page')
     .forEach(p=>{
       p.style.opacity = "0";
@@ -413,11 +408,6 @@ document.getElementById("students").innerHTML = "";
     .forEach(n=>n.classList.remove('active'));
 
   el.classList.add('active');
-
-  // 👉 RESULTS PAGE ONLY
-  if(page === "results"){
-    initResultsPage();
-  }
 }
 
 /* FIXED: removed duplicate variables */
@@ -425,7 +415,7 @@ let teacherId = null;
 let assignments = [];
 let selectedClass = null;
 let selectedSubject = null;
-let isPublished = false;
+
 /* SUPABASE */
 const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
@@ -477,9 +467,9 @@ async function init(){
   const hour = new Date().getHours();
 
   let greeting = "Good morning";
-  if(hour >= 12 && hour < 16){
+  if(hour >= 12 && hour < 17){
     greeting = "Good afternoon";
-  }else if(hour >= 16){
+  }else if(hour >= 17){
     greeting = "Good evening";
   }
 
@@ -487,21 +477,14 @@ async function init(){
     `${greeting}, ${name}`;
 
   await loadAssignments();
-  updateSoundUI();
 }
 
 function handleClassChange(){
   selectedClass = document.getElementById("class").value;
-
+  selectedSubject = null;
   document.getElementById("students").innerHTML = "";
 
-  // 🔥 ADD THIS
-  document.getElementById("resultsContent").innerHTML = "";
-  document.getElementById("publishStatus").innerText = "";
-
-  if(selectedClass){
-    loadSubjects(selectedClass);
-  }
+  if(selectedClass) loadSubjects(selectedClass);
 }
 
 function handleSubjectChange(){
@@ -595,57 +578,6 @@ async function loadStudents(class_id){
       `;
     }
   });
-  }
-
-  async function loadResults(){
-
-  const container = document.getElementById("resultsContent");
-
-  if(!selectedClass){
-    container.innerHTML = "<p>Select class first</p>";
-    return;
-  }
-
-  const { data, error } = await supabaseClient
-    .from("results")
-    .select(`
-      marks,
-      students(admission_no, student_name)
-    `)
-    .eq("class_id", selectedClass);
-
-  if(error){
-    container.innerHTML = "<p>Error loading results</p>";
-    return;
-  }
-
-  if(!data || data.length === 0){
-    container.innerHTML = "<p>No results found</p>";
-    return;
-  }
-
-  let html = `
-    <table>
-      <tr>
-        <th>Adm</th>
-        <th>Name</th>
-        <th>Marks</th>
-      </tr>
-  `;
-
-  data.forEach(r=>{
-    html += `
-      <tr>
-        <td>${r.students?.admission_no || ""}</td>
-        <td>${r.students?.student_name || ""}</td>
-        <td>${r.marks}</td>
-      </tr>
-    `;
-  });
-
-  html += "</table>";
-
-  container.innerHTML = html;
   }
   
 async function autoSave(studentId,value){
@@ -752,59 +684,9 @@ async function logout(){
     icon.style.background = "#6b7280";
   }
   }
+  
+init();
 
-
-  async function initResultsPage(){
-
-  const container = document.getElementById("resultsContent");
-  const status = document.getElementById("publishStatus");
-
-  status.innerText = "Checking publication...";
-  container.innerHTML = "";
-
-  const { data } = await supabaseClient
-    .from("published_reports")
-    .select("class_id")
-    .eq("is_published", true);
-
-  if(!data || data.length === 0){
-    status.innerText = "No published results yet";
-    return;
-  }
-
-  if(data.length === 1){
-  selectedClass = data[0].class_id;
-  status.innerText = "Loading results...";
-  await loadResults();
-  return;
-  }
-
-  status.innerText = "Select class";
-
-  let html = `<select id="publishedClassSelect">
-    <option value="">Choose class</option>`;
-
-  data.forEach(c=>{
-    html += `<option value="${c.class_id}">${c.class_id}</option>`;
-  });
-
-  html += `</select><div id="autoResults"></div>`;
-
-  container.innerHTML = html;
-
-  document.getElementById("publishedClassSelect")
-  .addEventListener("change", async (e)=>{
-    selectedClass = e.target.value;
-
-    if(!selectedClass){
-      document.getElementById("resultsContent").innerHTML = "";
-      return;
-    }
-
-    await loadResults();
-  });
-
-    
 </script>
 
   <audio id="uiClickSound" preload="auto">
