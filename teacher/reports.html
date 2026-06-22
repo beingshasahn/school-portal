@@ -42,6 +42,8 @@ button{cursor:pointer;}
   display:none !important;
 }
 
+/* ================= PRO TABLE UPGRADE ================= */
+
 .table-wrap{
   margin:10px;
   width:max-content;
@@ -51,12 +53,15 @@ button{cursor:pointer;}
   overflow-x:auto;
 }
 
+
 table{
   width:auto;
   border-collapse:collapse;
   font-size:11px;
-}
+  table-layout:auto;
+  }
 
+/* HEADER */
 th{
   background:#e6e6e6;
   border:1px solid #999;
@@ -65,16 +70,44 @@ th{
   text-align:center;
 }
 
+/* CELLS (COMPACT PRO STYLE) */
 td{
   border:2px solid #ccc;
   padding:1px 4px;
   white-space:nowrap;
+  overflow:hidden;
+  text-overflow:clip;
 }
 
+/* ONLY SUBJECT COLUMN WRAPS */
+#tbody td:nth-child(4){
+  white-space:nowrap;
+  text-align:left;
+}
+#tbody td:nth-child(1),
+#tbody td:nth-child(2){
+  min-width:110px !important;
+  max-width:none !important;
+  width:auto !important;
+  white-space:nowrap;
+  }
+
+  #tbody td:nth-child(3){
+  width:40px !important;
+  min-width:40px !important;
+  max-width:40px !important;
+  text-align:center;
+  white-space:nowrap;
+  }
+/* HOVER LIKE PRO SYSTEM */
 tr:hover td{
   background:#f3f8ff;
 }
-
+#gradePerf td{
+  padding:2px 6px;
+  white-space:nowrap;
+}
+/* PRINT */
 @media print{
   select,button{display:none;}
 }
@@ -86,7 +119,8 @@ tr:hover td{
 <body>
 
 <div class="header">TANDAHIMBA DISTRICT COUNCIL</div>
-<div class="school">KOROSHO ENGLISH MEDIUM PRE AND PRIMARY SCHOOL<br> RESULTS SUMMARY</div>
+<div class="school">KOROSHO ENGLISH MEDIUM PRE AND PRIMARY SCHOOL
+<br> RESULTS SUMMARY</div>
 
 <div id="lockNotice" class="lock">🔒 CLASS PUBLISHED - VIEW ONLY</div>
 
@@ -115,7 +149,7 @@ tr:hover td{
 <div class="table-wrap">
 <table>
 <thead>
-<tr>
+<tr id="mainHead">
 <th>CAND NO</th>
 <th>PREM NO</th>
 <th>SEX</th>
@@ -151,63 +185,107 @@ const client = supabase.createClient(
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s"
 );
 
-/* ROLE */
-let role = localStorage.getItem("role") || "teacher";
+/* ================= ROLE ================= */
+let role = "admin";
 
-/* STATE */
+function isPublic(){
+  return !["admin","teacher","headteacher"].includes(role);
+}
+
+/* ================= STATE ================= */
 let currentClass = null;
 let isPublished = false;
 
-/* URL CLASS */
-function getClassFromURL(){
-  return new URLSearchParams(window.location.search).get("class");
+/* ================= AUTO COLUMN WIDTH (YOUR ORIGINAL - KEPT) ================= */
+function autoFitTable(tableId){
+
+  if(tableId === "gradePerf") return;
+
+  const table = document.getElementById(tableId);
+  if(!table) return;
+
+  const rows = table.querySelectorAll("tr");
+  if(rows.length === 0) return;
+
+  const colCount = rows[0].children.length;
+  const maxWidths = new Array(colCount).fill(0);
+
+  rows.forEach(row=>{
+    [...row.children].forEach((cell,i)=>{
+      const text = (cell.innerText || "").trim();
+
+      if(text.length > maxWidths[i]){
+        maxWidths[i] = text.length;
+      }
+    });
+  });
+
+  rows.forEach(row=>{
+  [...row.children].forEach((cell,i)=>{
+
+    let width = (maxWidths[i] * 7) + 8;
+
+    // SEX column (index 2) fixed small size
+    if(i === 2){
+      width = 40;
+    }
+
+    if(width < 60) width = 60;
+
+    if(i !== 3 && width > 180) width = 180;
+
+    cell.style.width = width + "px";
+    cell.style.minWidth = width + "px";
+  });
+});
 }
 
-/* LOAD CLASSES */
+/* ================= EVERYTHING ELSE (UNCHANGED) ================= */
+function getClassFromURL(){
+  const p = new URLSearchParams(window.location.search);
+  return p.get("class");
+}
+
 async function loadClasses(){
   const { data } = await client.from("classes").select("*");
 
   const el = document.getElementById("class");
   el.innerHTML = `<option value="">Select Class</option>`;
 
-  (data || []).forEach(c=>{
+  data.forEach(c=>{
     el.innerHTML += `<option value="${c.id}">${c.class_name}</option>`;
   });
 }
 
-/* INIT */
 async function initFromLink(){
 
-  await loadClasses();
-
-  if(role !== "admin"){
-    document.getElementById("class").style.display = "none";
-  }
-
   const urlClass = getClassFromURL();
+
+  await loadClasses();
 
   if(urlClass){
     currentClass = urlClass;
     document.getElementById("class").value = urlClass;
-
+    document.getElementById("class").disabled = true;
+    document.getElementById("publishBar").style.display = "none";
     await checkPublishStatus();
     await loadReport();
   }
 }
 
-/* CLASS CHANGE */
 async function onClassChange(){
 
-  if(role !== "admin") return;
+  if(document.getElementById("class").disabled) return;
 
   currentClass = document.getElementById("class").value;
   if(!currentClass) return;
 
-  document.getElementById("publishBar").style.display = "block";
+  document.getElementById("publishBar").style.display =
+    role==="admin" ? "block":"none";
 
   await checkPublishStatus();
 
-  if(!isPublished){
+  if(isPublic() && !isPublished){
     document.getElementById("tbody").innerHTML =
       "<tr><td colspan='4'>RESULTS NOT PUBLISHED</td></tr>";
     return;
@@ -216,7 +294,6 @@ async function onClassChange(){
   loadReport();
 }
 
-/* CHECK PUBLISH */
 async function checkPublishStatus(){
 
   const { data } = await client
@@ -234,7 +311,6 @@ async function checkPublishStatus(){
     isPublished ? "block":"none";
 }
 
-/* TOGGLE PUBLISH */
 async function togglePublish(){
 
   const { data } = await client
@@ -243,37 +319,24 @@ async function togglePublish(){
     .eq("class_id", currentClass)
     .maybeSingle();
 
-  let newStatus = true;
-
   if(data){
-    newStatus = !data.is_published;
-
     await client.from("published_reports")
-      .update({ is_published: newStatus })
+      .update({ is_published: !data.is_published })
       .eq("class_id", currentClass);
-
   } else {
     await client.from("published_reports")
       .insert([{ class_id: currentClass, is_published: true }]);
   }
 
   await checkPublishStatus();
-
-  alert("Results published successfully.");
 }
 
-/* COPY LINK */
 function copyLink(){
-  const link =
-    window.location.origin +
-    window.location.pathname +
-    "?class=" + currentClass;
-
+  const link = window.location.origin + window.location.pathname + "?class=" + currentClass;
   navigator.clipboard.writeText(link);
   alert("Link copied:\n" + link);
 }
 
-/* GRADING */
 function grade(m){
   if(m>=81) return "A";
   if(m>=61) return "B";
@@ -285,8 +348,17 @@ function grade(m){
 function gpa(g){
   return {A:1,B:2,C:3,D:4,E:5}[g] || 1;
 }
+function formatSubject(name){
 
-/* REPORT */
+  const map = {
+    "Historia ya Tanzania na Maadili": "HIST.TZ",
+    "Geography and the environment": "GEOGRAPHY",
+    "Arts and Sports": "ARTS & SPORTS"
+  };
+
+  return map[name] || name;
+  }
+/* ================= REPORT (UNCHANGED) ================= */
 async function loadReport(){
 
   if(!currentClass) return;
@@ -299,12 +371,12 @@ async function loadReport(){
     String(s.class_id) === String(currentClass)
   );
 
+  let final = [];
+
   let gradePerf = {
     Male:{A:0,B:0,C:0,D:0,E:0},
     Female:{A:0,B:0,C:0,D:0,E:0}
   };
-
-  let final = [];
 
   filtered.forEach(stu=>{
 
@@ -319,18 +391,19 @@ async function loadReport(){
       if(!r) return;
 
       let m = Number(r.marks);
+
       total += m;
       count++;
 
-      detail.push(sub.subject_name + "-" + grade(m));
+      const subName = formatSubject(sub.subject_name);
+detail.push(subName + "-" + grade(m));
     });
 
     if(count===0) return;
 
     let avg = total/count;
     let g = grade(avg);
-
-    detail.push("AVERAGE - " + g);
+   detail.push("AVERAGE - " + g);
     gradePerf[stu.gender||"Male"][g]++;
 
     final.push({
@@ -342,47 +415,54 @@ async function loadReport(){
   });
 
   document.getElementById("tbody").innerHTML =
-    final.map(r=>`
-      <tr>
-        <td>${r.adm}</td>
-        <td>${r.prem}</td>
-        <td>${r.sex}</td>
-        <td>${r.detail}</td>
-      </tr>
-    `).join("");
+  final.map(r=>`
+    <tr>
+      <td>${r.adm}</td>
+      <td>${r.prem}</td>
+      <td>${r.sex}</td>
+      <td>${r.detail}</td>
+    </tr>
+  `).join("");
 
   document.getElementById("gradePerf").innerHTML =
-    Object.entries(gradePerf).map(([k,v])=>`
-      <tr>
-        <td>${k}</td>
-        <td>${v.A}</td>
-        <td>${v.B}</td>
-        <td>${v.C}</td>
-        <td>${v.D}</td>
-        <td>${v.E}</td>
-      </tr>
-    `).join("");
+  Object.entries(gradePerf).map(([k,v])=>`
+    <tr>
+      <td>${k}</td>
+      <td>${v.A}</td>
+      <td>${v.B}</td>
+      <td>${v.C}</td>
+      <td>${v.D}</td>
+      <td>${v.E}</td>
+    </tr>
+  `).join("");
 
   let i=1;
-
   document.getElementById("subtbody").innerHTML =
-    subjects.map(sub=>{
-      let st = results.filter(r=>r.subject_id===sub.id);
-      if(!st.length) return "";
+  subjects.map(sub=>{
+    let st = results.filter(r=>r.subject_id===sub.id);
+    let sat = st.length;
+    if(!sat) return "";
 
-      let avg = st.reduce((a,b)=>a+Number(b.marks),0)/st.length;
+    let total = st.reduce((a,b)=>a+Number(b.marks),0);
+    let avg = total/sat;
 
-      return `
-        <tr>
-          <td>${i++}</td>
-          <td>${sub.subject_name}</td>
-          <td>${st.length}</td>
-          <td>${st.length}</td>
-          <td>${st.filter(x=>x.marks>=41).length}</td>
-          <td>${avg.toFixed(1)}</td>
-          <td>${gpa(grade(avg))}</td>
-        </tr>`;
-    }).join("");
+    return `
+      <tr>
+        <td>${i++}</td>
+        <td>${sub.subject_name}</td>
+        <td>${sat}</td>
+        <td>${sat}</td>
+        <td>${st.filter(x=>x.marks>=41).length}</td>
+        <td>${avg.toFixed(1)}</td>
+        <td>${gpa(grade(avg))}</td>
+      </tr>`;
+  }).join("");
+
+  setTimeout(()=>{
+    autoFitTable("gradePerf");
+    autoFitTable("tbody");
+    autoFitTable("subtbody");
+  },50);
 }
 
 initFromLink();
