@@ -612,12 +612,12 @@ async function loadStudents(class_id){
     return;
   }
 
-  const { data } = await supabaseClient
-    .from("published_reports")
-    .select("*")
-    .eq("class_id", Number(selectedClass))
-    .maybeSingle();
-console.log("Publish data from DB:", data);
+  const { data, error } = await supabaseClient
+  .from("published_reports")
+  .select("*")
+  .eq("class_id", String(selectedClass));
+console.log("Selected class:", selectedClass);
+console.log("PUBLISH ROWS:", data);
     
   isPublished = data?.is_published || false;
 
