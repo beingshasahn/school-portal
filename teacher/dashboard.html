@@ -601,7 +601,7 @@ async function loadStudents(class_id){
   });
   }
 
-  async function checkPublishStatus(){
+async function checkPublishStatus(){
 
   if(!selectedClass){
     document.getElementById("publishStatus").innerText =
@@ -612,12 +612,29 @@ async function loadStudents(class_id){
   const { data, error } = await supabaseClient
     .from("published_reports")
     .select("is_published")
-    .eq("class_id", String(selectedClass))
+    .eq("class_id", String(selectedSubject))
     .maybeSingle();
 
   console.log("PUBLISH ROW:", data);
 
-  isPublished = data?.is_published === true;
+  // safety check (IMPORTANT)
+  if(error){
+    console.log("ERROR:", error);
+    document.getElementById("publishStatus").innerText =
+      "Error checking publication";
+    return false;
+  }
+
+  // kama hakuna row kabisa
+  if(!data){
+    isPublished = false;
+    document.getElementById("publishStatus").innerText =
+      "Results Not Published";
+    return false;
+  }
+
+  // actual boolean check
+  isPublished = data.is_published === true;
 
   document.getElementById("publishStatus").innerText =
     isPublished
@@ -625,18 +642,18 @@ async function loadStudents(class_id){
       : "Results Not Published";
 
   return isPublished;
-  }
+}
 
   async function loadResults(){
 
   const container = document.getElementById("resultsContent");
 
-  if(!selectedClass){
-    container.innerHTML = "<p>Select class first</p>";
-    return;
+  if(!selectedClass || !selectedSubject){
+  container.innerHTML = "<p>Please select class and subject first</p>";
+  return;
   }
 
-  const ok = await checkPublishStatus();
+  const ok = await checkPublishStatus(selectedSubject);
 
 if(!ok){
   container.innerHTML = "<p>Results have not been published yet.</p>";
@@ -644,13 +661,13 @@ if(!ok){
 }
 
   const { data } = await supabaseClient
-    .from("results")
-    .select(`
-      student_id,
-      marks,
-      students(student_name, admission_no)
-    `)
-    .eq("class_id", selectedClass);
+  .from("results")
+  .select(`
+    student_id,
+    marks,
+    subject_id
+  `)
+  .eq("subject_id", selectedSubject);
 
   if(!data || data.length === 0){
     container.innerHTML = "<p>No results found</p>";
