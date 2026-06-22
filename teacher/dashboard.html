@@ -186,6 +186,26 @@ th,td{
   font-weight:bold;
 }
 
+    .brand{
+  font-weight:bold;
+  color:#111;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  position:relative;
+}
+
+/* SCHOOL LOGO BACKGROUND */
+.brand-logo{
+  width:28px;
+  height:28px;
+  background-image:url("https://bslofdobcvxkjphbjyzb.supabase.co/storage/v1/object/public/logos/logo.png");
+  background-size:cover;
+  background-position:center;
+  border-radius:6px;
+  opacity:0.9;
+}
+
 /* FIX: hidden class */
 .hidden{
   display:none;
@@ -198,7 +218,10 @@ th,td{
 
 <!-- TOP -->
 <div class="topbar">
-  <div class="brand">KempsPortal</div>
+  <div class="brand">
+  <span class="brand-logo"></span>
+  KempsPortal
+  </div>
 
   <div style="display:flex;align-items:center;gap:10px;">
 
