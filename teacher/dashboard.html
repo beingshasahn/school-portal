@@ -390,6 +390,37 @@ async function loadStudents(class_id){
   });
 }
 
+  async function loadAssignments(){
+
+  const { data } = await supabaseClient
+    .from("teacher_assignments")
+    .select(`
+      class_id,
+      subject_id,
+      classes(id,class_name),
+      subjects(id,subject_name)
+    `)
+    .eq("teacher_id", teacherId);
+
+  assignments = data || [];
+
+  const sel = document.getElementById("class");
+  sel.innerHTML = `<option value="">Select Class</option>`;
+
+  const seen = new Set();
+
+  assignments.forEach(a=>{
+    if(a.classes && !seen.has(a.classes.id)){
+      seen.add(a.classes.id);
+      sel.innerHTML += `
+        <option value="${a.classes.id}">
+          ${a.classes.class_name}
+        </option>
+      `;
+    }
+  });
+  }
+  
 async function autoSave(studentId,value){
 
   if(!selectedSubject) return;
