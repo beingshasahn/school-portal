@@ -412,10 +412,37 @@ th,td{
 
 <!-- CHAT -->
 <div id="chat" class="page">
+
   <div class="card">
-    <h3>Chat</h3>
-    <p>Chat system coming soon...</p>
+    <h3>School Chat</h3>
+
+    <select id="chatUser">
+      <option value="">Select User</option>
+    </select>
+
+    <div id="chatMessages" style="
+      height:300px;
+      overflow-y:auto;
+      border:1px solid #ddd;
+      margin-top:10px;
+      padding:10px;
+      border-radius:8px;
+    ">
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <input
+        id="chatInput"
+        placeholder="Type message..."
+      >
+
+      <button onclick="sendMessage()">
+        Send
+      </button>
+    </div>
+
   </div>
+
 </div>
 
 <!-- NOTICES -->
@@ -857,6 +884,61 @@ async function logout(){
     icon.classList.remove("sound-active");
     icon.style.background = "#6b7280";
   }
+  }
+
+  async function sendMessage(){
+
+  const receiver =
+    document.getElementById("chatUser").value;
+
+  const text =
+    document.getElementById("chatInput").value;
+
+  if(!receiver || !text) return;
+
+  await supabaseClient
+    .from("chats")
+    .insert({
+      sender_id: teacherId,
+      receiver_id: receiver,
+      message: text
+    });
+
+  document.getElementById("chatInput").value = "";
+
+  loadMessages();
+  }
+  async function loadMessages(){
+
+  const receiver =
+    document.getElementById("chatUser").value;
+
+  if(!receiver) return;
+
+  const { data } = await supabaseClient
+    .from("chats")
+    .select("*")
+    .or(
+      `and(sender_id.eq.${teacherId},receiver_id.eq.${receiver}),
+       and(sender_id.eq.${receiver},receiver_id.eq.${teacherId})`
+    )
+    .order("created_at");
+
+  const box =
+    document.getElementById("chatMessages");
+
+  box.innerHTML = "";
+
+  (data || []).forEach(msg=>{
+
+    box.innerHTML += `
+      <div style="margin-bottom:8px">
+        ${msg.message}
+      </div>
+    `;
+
+  });
+
   }
   
 init();
