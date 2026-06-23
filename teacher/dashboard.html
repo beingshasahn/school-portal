@@ -81,6 +81,10 @@ body{
   box-shadow:0 2px 8px rgba(0,0,0,0.06);
 }
 
+  #marksCard {
+  transition: all 0.3s ease;
+  }
+  
 /* EMPTY */
 .empty{
   text-align:center;
@@ -308,7 +312,7 @@ th,td{
     Open Class Teacher Panel
   </button>
 </div>
-  <div class="card">
+  <div class="card hidden" id="marksCard">
 
   <h2 style="
     margin-top:0;
@@ -608,9 +612,15 @@ function handleClassChange(){
   if(selectedClass) loadSubjects(selectedClass);
 }
 
-function handleSubjectChange(){
-  selectedSubject = document.getElementById("subject").value;
-  loadStudents(selectedClass);
+function handleClassChange(){
+  selectedClass = document.getElementById("class").value;
+  selectedSubject = null;
+  document.getElementById("students").innerHTML = "";
+
+  // hide marks form again
+  document.getElementById("marksCard").classList.add("hidden");
+
+  if(selectedClass) loadSubjects(selectedClass);
 }
 
 function loadSubjects(class_id){
