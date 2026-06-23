@@ -309,25 +309,92 @@ th,td{
   </button>
 </div>
   <div class="card">
-    <h4>Select Class</h4>
-    <select id="class" onchange="handleClassChange()"></select>
 
-    <h4 id="subjectLabel" class="hidden">Subject</h4>
-    <select id="subject" class="hidden" onchange="handleSubjectChange()"></select>
+  <h2 style="
+    margin-top:0;
+    color:#1e3a8a;
+    border-bottom:2px solid #1e3a8a;
+    padding-bottom:8px;
+  ">
+    STUDENT MARKS ENTRY FORM
+  </h2>
+
+  <div style="
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:15px;
+    margin-top:20px;
+  ">
+
+    <div>
+      <label style="font-weight:bold;">Class</label>
+      <select id="class" onchange="handleClassChange()"></select>
+    </div>
+
+    <div>
+      <label id="subjectLabel" class="hidden" style="font-weight:bold;">
+        Subject
+      </label>
+      <select id="subject"
+              class="hidden"
+              onchange="handleSubjectChange()">
+      </select>
+    </div>
+
   </div>
 
-  <div class="card">
-    <h3>Students</h3>
+</div>
+
+<div class="card">
+
+  <div style="
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:15px;
+    flex-wrap:wrap;
+  ">
+
+    <div>
+      <h3 style="margin:0;">Students Marks Sheet</h3>
+      <small>Enter marks out of 100</small>
+    </div>
+
+    <div style="
+      background:#eef4ff;
+      color:#1e3a8a;
+      padding:8px 15px;
+      border-radius:20px;
+      font-weight:bold;
+    ">
+      Academic Record
+    </div>
+
+  </div>
+
+  <div style="overflow-x:auto;">
+
     <table>
-      <thead>
+
+      <thead style="
+        background:#1e3a8a;
+        color:white;
+      ">
+
         <tr>
-          <th>Adm</th>
-          <th>Name</th>
-          <th>Marks</th>
+          <th style="width:90px;">Adm No</th>
+          <th>Student Name</th>
+          <th style="width:120px;text-align:center;">
+            Marks
+          </th>
         </tr>
+
       </thead>
+
       <tbody id="students"></tbody>
+
     </table>
+
   </div>
 
 </div>
