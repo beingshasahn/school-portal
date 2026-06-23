@@ -817,6 +817,10 @@ async function logout(){
   await supabaseClient.auth.signOut();
   location.href="../index.html";
 }
+  function openMyClass(){
+  document.getElementById("marksCard").classList.remove("hidden");
+  document.getElementById("class").classList.remove("hidden");
+  }
   function openResults(){
   window.location.href = "results.html";
   }
