@@ -157,6 +157,39 @@ body{
   transition:.2s;
 }
 
+  .chat-row{
+  display:flex;
+  margin-bottom:12px;
+}
+
+.chat-row.mine{
+  justify-content:flex-end;
+}
+
+.chat-row.other{
+  justify-content:flex-start;
+}
+
+.chat-row.mine .chat-bubble{
+  background:#1e3a8a;
+  color:white;
+  border:none;
+  max-width:80%;
+}
+
+.chat-row.mine .chat-name{
+  color:#bfdbfe;
+}
+
+.chat-row.mine .chat-time{
+  color:#dbeafe;
+}
+
+.chat-row.other .chat-bubble{
+  background:white;
+  max-width:80%;
+}
+  
 .chat-messages::-webkit-scrollbar{
   width:6px;
 }
@@ -530,16 +563,16 @@ th,td{
     <div class="chat-header">
 
       <div class="chat-avatar">
-        💬
+  KEMPS
       </div>
 
       <div>
         <div class="chat-title">
-          School Staff Chat
+          Korosho Staff Chat
         </div>
 
         <div class="chat-subtitle">
-          Teachers & Administration Communication
+  Official School Communication Platform
         </div>
       </div>
 
@@ -1068,6 +1101,7 @@ await loadMessages();
   }
   
   async function loadMessages(){
+async function loadMessages(){
 
   const { data, error } = await supabaseClient
     .from("chats")
@@ -1085,6 +1119,8 @@ await loadMessages();
 
   (data || []).forEach(msg=>{
 
+    const mine = msg.sender_id === teacherId;
+
     const time = new Date(msg.created_at)
       .toLocaleTimeString([],{
         hour:"2-digit",
@@ -1092,18 +1128,22 @@ await loadMessages();
       });
 
     box.innerHTML += `
-      <div class="chat-bubble">
+      <div class="chat-row ${mine ? "mine" : "other"}">
 
-        <div class="chat-name">
-          ${msg.sender_name || "Unknown"}
-        </div>
+        <div class="chat-bubble">
 
-        <div class="chat-text">
-          ${msg.message || ""}
-        </div>
+          <div class="chat-name">
+            ${msg.sender_name || "Unknown"}
+          </div>
 
-        <div class="chat-time">
-          ${time}
+          <div class="chat-text">
+            ${msg.message || ""}
+          </div>
+
+          <div class="chat-time">
+            ${time}
+          </div>
+
         </div>
 
       </div>
@@ -1111,7 +1151,7 @@ await loadMessages();
   });
 
   box.scrollTop = box.scrollHeight;
-        }
+              }
 
   document
 .getElementById("chatInput")
