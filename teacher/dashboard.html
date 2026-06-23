@@ -44,6 +44,19 @@ body{
   background:#f8fafc;
 }
 
+  .teacher-greeting{
+  font-size:14px;
+  font-weight:600;
+  margin-bottom:4px;
+  color:#111827;
+  }
+
+  .teacher-subtitle{
+  font-size:12px;
+  color:#6b7280;
+  margin:0;
+  }
+  
 .mark-input{
   width:60px;
   padding:6px;
@@ -344,8 +357,12 @@ th,td{
 <div id="home" class="page active">
 
   <div class="card">
-    <h3 id="teacherInfo">Welcome Teacher</h3>
-    <p>Manage your classes and students easily</p>
+    <h3 id="teacherInfo" class="teacher-greeting">
+  Welcome Teacher
+    </h3>
+    <p class="teacher-subtitle">
+  Manage your classes and students easily
+    </p>
   </div>
 <div class="card">
   <button onclick="openMyClass()" style="
