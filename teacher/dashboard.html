@@ -543,6 +543,7 @@ function switchPage(page, el){
 
 /* FIXED: removed duplicate variables */
 let teacherId = null;
+let teacherName = "";
 let assignments = [];
 let selectedClass = null;
 let selectedSubject = null;
@@ -608,6 +609,8 @@ async function init(){
 
   const name = profile?.full_name || "Teacher";
 
+teacherName = name;
+
   const hour = new Date().getHours();
 
   let greeting = "Good morning";
@@ -621,7 +624,7 @@ async function init(){
     `${greeting}, ${name}`;
 
   await loadAssignments();
-await loadChatUsers();
+await loadMessages();
 }
 
 function handleClassChange(){
@@ -899,25 +902,40 @@ async function logout(){
 
   async function sendMessage(){
 
-  const text =
-    document.getElementById("chatInput").value;
+  try{
 
-  const { data, error } = await supabaseClient
-    .from("chats")
-    .insert({
-      sender_id: teacherId,
-      sender_name: teacherName,
-      message: text
-    });
+    const text =
+      document.getElementById("chatInput").value.trim();
 
-  if(error){
-    alert("ERROR: " + error.message);
-    console.log(error);
-    return;
+    if(!text){
+      alert("Enter message");
+      return;
+    }
+
+    const { error } = await supabaseClient
+      .from("chats")
+      .insert([{
+        sender_id: teacherId,
+        sender_name: teacherName,
+        message: text
+      }]);
+
+    if(error){
+      alert(error.message);
+      console.log(error);
+      return;
+    }
+
+    document.getElementById("chatInput").value = "";
+
+    alert("Message sent");
+
+  }catch(err){
+
+    alert(err.message);
+    console.error(err);
+
   }
-
-  alert("Message saved");
-
   }
   
   async function loadMessages(){
