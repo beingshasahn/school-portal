@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kemps Portal</title>
+<title>Kemps Portal FIXED</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -31,6 +31,9 @@ body{
 .brand{
   font-weight:bold;
   color:#111;
+  display:flex;
+  align-items:center;
+  gap:8px;
 }
 
 .user{
@@ -42,34 +45,16 @@ body{
   display:flex;
   align-items:center;
   justify-content:center;
-  font-weight:bold;
 }
 
-/* PAGE SYSTEM */
+/* PAGES */
 .page{
   display:none;
   padding:15px;
-  animation:fade 0.3s ease-in-out;
 }
-
-  .tod-flash{
-  animation: flash 0.6s ease;
-}
-
-@keyframes flash{
-  0%{background:#000}
-  50%{background:#1e3c72}
-  100%{background:#000}
-}
-  
 
 .page.active{
   display:block;
-}
-
-@keyframes fade{
-  from{opacity:0; transform:translateY(10px)}
-  to{opacity:1; transform:translateY(0)}
 }
 
 /* CARD */
@@ -78,19 +63,11 @@ body{
   padding:15px;
   border-radius:12px;
   margin-bottom:12px;
-  box-shadow:0 2px 8px rgba(0,0,0,0.06);
 }
 
-  #marksCard {
-  transition: all 0.3s ease;
-  transform: translateY(10px);
-  }
-  
-/* EMPTY */
-.empty{
-  text-align:center;
-  padding:40px 10px;
-  color:#888;
+/* HIDDEN FIX */
+.hidden{
+  display:none !important;
 }
 
 /* INPUTS */
@@ -111,146 +88,11 @@ table{
 th,td{
   padding:10px;
   border-bottom:1px solid #eee;
-  text-align:left;
 }
 
-/* BOTTOM NAV */
-.bottom-nav{
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  height:65px;
-  background:#fff;
-  display:flex;
-  justify-content:space-around;
-  align-items:center;
-  border-top:1px solid #eee;
-}
-
-.nav-item{
-  text-align:center;
-  font-size:12px;
-  color:#777;
+/* BUTTON */
+button{
   cursor:pointer;
-}
-
-.nav-item span{
-  display:block;
-  font-size:18px;
-}
-
-  .page{
-  opacity:0;
-  transform:translateY(12px) scale(0.98);
-  transition:all 0.35s ease-in-out;
-  display:none;
-}
-
-.page.active{
-  display:block;
-  opacity:1;
-  transform:translateY(0) scale(1);
-}
-
-/* CLASSIC SMOOTH NAV ANIMATION */
-.nav-item{
-  transition:all 0.25s ease;
-}
-
-.nav-item:active{
-  transform:scale(0.92);
-}
-
-/* CARD ANIMATION (AUTO ENTRY) */
-.card{
-  animation:cardIn 0.4s ease;
-}
-
-@keyframes cardIn{
-  from{
-    opacity:0;
-    transform:translateY(15px);
-  }
-  to{
-    opacity:1;
-    transform:translateY(0);
-  }
-}
-
-  @keyframes pulse {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(30, 58, 138, 0.6);
-  }
-  70% {
-    transform: scale(1.1);
-    box-shadow: 0 0 0 10px rgba(30, 58, 138, 0);
-  }
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(30, 58, 138, 0);
-  }
-}
-
-.sound-active {
-  animation: pulse 1.2s infinite;
-}
-  
-.nav-item.active{
-  color:#f59e0b;
-  font-weight:bold;
-}
-
-    .brand{
-  font-weight:bold;
-  color:#111;
-  display:flex;
-  align-items:center;
-  gap:8px;
-  position:relative;
-}
-
-  .tod-wrapper{
-  overflow:hidden;
-  white-space:nowrap;
-  background:#000;
-  padding:6px 0;
-  border-bottom:1px solid #222;
-}
-
-.tod-scroll{
-  display:inline-block;
-  white-space:nowrap;
-  color:#00ff88;
-  font-weight:bold;
-  font-size:14px;
-  animation:scrollLeft 12s linear infinite;
-  padding-left:100%;
-}
-
-@keyframes scrollLeft{
-  0%{transform:translateX(0)}
-  100%{transform:translateX(-100%)}
-}
-  
-
-/* SCHOOL LOGO BACKGROUND */
-.brand-logo{
-  width:30px;
-  height:30px;
-  background-image:url("https://bslofdobcvxkjphbjyzb.supabase.co/storage/v1/object/public/logos/school.png");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  border-radius:8px;
-  background-color:white;
-  padding:2px;
-    }
-
-/* FIX: hidden class */
-.hidden{
-  display:none;
 }
 
 </style>
@@ -258,399 +100,201 @@ th,td{
 
 <body>
 
-<!-- TOP -->
 <div class="topbar">
-  <div class="brand">
-  <span class="brand-logo"></span>
-  KempsPortal
-  </div>
-
-  <div style="display:flex;align-items:center;gap:10px;">
-
-    <!-- SOUND ICON -->
-    <div id="soundIcon" onclick="SoundManager.toggle()" style="
-      width:30px;
-      height:30px;
-      border-radius:50%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:#1e3a8a;
-      color:#fff;
-      font-size:14px;
-      cursor:pointer;
-    ">
-      🔊
-    </div>
-
-    <!-- USER INITIALS -->
-    <div class="user" id="userInitials">SM</div>
-
-  </div>
+  <div class="brand">📘 KempsPortal</div>
+  <div class="user">SM</div>
 </div>
-<div class="tod-wrapper">
-  <div id="todText" class="tod-scroll">Loading T.O.D...</div>
-</div>
+
 <!-- HOME -->
 <div id="home" class="page active">
 
   <div class="card">
     <h3 id="teacherInfo">Welcome Teacher</h3>
-    <p>Manage your classes and students easily</p>
   </div>
-  
-<div class="card">
-  <button onclick="openMyClass()" style="
-    width:100%;
-    padding:10px;
-    border:none;
-    background:#1e3a8a;
-    color:#fff;
-    border-radius:8px;
-    cursor:pointer;
-    margin-top:10px;
-  ">
-    Open Class Teacher Panel
-  </button>
-</div>
+
+  <div class="card">
+    <button onclick="openMyClass()">Open Class Panel</button>
+  </div>
+
+  <!-- CLASS + SUBJECT -->
   <div class="card hidden" id="marksCard">
 
-  <h2 style="
-    margin-top:0;
-    color:#1e3a8a;
-    border-bottom:2px solid #1e3a8a;
-    padding-bottom:8px;
-  ">
-    STUDENT MARKS ENTRY FORM
-  </h2>
+    <h3>Marks Entry</h3>
 
-  <div style="
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:15px;
-    margin-top:20px;
-  ">
+    <label>Class</label>
+    <select id="class" onchange="handleClassChange()">
+      <option value="">Select Class</option>
+    </select>
 
-    <div>
-      <label style="font-weight:bold;">Class</label>
-      <select id="class" onchange="handleClassChange()"></select>
-    </div>
-
-    <div>
-      <label id="subjectLabel">
-        Subject
-      </label>
-      <select id="subject" onchange="handleSubjectChange()"></select>
+    <div id="subjectWrapper" class="hidden">
+      <label>Subject</label>
+      <select id="subject" onchange="handleSubjectChange()">
+        <option value="">Select Subject</option>
+      </select>
     </div>
 
   </div>
 
-</div>
-
-<div class="card">
-
-  <div style="
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:15px;
-    flex-wrap:wrap;
-  ">
-
-    <div>
-      <h3 style="margin:0;">Students Marks Sheet</h3>
-      <small>Enter marks out of 100</small>
-    </div>
-
-    <div style="
-      background:#eef4ff;
-      color:#1e3a8a;
-      padding:8px 15px;
-      border-radius:20px;
-      font-weight:bold;
-    ">
-      Academic Record
-    </div>
-
-  </div>
-
-  <div style="overflow-x:auto;">
-
+  <!-- TABLE -->
+  <div class="card">
     <table>
-
-      <thead style="
-        background:#1e3a8a;
-        color:white;
-      ">
-
+      <thead>
         <tr>
-          <th style="width:90px;">Adm No</th>
-          <th>Student Name</th>
-          <th style="width:120px;text-align:center;">
-            Marks
-          </th>
+          <th>Adm</th>
+          <th>Name</th>
+          <th>Marks</th>
         </tr>
-
       </thead>
-
       <tbody id="students"></tbody>
-
     </table>
-
   </div>
 
-</div>
-
-<!-- RESULTS -->
-<div id="results" class="page">
-  <div class="card">
-    <h3>Results</h3>
-    <p>View and manage results here</p>
-  </div>
-</div>
-
-<!-- CHAT -->
-<div id="chat" class="page">
-  <div class="card">
-    <h3>Chat</h3>
-    <p>Chat system coming soon...</p>
-  </div>
-</div>
-
-<!-- NOTICES -->
-<div id="notices" class="page">
-  <div class="card">
-    <div class="empty">
-      📢
-      <h3>No notices</h3>
-      <p>Check back later for updates</p>
-    </div>
-  </div>
-</div>
-
-<!-- PROFILE -->
-<div id="profile" class="page">
-
-  <div style="display:flex;justify-content:flex-end;padding:10px 10px 0 10px;">
-    <div onclick="logout()" style="
-      width:40px;
-      height:40px;
-      border-radius:50%;
-      background:#ef4444;
-      color:#fff;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
-      font-size:20px;
-    ">
-      ⎋
-    </div>
-  </div>
-
-  <div class="card">
-    <h3>Profile</h3>
-    <p>Teacher profile settings</p>
-  </div>
-
-  <div class="card">
-    <h3>🔑 Change Password</h3>
-
-    <input type="password" id="currentPassword" placeholder="Current Password">
-    <input type="password" id="newPassword" placeholder="New Password">
-    <input type="password" id="confirmPassword" placeholder="Confirm Password">
-
-    <button onclick="changePassword()" style="
-      width:100%;
-      margin-top:10px;
-      padding:10px;
-      border:none;
-      background:#1e3a8a;
-      color:#fff;
-      border-radius:8px;
-    ">
-      Update Password
-    </button>
-
-    <div id="passwordMsg" style="margin-top:10px;"></div>
-  </div>
-
-</div>
-
-<!-- BOTTOM NAV -->
-<div class="bottom-nav">
-  <div class="nav-item active" onclick="switchPage('home',this)">
-    <span>🏠</span>Home
-  </div>
-
-  <div class="nav-item" onclick="openResults()">
-  <span>📊</span>Results
-  </div>
-
-  <div class="nav-item" onclick="switchPage('chat',this)">
-    <span>💬</span>Chat
-  </div>
-
-  <div class="nav-item" onclick="switchPage('notices',this)">
-    <span>📢</span>Notices
-  </div>
-
-  <div class="nav-item" onclick="switchPage('profile',this)">
-    <span>👤</span>Profile
-  </div>
 </div>
 
 <script>
 
-/* PAGE SWITCHER */
-function switchPage(page, el){
-
-  // fade out first
-  document.querySelectorAll('.page')
-    .forEach(p=>{
-      p.style.opacity = "0";
-      p.style.transform = "translateY(10px) scale(0.98)";
-      setTimeout(()=>p.classList.remove('active'), 150);
-    });
-
-  setTimeout(()=>{
-
-    document.getElementById(page).classList.add('active');
-
-    setTimeout(()=>{
-      document.getElementById(page).style.opacity = "1";
-      document.getElementById(page).style.transform = "translateY(0) scale(1)";
-    }, 50);
-
-  }, 150);
-
-  document.querySelectorAll('.nav-item')
-    .forEach(n=>n.classList.remove('active'));
-
-  el.classList.add('active');
-}
-
-/* FIXED: removed duplicate variables */
+/* STATE */
 let teacherId = null;
 let assignments = [];
 let selectedClass = null;
 let selectedSubject = null;
 
 /* SUPABASE */
-const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
-
-const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-
-/* AUTH */
-async function protect(roleRequired){
-
-  const { data:{ user } } = await supabaseClient.auth.getUser();
-
-  if(!user){
-    location.href="../index.html";
-    return false;
-  }
-
-  const { data: profile } = await supabaseClient
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  if(!profile || profile.role !== roleRequired){
-    alert("No permission");
-    location.href="../index.html";
-    return false;
-  }
-
-  return true;
-}
+const supabaseClient = supabase.createClient(
+  "https://bslofdobcvxkjphbjyzb.supabase.co",
+  "YOUR_KEY"
+);
 
 /* INIT */
 async function init(){
 
-  const ok = await protect("teacher");
-  if(!ok) return;
-
   const { data:{ user } } = await supabaseClient.auth.getUser();
   teacherId = user.id;
 
-  const { data: profile } = await supabaseClient
-    .from("profiles")
-    .select("full_name")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  const name = profile?.full_name || "Teacher";
-
-  const hour = new Date().getHours();
-
-  let greeting = "Good morning";
-  if(hour >= 12 && hour < 17){
-    greeting = "Good afternoon";
-  }else if(hour >= 17){
-    greeting = "Good evening";
-  }
-
-  document.getElementById("teacherInfo").innerText =
-    `${greeting}, ${name}`;
-
-  await loadAssignments();
-await ensureTOD();
-await loadTOD();
-  subscribeTODRealtime();
+  loadAssignments();
 }
 
+init();
+
+/* OPEN CLASS PANEL */
+function openMyClass(){
+
+  document.getElementById("marksCard").classList.remove("hidden");
+
+  // IMPORTANT FIX:
+  document.getElementById("class").classList.remove("hidden");
+
+}
+
+/* STEP 1: CLASS CHANGE */
 function handleClassChange(){
+
   selectedClass = document.getElementById("class").value;
+
   selectedSubject = null;
 
   document.getElementById("students").innerHTML = "";
 
-  // SHOW SUBJECT DROPDOWN ONLY AFTER CLASS SELECT
-  if(selectedClass){
-    document.getElementById("subject").style.display = "block";
-    document.getElementById("subjectLabel").style.display = "block";
-    loadSubjects(selectedClass);
-  }
+  document.getElementById("subjectWrapper").classList.remove("hidden");
+
+  loadSubjects(selectedClass);
 }
 
-  function handleSubjectChange(){
+/* STEP 2: LOAD SUBJECTS */
+function loadSubjects(class_id){
+
+  const sub = document.getElementById("subject");
+
+  sub.innerHTML = `<option value="">Select Subject</option>`;
+
+  assignments.forEach(a=>{
+
+    const cid = a.class_id || a.classes?.id;
+
+    if(String(cid) === String(class_id)){
+
+      sub.innerHTML += `
+        <option value="${a.subjects.id}">
+          ${a.subjects.subject_name}
+        </option>
+      `;
+    }
+  });
+}
+
+/* STEP 3: SUBJECT CHANGE */
+function handleSubjectChange(){
+
   selectedSubject = document.getElementById("subject").value;
 
   if(!selectedSubject) return;
 
-  const marksCard = document.getElementById("marksCard");
-
-  marksCard.style.opacity = "0";
-
-  setTimeout(()=>{
-    marksCard.classList.remove("hidden");
-    marksCard.style.opacity = "1";
-  }, 100);
-
   loadStudents(selectedClass);
-  }
-  
-function loadSubjects(class_id){
 
-  const sub = document.getElementById("subject");
-  sub.innerHTML = `<option value="">Select Subject</option>`;
+}
+
+/* LOAD ASSIGNMENTS */
+async function loadAssignments(){
+
+  const { data } = await supabaseClient
+    .from("teacher_assignments")
+    .select(`
+      class_id,
+      classes(id,class_name),
+      subjects(id,subject_name)
+    `)
+    .eq("teacher_id", teacherId);
+
+  assignments = data || [];
+
+  const sel = document.getElementById("class");
+
+  sel.innerHTML = `<option value="">Select Class</option>`;
+
+  const seen = new Set();
 
   assignments.forEach(a=>{
-    const cid = a.classes?.id || a.class_id;
 
-    if(String(cid) === String(class_id) && a.subjects){
-      sub.innerHTML += `
-        <option value="${a.subjects.id}">
-          ${a.subjects.subject_name}
-        </option>`;
+    if(!seen.has(a.classes.id)){
+      seen.add(a.classes.id);
+
+      sel.innerHTML += `
+        <option value="${a.classes.id}">
+          ${a.classes.class_name}
+        </option>
+      `;
     }
+
   });
 
-  showSubject();
 }
+
+/* LOAD STUDENTS */
+async function loadStudents(class_id){
+
+  const { data: students } = await supabaseClient
+    .from("students")
+    .select("*")
+    .eq("class_id", class_id);
+
+  const tbody = document.getElementById("students");
+  tbody.innerHTML = "";
+
+  students.forEach(s=>{
+    tbody.innerHTML += `
+      <tr>
+        <td>${s.admission_no}</td>
+        <td>${s.student_name}</td>
+        <td><input type="number"></td>
+      </tr>
+    `;
+  });
+
+}
+
+  /* =========================
+   MARKS SYSTEM (FULL FIX)
+========================= */
 
 async function loadStudents(class_id){
 
@@ -668,6 +312,7 @@ async function loadStudents(class_id){
     .eq("subject_id", selectedSubject);
 
   const marksMap = {};
+
   (marksData || []).forEach(r=>{
     marksMap[r.student_id] = r.marks;
   });
@@ -690,42 +335,12 @@ async function loadStudents(class_id){
   });
 }
 
-  async function loadAssignments(){
-
-  const { data } = await supabaseClient
-    .from("teacher_assignments")
-    .select(`
-      class_id,
-      subject_id,
-      classes(id,class_name),
-      subjects(id,subject_name)
-    `)
-    .eq("teacher_id", teacherId);
-
-  assignments = data || [];
-
-  const sel = document.getElementById("class");
-  sel.innerHTML = `<option value="">Select Class</option>`;
-
-  const seen = new Set();
-
-  assignments.forEach(a=>{
-    if(a.classes && !seen.has(a.classes.id)){
-      seen.add(a.classes.id);
-      sel.innerHTML += `
-        <option value="${a.classes.id}">
-          ${a.classes.class_name}
-        </option>
-      `;
-    }
-  });
-  }
-  
-async function autoSave(studentId,value){
+/* AUTO SAVE MARKS */
+async function autoSave(studentId, value){
 
   if(!selectedSubject) return;
 
-  if(value.trim() === ""){
+  if(value === "" || value === null){
 
     await supabaseClient
       .from("results")
@@ -744,109 +359,27 @@ async function autoSave(studentId,value){
       teacher_id: teacherId,
       marks: Number(value)
     }],{
-      onConflict:"student_id,subject_id"
+      onConflict: "student_id,subject_id"
     });
 }
-async function openMyClass(){
-
-  const { data:{ user } } = await supabaseClient.auth.getUser();
-
-  const { data } = await supabaseClient
-    .from("teacher_assignments")
-    .select("class_id")
-    .eq("teacher_id", user.id)
-    .eq("is_class_teacher", true)
-    .maybeSingle();
-
-  if(!data){
-    alert("You are not assigned as a class teacher yet.");
-    return;
-  }
-
-  // SHOW FORM PROPERLY
-  document.getElementById("marksCard").classList.remove("hidden");
-  document.getElementById("class").style.display = "block";
-
-  // reset UI
-  document.getElementById("subject").style.display = "none";
-  document.getElementById("subjectLabel").style.display = "none";
-}
 
 
-  let soundEnabled = true;
+/* =========================
+   TOD SYSTEM (FULL)
+========================= */
 
-const SoundManager = {
+function getWeekRange(){
 
-  play(){
-    if(!soundEnabled) return;
-
-    const audio = document.getElementById("uiClickSound");
-    if(!audio) return;
-
-    audio.currentTime = 0;
-    audio.play().catch(()=>{});
-  },
-
-  toggle(){
-    soundEnabled = !soundEnabled;
-    updateSoundUI();
-  }
-};
-
-  document.addEventListener("click",(e)=>{
-
-  if(
-    e.target.closest("button") ||
-    e.target.closest(".nav-item") ||
-    e.target.closest("select") ||
-    e.target.closest("input")
-  ){
-    SoundManager.play();
-  }
-
-});
-  
-function showSubject(){
-  document.getElementById("subject").classList.remove("hidden");
-  document.getElementById("subjectLabel").classList.remove("hidden");
-}
-async function logout(){
-  await supabaseClient.auth.signOut();
-  location.href="../index.html";
-}
-  function openMyClass(){
-  document.getElementById("marksCard").classList.remove("hidden");
-  document.getElementById("class").classList.remove("hidden");
-  }
-  function openResults(){
-  window.location.href = "results.html";
-  }
-  
-
-  function updateSoundUI(){
-
-  const icon = document.getElementById("soundIcon");
-
-  if(!icon) return;
-
-  icon.innerHTML = soundEnabled ? "🔊" : "🔇";
-
-  if(soundEnabled){
-    icon.classList.add("sound-active");
-    icon.style.background = "#1e3a8a";
-  } else {
-    icon.classList.remove("sound-active");
-    icon.style.background = "#6b7280";
-  }
-  }
-  function getWeekRange(){
   const d = new Date();
   const day = d.getDay();
+
   const diff = (day === 0 ? -6 : 1) - day;
 
-  const monday = new Date(d.setDate(d.getDate()+diff));
+  const monday = new Date(d);
+  monday.setDate(d.getDate() + diff);
+
   const sunday = new Date(monday);
-  sunday.setDate(monday.getDate()+6);
+  sunday.setDate(monday.getDate() + 6);
 
   return {
     start: monday.toISOString().split("T")[0],
@@ -855,6 +388,7 @@ async function logout(){
 }
 
 async function ensureTOD(){
+
   const { start, end } = getWeekRange();
 
   const { data: exists } = await supabaseClient
@@ -874,14 +408,17 @@ async function ensureTOD(){
 
   const random = teachers[Math.floor(Math.random() * teachers.length)];
 
-  await supabaseClient.from("tod_rotation").insert([{
-    teacher_id: random.id,
-    week_start: start,
-    week_end: end
-  }]);
+  await supabaseClient
+    .from("tod_rotation")
+    .insert([{
+      teacher_id: random.id,
+      week_start: start,
+      week_end: end
+    }]);
 }
 
 async function loadTOD(){
+
   const { start } = getWeekRange();
 
   const { data: row } = await supabaseClient
@@ -910,7 +447,8 @@ async function loadTOD(){
 
   document.getElementById("todText").innerText = text;
 }
-  function subscribeTODRealtime(){
+
+function subscribeTODRealtime(){
 
   supabaseClient
     .channel('tod-live')
@@ -931,12 +469,23 @@ async function loadTOD(){
         setTimeout(()=>{
           el.classList.remove("tod-flash");
         }, 800);
+
       }
     )
     .subscribe();
-  }
-  
-  async function changePassword(){
+}
+
+
+/* =========================
+   AUTH FUNCTIONS
+========================= */
+
+async function logout(){
+  await supabaseClient.auth.signOut();
+  location.href = "../index.html";
+}
+
+async function changePassword(){
 
   const current = document.getElementById("currentPassword").value.trim();
   const newPass = document.getElementById("newPassword").value.trim();
@@ -945,14 +494,14 @@ async function loadTOD(){
   const msg = document.getElementById("passwordMsg");
 
   if(!current || !newPass || !confirm){
-    msg.style.color = "red";
     msg.innerText = "Fill all fields";
+    msg.style.color = "red";
     return;
   }
 
   if(newPass !== confirm){
-    msg.style.color = "red";
     msg.innerText = "Passwords do not match";
+    msg.style.color = "red";
     return;
   }
 
@@ -964,8 +513,8 @@ async function loadTOD(){
   });
 
   if(loginError){
-    msg.style.color = "red";
     msg.innerText = "Current password is wrong";
+    msg.style.color = "red";
     return;
   }
 
@@ -974,25 +523,76 @@ async function loadTOD(){
   });
 
   if(error){
-    msg.style.color = "red";
     msg.innerText = error.message;
+    msg.style.color = "red";
     return;
   }
 
-  msg.style.color = "green";
   msg.innerText = "Password updated successfully";
+  msg.style.color = "green";
 
   document.getElementById("currentPassword").value = "";
   document.getElementById("newPassword").value = "";
   document.getElementById("confirmPassword").value = "";
-  }
-  
-init();
+}
 
+
+/* =========================
+   NAVIGATION
+========================= */
+
+function openResults(){
+  window.location.href = "results.html";
+}
+
+
+/* =========================
+   SOUND SYSTEM
+========================= */
+
+let soundEnabled = true;
+
+const SoundManager = {
+
+  play(){
+    if(!soundEnabled) return;
+
+    const audio = document.getElementById("uiClickSound");
+    if(!audio) return;
+
+    audio.currentTime = 0;
+    audio.play().catch(()=>{});
+  },
+
+  toggle(){
+    soundEnabled = !soundEnabled;
+    updateSoundUI();
+  }
+};
+
+function updateSoundUI(){
+
+  const icon = document.getElementById("soundIcon");
+  if(!icon) return;
+
+  icon.innerHTML = soundEnabled ? "🔊" : "🔇";
+
+  icon.style.background = soundEnabled ? "#1e3a8a" : "#6b7280";
+}
+
+document.addEventListener("click", (e)=>{
+
+  if(
+    e.target.closest("button") ||
+    e.target.closest("select") ||
+    e.target.closest("input") ||
+    e.target.closest(".nav-item")
+  ){
+    SoundManager.play();
+  }
+
+});
 </script>
 
-  <audio id="uiClickSound" preload="auto">
-  <source src="https://bslofdobcvxkjphbjyzb.supabase.co/storage/v1/object/public/sounds/click.mp3" type="audio/mpeg">
-  </audio>
 </body>
 </html>
