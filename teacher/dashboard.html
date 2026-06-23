@@ -363,8 +363,8 @@ th,td{
     <span>🏠</span>Home
   </div>
 
-  <div class="nav-item" onclick="switchPage('results',this)">
-    <span>📊</span>Results
+  <div class="nav-item" onclick="openResults()">
+  <span>📊</span>Results
   </div>
 
   <div class="nav-item" onclick="switchPage('chat',this)">
@@ -667,6 +667,10 @@ async function logout(){
   await supabaseClient.auth.signOut();
   location.href="../index.html";
 }
+  function openResults(){
+  window.location.href = "results.html";
+  }
+  
 
   function updateSoundUI(){
 
