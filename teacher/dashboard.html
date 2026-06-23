@@ -897,8 +897,15 @@ async function logout(){
   }
   }
 
-  function sendMessage(){
-  alert("Button works");
+  async function sendMessage(){
+
+  alert("Function started");
+
+  const text =
+    document.getElementById("chatInput").value;
+
+  alert("Message = " + text);
+
   }
   
   async function loadMessages(){
