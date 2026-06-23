@@ -253,6 +253,10 @@ th,td{
 <div id="home" class="page active">
 
   <div class="card">
+    <div class="card">
+  <h3>📢 T.O.D This Week</h3>
+  <div id="todText">Loading T.O.D...</div>
+    </div>
     <h3 id="teacherInfo">Welcome Teacher</h3>
     <p>Manage your classes and students easily</p>
   </div>
@@ -329,18 +333,28 @@ th,td{
   </div>
 
   <div class="card">
-    <h3>Sound Settings</h3>
+    <div class="card">
+  <h3>🔑 Change Password</h3>
 
-    <button id="soundBtn" onclick="SoundManager.toggle()" style="
-  width:100%;
-  padding:10px;
-  border:none;
-  border-radius:8px;
-  background:#1e3a8a;
-  color:#fff;
-">
-  🔊 Sound: ON
-    </button>
+  <input type="password" id="currentPassword" placeholder="Current Password">
+  <input type="password" id="newPassword" placeholder="New Password">
+  <input type="password" id="confirmPassword" placeholder="Confirm Password">
+
+  <button onclick="changePassword()" style="
+    width:100%;
+    margin-top:10px;
+    padding:10px;
+    border:none;
+    background:#1e3a8a;
+    color:#fff;
+    border-radius:8px;
+  ">
+    Update Password
+  </button>
+
+  <div id="passwordMsg" style="margin-top:10px;"></div>
+    </div>
+    <h3>Sound Settings</h3>
 
   <button onclick="logout()" style="
     margin-top:10px;
@@ -477,6 +491,8 @@ async function init(){
     `${greeting}, ${name}`;
 
   await loadAssignments();
+await ensureTOD();
+await loadTOD();
 }
 
 function handleClassChange(){
@@ -687,6 +703,126 @@ async function logout(){
     icon.classList.remove("sound-active");
     icon.style.background = "#6b7280";
   }
+  }
+  function getWeekRange(){
+  const d = new Date();
+  const day = d.getDay();
+  const diff = (day === 0 ? -6 : 1) - day;
+
+  const monday = new Date(d.setDate(d.getDate()+diff));
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate()+6);
+
+  return {
+    start: monday.toISOString().split("T")[0],
+    end: sunday.toISOString().split("T")[0]
+  };
+}
+
+async function ensureTOD(){
+  const { start, end } = getWeekRange();
+
+  const { data: exists } = await supabaseClient
+    .from("tod_rotation")
+    .select("id")
+    .eq("week_start", start)
+    .maybeSingle();
+
+  if(exists) return;
+
+  const { data: teachers } = await supabaseClient
+    .from("profiles")
+    .select("id")
+    .eq("role", "teacher");
+
+  if(!teachers?.length) return;
+
+  const random = teachers[Math.floor(Math.random() * teachers.length)];
+
+  await supabaseClient.from("tod_rotation").insert([{
+    teacher_id: random.id,
+    week_start: start,
+    week_end: end
+  }]);
+}
+
+async function loadTOD(){
+  const { start } = getWeekRange();
+
+  const { data: tod } = await supabaseClient
+    .from("tod_rotation")
+    .select("teacher_id")
+    .eq("week_start", start)
+    .maybeSingle();
+
+  if(!tod){
+    document.getElementById("todText").innerText = "No T.O.D assigned";
+    return;
+  }
+
+  const { data: t } = await supabaseClient
+    .from("profiles")
+    .select("full_name")
+    .eq("id", tod.teacher_id)
+    .maybeSingle();
+
+  const { data:{ user } } = await supabaseClient.auth.getUser();
+
+  document.getElementById("todText").innerText =
+    tod.teacher_id === user.id
+      ? "🔥 YOU ARE T.O.D THIS WEEK"
+      : "T.O.D: " + (t?.full_name || "Unknown");
+  }
+  
+  async function changePassword(){
+
+  const current = document.getElementById("currentPassword").value.trim();
+  const newPass = document.getElementById("newPassword").value.trim();
+  const confirm = document.getElementById("confirmPassword").value.trim();
+
+  const msg = document.getElementById("passwordMsg");
+
+  if(!current || !newPass || !confirm){
+    msg.style.color = "red";
+    msg.innerText = "Fill all fields";
+    return;
+  }
+
+  if(newPass !== confirm){
+    msg.style.color = "red";
+    msg.innerText = "Passwords do not match";
+    return;
+  }
+
+  const { data:{ user } } = await supabaseClient.auth.getUser();
+
+  const { error: loginError } = await supabaseClient.auth.signInWithPassword({
+    email: user.email,
+    password: current
+  });
+
+  if(loginError){
+    msg.style.color = "red";
+    msg.innerText = "Current password is wrong";
+    return;
+  }
+
+  const { error } = await supabaseClient.auth.updateUser({
+    password: newPass
+  });
+
+  if(error){
+    msg.style.color = "red";
+    msg.innerText = error.message;
+    return;
+  }
+
+  msg.style.color = "green";
+  msg.innerText = "Password updated successfully";
+
+  document.getElementById("currentPassword").value = "";
+  document.getElementById("newPassword").value = "";
+  document.getElementById("confirmPassword").value = "";
   }
   
 init();
