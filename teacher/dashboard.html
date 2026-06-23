@@ -927,7 +927,7 @@ async function logout(){
     }
 
     document.getElementById("chatInput").value = "";
-
+await loadMessages();
     alert("Message sent");
 
   }catch(err){
@@ -939,7 +939,7 @@ async function logout(){
   }
   
   async function loadMessages(){
-
+  alert("Loading messages");
   const { data } = await supabaseClient
     .from("chats")
     .select("*")
