@@ -385,7 +385,7 @@ th,td{
     <h4 id="subjectLabel" class="hidden">Subject</h4>
     <select id="subject" class="hidden" onchange="handleSubjectChange()"></select>
   </div>
-</div>
+  
   <div class="card hidden" id="studentsCard">
   <h3>Students</h3>
   <table class="students-table">
@@ -417,13 +417,14 @@ th,td{
     <h3>School Chat</h3>
 
     <div id="chatMessages" style="
-      height:300px;
+      height:350px;
       overflow-y:auto;
       border:1px solid #ddd;
       margin-top:10px;
       padding:10px;
       border-radius:8px;
-    ">
+      background:#f8fafc;
+">
     </div>
 
     <div style="display:flex;gap:8px;margin-top:10px;">
@@ -942,46 +943,39 @@ await loadMessages();
   
   async function loadMessages(){
 
-  const { data, error } = await supabaseClient
+  const { data } = await supabaseClient
     .from("chats")
     .select("*")
-    .order("created_at");
-  alert("Messages found: " + (data ? data.length : 0));
-  console.log("CHAT DATA:", data);
-  console.log("CHAT ERROR:", error);
+    .order("created_at",{ascending:true});
 
-  const box =
-    document.getElementById("chatMessages");
+  const box = document.getElementById("chatMessages");
 
   box.innerHTML = "";
 
   (data || []).forEach(msg=>{
 
-    const mine =
-      msg.sender_id === teacherId;
-
     box.innerHTML += `
       <div style="
-        display:flex;
-        justify-content:${mine ? "flex-end" : "flex-start"};
+        background:#ffffff;
+        border:1px solid #e5e7eb;
+        border-radius:12px;
+        padding:10px;
         margin-bottom:10px;
       ">
         <div style="
-          max-width:80%;
-          padding:10px;
-          border-radius:12px;
-          background:${mine ? "#1e3a8a" : "#e5e7eb"};
-          color:${mine ? "#fff" : "#111"};
+          font-weight:700;
+          color:#1e3a8a;
+          font-size:12px;
+          margin-bottom:5px;
         ">
-          <div style="
-            font-size:11px;
-            font-weight:bold;
-            margin-bottom:4px;
-          ">
-            ${msg.sender_name || "Unknown"}
-          </div>
+          ${msg.sender_name}
+        </div>
 
-          ${msg.message || ""}
+        <div style="
+          font-size:14px;
+          color:#111827;
+        ">
+          ${msg.message}
         </div>
       </div>
     `;
