@@ -899,12 +899,24 @@ async function logout(){
 
   async function sendMessage(){
 
-  alert("Function started");
-
   const text =
     document.getElementById("chatInput").value;
 
-  alert("Message = " + text);
+  const { data, error } = await supabaseClient
+    .from("chats")
+    .insert({
+      sender_id: teacherId,
+      sender_name: teacherName,
+      message: text
+    });
+
+  if(error){
+    alert("ERROR: " + error.message);
+    console.log(error);
+    return;
+  }
+
+  alert("Message saved");
 
   }
   
