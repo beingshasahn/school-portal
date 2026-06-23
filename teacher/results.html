@@ -133,7 +133,17 @@ const client = supabase.createClient(
 
 let currentClass = null;
 let isPublished = false;
+function formatSubject(name){
 
+  const map = {
+    "Geography and the environment": "GEOGRAPHY",
+    "Historia ya Tanzania na Maadili": "HIST.TZ",
+    "Arts and Sports": "ARTS & SPORTS"
+  };
+
+  return map[name] || name;
+}
+  
 /* ================= GRADES ================= */
 function grade(m){
   if(m >= 81) return "A";
@@ -245,8 +255,8 @@ async function loadReport(){
       total += m;
       count++;
 
-      detail.push(sub.subject_name + "-" + grade(m));
-    });
+      const shortName = formatSubject(sub.subject_name);
+detail.push(shortName + " - " + grade(m));
 
     if(count === 0) return;
 
@@ -262,7 +272,7 @@ async function loadReport(){
       prem: stu.prem_no,
       name: stu.student_name || "-",
       sex: stu.gender === "Female" ? "F" : "M",
-      detail: detail.join(" ")
+      detail: detail.join(", ")
     });
 
   });
