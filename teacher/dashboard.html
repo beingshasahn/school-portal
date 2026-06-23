@@ -52,6 +52,17 @@ body{
   animation:fade 0.3s ease-in-out;
 }
 
+  .tod-flash{
+  animation: flash 0.6s ease;
+}
+
+@keyframes flash{
+  0%{background:#000}
+  50%{background:#1e3c72}
+  100%{background:#000}
+}
+  
+
 .page.active{
   display:block;
 }
@@ -195,6 +206,30 @@ th,td{
   position:relative;
 }
 
+  .tod-wrapper{
+  overflow:hidden;
+  white-space:nowrap;
+  background:#000;
+  padding:6px 0;
+  border-bottom:1px solid #222;
+}
+
+.tod-scroll{
+  display:inline-block;
+  white-space:nowrap;
+  color:#00ff88;
+  font-weight:bold;
+  font-size:14px;
+  animation:scrollLeft 12s linear infinite;
+  padding-left:100%;
+}
+
+@keyframes scrollLeft{
+  0%{transform:translateX(0)}
+  100%{transform:translateX(-100%)}
+}
+  
+
 /* SCHOOL LOGO BACKGROUND */
 .brand-logo{
   width:30px;
@@ -248,15 +283,13 @@ th,td{
 
   </div>
 </div>
-
+<div class="tod-wrapper">
+  <div id="todText" class="tod-scroll">Loading T.O.D...</div>
+</div>
 <!-- HOME -->
 <div id="home" class="page active">
 
   <div class="card">
-    <div class="card">
-  <h3>📢 T.O.D This Week</h3>
-  <div id="todText">Loading T.O.D...</div>
-    </div>
     <h3 id="teacherInfo">Welcome Teacher</h3>
     <p>Manage your classes and students easily</p>
   </div>
@@ -493,6 +526,7 @@ async function init(){
   await loadAssignments();
 await ensureTOD();
 await loadTOD();
+  subscribeTODRealtime();
 }
 
 function handleClassChange(){
@@ -749,29 +783,56 @@ async function ensureTOD(){
 async function loadTOD(){
   const { start } = getWeekRange();
 
-  const { data: tod } = await supabaseClient
+  const { data: row } = await supabaseClient
     .from("tod_rotation")
     .select("teacher_id")
     .eq("week_start", start)
     .maybeSingle();
 
-  if(!tod){
-    document.getElementById("todText").innerText = "No T.O.D assigned";
+  if(!row){
+    document.getElementById("todText").innerText =
+      "T.O.D: Not assigned this week";
     return;
   }
 
   const { data: t } = await supabaseClient
     .from("profiles")
     .select("full_name")
-    .eq("id", tod.teacher_id)
+    .eq("id", row.teacher_id)
     .maybeSingle();
 
   const { data:{ user } } = await supabaseClient.auth.getUser();
 
-  document.getElementById("todText").innerText =
-    tod.teacher_id === user.id
-      ? "🔥 YOU ARE T.O.D THIS WEEK"
-      : "T.O.D: " + (t?.full_name || "Unknown");
+  const text = row.teacher_id === user.id
+    ? "YOU ARE A T.O.D THIS WEEK"
+    : "T.O.D: " + (t?.full_name || "Unknown");
+
+  document.getElementById("todText").innerText = text;
+}
+  function subscribeTODRealtime(){
+
+  supabaseClient
+    .channel('tod-live')
+    .on('postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'tod_rotation'
+      },
+      () => {
+
+        const el = document.getElementById("todText");
+
+        el.classList.add("tod-flash");
+
+        loadTOD();
+
+        setTimeout(()=>{
+          el.classList.remove("tod-flash");
+        }, 800);
+      }
+    )
+    .subscribe();
   }
   
   async function changePassword(){
