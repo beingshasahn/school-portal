@@ -1,245 +1,434 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kemps Portal FIXED</title>
+<title>Kemps Portal</title>
 
+<!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
-*{
+<!-- *{
+  margin:0;
+  padding:0;
   box-sizing:border-box;
-  font-family:Segoe UI, Arial;
+  font-family:Segoe UI, Arial, sans-serif;
 }
 
 body{
-  margin:0;
   background:#f5f6fa;
+  color:#111;
 }
 
-/* TOP BAR */
+/* ================= TOP BAR ================= */
 .topbar{
-  background:#fff;
-  padding:12px 15px;
   display:flex;
   justify-content:space-between;
   align-items:center;
-  border-bottom:1px solid #eee;
+  padding:12px 15px;
+  background:#fff;
+  border-bottom:1px solid #e5e5e5;
+  position:sticky;
+  top:0;
+  z-index:10;
 }
 
 .brand{
-  font-weight:bold;
-  color:#111;
   display:flex;
   align-items:center;
   gap:8px;
+  font-weight:bold;
+  font-size:18px;
+}
+
+.brand-logo{
+  width:32px;
+  height:32px;
+  background:url("https://bslofdobcvxkjphbjyzb.supabase.co/storage/v1/object/public/logos/school.png");
+  background-size:contain;
+  background-repeat:no-repeat;
+  background-position:center;
+  border-radius:6px;
+  background-color:#fff;
+}
+
+.user-section{
+  display:flex;
+  align-items:center;
+  gap:10px;
 }
 
 .user{
+  width:36px;
+  height:36px;
+  border-radius:50%;
   background:#a78bfa;
   color:#fff;
-  width:35px;
-  height:35px;
-  border-radius:50%;
   display:flex;
   align-items:center;
   justify-content:center;
+  font-weight:bold;
 }
 
-/* PAGES */
+/* ================= T.O.D ================= */
+#todText{
+  background:#0f172a;
+  color:#00ff88;
+  padding:8px 12px;
+  font-size:13px;
+  font-weight:600;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* ================= PAGE SYSTEM ================= */
 .page{
   display:none;
   padding:15px;
+  animation:fadeIn 0.25s ease-in-out;
 }
 
 .page.active{
   display:block;
 }
 
-/* CARD */
+@keyframes fadeIn{
+  from{opacity:0; transform:translateY(10px);}
+  to{opacity:1; transform:translateY(0);}
+}
+
+/* ================= CARDS ================= */
 .card{
   background:#fff;
   padding:15px;
   border-radius:12px;
   margin-bottom:12px;
+  box-shadow:0 2px 10px rgba(0,0,0,0.05);
 }
 
-/* HIDDEN FIX */
-.hidden{
-  display:none !important;
+/* ================= BUTTONS ================= */
+button{
+  padding:10px 12px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  background:#1e3a8a;
+  color:#fff;
+  font-weight:600;
 }
 
-/* INPUTS */
-input,select{
+button:hover{
+  opacity:0.9;
+}
+
+/* ================= INPUTS ================= */
+input, select{
   width:100%;
   padding:10px;
   margin-top:6px;
+  margin-bottom:10px;
   border:1px solid #ddd;
   border-radius:8px;
+  outline:none;
 }
 
-/* TABLE */
+/* ================= TABLE ================= */
 table{
   width:100%;
   border-collapse:collapse;
+  margin-top:10px;
 }
 
-th,td{
+th{
+  background:#1e3a8a;
+  color:#fff;
+  text-align:left;
+  padding:10px;
+  font-size:14px;
+}
+
+td{
   padding:10px;
   border-bottom:1px solid #eee;
 }
 
-/* BUTTON */
-button{
-  cursor:pointer;
+/* ================= MARKS INPUT ================= */
+td input{
+  width:70px;
+  padding:6px;
+  text-align:center;
 }
 
-</style>
-</head>
+/* ================= HIDDEN SYSTEM ================= */
+.hidden{
+  display:none !important;
+}
 
+/* ================= NAVIGATION ================= */
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  height:60px;
+  background:#fff;
+  border-top:1px solid #e5e5e5;
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  z-index:20;
+}
+
+.nav-item{
+  background:none;
+  color:#777;
+  font-size:12px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:3px;
+}
+
+.nav-item.active{
+  color:#1e3a8a;
+  font-weight:bold;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width:768px){
+
+  .brand{
+    font-size:16px;
+  }
+
+  .card{
+    padding:12px;
+  }
+
+  td input{
+    width:60px;
+  }
+}
+
+/* ================= SMALL ANIMATIONS ================= */
+.card{
+  transition:0.2s ease;
+}
+
+.card:hover{
+  transform:translateY(-2px);
+}
+
+button:active{
+  transform:scale(0.98);
+}CSS will come in Part 2 -->
+  
+</head>
+</style>
 <body>
 
-<div class="topbar">
-  <div class="brand">📘 KempsPortal</div>
-  <div class="user">SM</div>
-</div>
-
-<!-- HOME -->
-<div id="home" class="page active">
-
-  <div class="card">
-    <h3 id="teacherInfo">Welcome Teacher</h3>
+<!-- ================= TOP BAR ================= -->
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-logo"></span>
+    KempsPortal
   </div>
 
-  <div class="card">
-    <button onclick="openMyClass()">Open Class Panel</button>
+  <div class="user-section">
+    <div id="soundIcon">🔊</div>
+    <div class="user" id="userInitials">SM</div>
   </div>
+</header>
 
-  <!-- CLASS + SUBJECT -->
-  <div class="card hidden" id="marksCard">
+<!-- ================= T.O.D BAR ================= -->
+<div id="todText">Loading T.O.D...</div>
 
-    <h3>Marks Entry</h3>
+<!-- ================= MAIN WRAPPER ================= -->
+<main>
 
-    <label>Class</label>
-    <select id="class" onchange="handleClassChange()">
-      <option value="">Select Class</option>
-    </select>
+  <!-- HOME PAGE -->
+  <section id="home" class="page active">
 
-    <div id="subjectWrapper" class="hidden">
-      <label>Subject</label>
-      <select id="subject" onchange="handleSubjectChange()">
-        <option value="">Select Subject</option>
-      </select>
+    <div class="card">
+      <h2 id="teacherInfo">Welcome Teacher</h2>
+      <p>Manage your classes and students</p>
     </div>
 
-  </div>
+    <div class="card">
+      <button id="openClassBtn">Open Class Panel</button>
+    </div>
 
-  <!-- TABLE -->
-  <div class="card">
-    <table>
-      <thead>
-        <tr>
-          <th>Adm</th>
-          <th>Name</th>
-          <th>Marks</th>
-        </tr>
-      </thead>
-      <tbody id="students"></tbody>
-    </table>
-  </div>
+    <!-- CLASS + SUBJECT SELECT -->
+    <div class="card">
 
-</div>
+      <label for="class">Class</label>
+      <select id="class"></select>
 
+      <label id="subjectLabel" class="hidden">Subject</label>
+      <select id="subject" class="hidden"></select>
+
+    </div>
+
+    <!-- MARKS TABLE -->
+    <div class="card hidden" id="marksCard">
+
+      <h3>Student Marks</h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Adm No</th>
+            <th>Name</th>
+            <th>Marks</th>
+          </tr>
+        </thead>
+
+        <tbody id="students"></tbody>
+      </table>
+
+    </div>
+
+  </section>
+
+  <!-- RESULTS PAGE -->
+  <section id="results" class="page">
+    <div class="card">
+      <h2>Results</h2>
+      <p>Results management area</p>
+    </div>
+  </section>
+
+  <!-- CHAT PAGE -->
+  <section id="chat" class="page">
+    <div class="card">
+      <h2>Chat</h2>
+      <p>Chat system coming soon</p>
+    </div>
+  </section>
+
+  <!-- NOTICES PAGE -->
+  <section id="notices" class="page">
+    <div class="card">
+      <h2>Notices</h2>
+      <p>No notices available</p>
+    </div>
+  </section>
+
+  <!-- PROFILE PAGE -->
+  <section id="profile" class="page">
+
+    <div class="card">
+      <h2>Profile</h2>
+      <p>Teacher profile settings</p>
+    </div>
+
+    <div class="card">
+
+      <h3>Settings</h3>
+
+      <button id="soundToggleBtn">Toggle Sound</button>
+      <button id="logoutBtn">Logout</button>
+
+    </div>
+
+  </section>
+
+</main>
+
+<!-- ================= BOTTOM NAV ================= -->
+<nav class="bottom-nav">
+
+  <button class="nav-item active" data-page="home">Home</button>
+  <button class="nav-item" data-page="results">Results</button>
+  <button class="nav-item" data-page="chat">Chat</button>
+  <button class="nav-item" data-page="notices">Notices</button>
+  <button class="nav-item" data-page="profile">Profile</button>
+
+</nav>
 <script>
 
-/* STATE */
+const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
+const supabaseKey = "YOUR_ANON_KEY_HERE";
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+/* ================= GLOBAL STATE ================= */
 let teacherId = null;
 let assignments = [];
 let selectedClass = null;
 let selectedSubject = null;
+let soundEnabled = true;
 
-/* SUPABASE */
-const supabaseClient = supabase.createClient(
-  "https://bslofdobcvxkjphbjyzb.supabase.co",
-  "YOUR_KEY"
-);
+/* ================= PAGE SWITCHER ================= */
+function switchPage(page, el){
 
-/* INIT */
+  document.querySelectorAll('.page').forEach(p=>{
+    p.classList.remove('active');
+  });
+
+  document.getElementById(page).classList.add('active');
+
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    n.classList.remove('active');
+  });
+
+  if(el) el.classList.add('active');
+}
+
+/* ================= AUTH PROTECT ================= */
+async function protect(roleRequired){
+
+  const { data:{ user } } = await supabaseClient.auth.getUser();
+
+  if(!user){
+    location.href = "../index.html";
+    return false;
+  }
+
+  const { data: profile } = await supabaseClient
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if(!profile || profile.role !== roleRequired){
+    alert("No permission");
+    location.href = "../index.html";
+    return false;
+  }
+
+  return true;
+}
+
+/* ================= INIT ================= */
 async function init(){
+
+  const ok = await protect("teacher");
+  if(!ok) return;
 
   const { data:{ user } } = await supabaseClient.auth.getUser();
   teacherId = user.id;
 
-  loadAssignments();
+  const { data: profile } = await supabaseClient
+    .from("profiles")
+    .select("full_name")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  document.getElementById("teacherInfo").innerText =
+    "Welcome " + (profile?.full_name || "Teacher");
+
+  await loadAssignments();
 }
 
-init();
-
-/* OPEN CLASS PANEL */
-function openMyClass(){
-
-  document.getElementById("marksCard").classList.remove("hidden");
-
-  // IMPORTANT FIX:
-  document.getElementById("class").classList.remove("hidden");
-
-}
-
-/* STEP 1: CLASS CHANGE */
-function handleClassChange(){
-
-  selectedClass = document.getElementById("class").value;
-
-  selectedSubject = null;
-
-  document.getElementById("students").innerHTML = "";
-
-  document.getElementById("subjectWrapper").classList.remove("hidden");
-
-  loadSubjects(selectedClass);
-}
-
-/* STEP 2: LOAD SUBJECTS */
-function loadSubjects(class_id){
-
-  const sub = document.getElementById("subject");
-
-  sub.innerHTML = `<option value="">Select Subject</option>`;
-
-  assignments.forEach(a=>{
-
-    const cid = a.class_id || a.classes?.id;
-
-    if(String(cid) === String(class_id)){
-
-      sub.innerHTML += `
-        <option value="${a.subjects.id}">
-          ${a.subjects.subject_name}
-        </option>
-      `;
-    }
-  });
-}
-
-/* STEP 3: SUBJECT CHANGE */
-function handleSubjectChange(){
-
-  selectedSubject = document.getElementById("subject").value;
-
-  if(!selectedSubject) return;
-
-  loadStudents(selectedClass);
-
-}
-
-/* LOAD ASSIGNMENTS */
+/* ================= LOAD ASSIGNMENTS ================= */
 async function loadAssignments(){
 
   const { data } = await supabaseClient
     .from("teacher_assignments")
     .select(`
       class_id,
+      subject_id,
       classes(id,class_name),
       subjects(id,subject_name)
     `)
@@ -247,55 +436,70 @@ async function loadAssignments(){
 
   assignments = data || [];
 
-  const sel = document.getElementById("class");
-
-  sel.innerHTML = `<option value="">Select Class</option>`;
+  const classSel = document.getElementById("class");
+  classSel.innerHTML = `<option value="">Select Class</option>`;
 
   const seen = new Set();
 
   assignments.forEach(a=>{
-
-    if(!seen.has(a.classes.id)){
+    if(a.classes && !seen.has(a.classes.id)){
       seen.add(a.classes.id);
 
-      sel.innerHTML += `
+      classSel.innerHTML += `
         <option value="${a.classes.id}">
           ${a.classes.class_name}
-        </option>
-      `;
+        </option>`;
     }
-
   });
-
 }
 
-/* LOAD STUDENTS */
-async function loadStudents(class_id){
+/* ================= CLASS CHANGE ================= */
+function handleClassChange(){
 
-  const { data: students } = await supabaseClient
-    .from("students")
-    .select("*")
-    .eq("class_id", class_id);
+  selectedClass = document.getElementById("class").value;
+  selectedSubject = null;
 
-  const tbody = document.getElementById("students");
-  tbody.innerHTML = "";
+  document.getElementById("students").innerHTML = "";
 
-  students.forEach(s=>{
-    tbody.innerHTML += `
-      <tr>
-        <td>${s.admission_no}</td>
-        <td>${s.student_name}</td>
-        <td><input type="number"></td>
-      </tr>
-    `;
-  });
+  const subject = document.getElementById("subject");
+  const label = document.getElementById("subjectLabel");
 
+  subject.classList.remove("hidden");
+  label.classList.remove("hidden");
+
+  loadSubjects(selectedClass);
 }
 
-  /* =========================
-   MARKS SYSTEM (FULL FIX)
-========================= */
+/* ================= LOAD SUBJECTS ================= */
+function loadSubjects(class_id){
 
+  const subjectSel = document.getElementById("subject");
+  subjectSel.innerHTML = `<option value="">Select Subject</option>`;
+
+  assignments.forEach(a=>{
+
+    const cid = a.classes?.id || a.class_id;
+
+    if(String(cid) === String(class_id) && a.subjects){
+      subjectSel.innerHTML += `
+        <option value="${a.subjects.id}">
+          ${a.subjects.subject_name}
+        </option>`;
+    }
+  });
+}
+
+/* ================= SUBJECT CHANGE ================= */
+function handleSubjectChange(){
+
+  selectedSubject = document.getElementById("subject").value;
+
+  if(!selectedSubject) return;
+
+  loadStudents(selectedClass);
+}
+
+/* ================= LOAD STUDENTS ================= */
 async function loadStudents(class_id){
 
   if(!selectedSubject) return;
@@ -306,15 +510,14 @@ async function loadStudents(class_id){
     .eq("class_id", class_id)
     .order("admission_no");
 
-  const { data: marksData } = await supabaseClient
+  const { data: marks } = await supabaseClient
     .from("results")
     .select("student_id, marks")
     .eq("subject_id", selectedSubject);
 
-  const marksMap = {};
-
-  (marksData || []).forEach(r=>{
-    marksMap[r.student_id] = r.marks;
+  const map = {};
+  (marks || []).forEach(m=>{
+    map[m.student_id] = m.marks;
   });
 
   const tbody = document.getElementById("students");
@@ -327,7 +530,7 @@ async function loadStudents(class_id){
         <td>${s.student_name}</td>
         <td>
           <input type="number"
-            value="${marksMap[s.id] ?? ''}"
+            value="${map[s.id] ?? ''}"
             oninput="autoSave('${s.id}',this.value)">
         </td>
       </tr>
@@ -335,19 +538,17 @@ async function loadStudents(class_id){
   });
 }
 
-/* AUTO SAVE MARKS */
+/* ================= AUTO SAVE MARKS ================= */
 async function autoSave(studentId, value){
 
   if(!selectedSubject) return;
 
-  if(value === "" || value === null){
-
+  if(value === ""){
     await supabaseClient
       .from("results")
       .delete()
       .eq("student_id", studentId)
       .eq("subject_id", selectedSubject);
-
     return;
   }
 
@@ -363,236 +564,62 @@ async function autoSave(studentId, value){
     });
 }
 
-
-/* =========================
-   TOD SYSTEM (FULL)
-========================= */
-
-function getWeekRange(){
-
-  const d = new Date();
-  const day = d.getDay();
-
-  const diff = (day === 0 ? -6 : 1) - day;
-
-  const monday = new Date(d);
-  monday.setDate(d.getDate() + diff);
-
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
-
-  return {
-    start: monday.toISOString().split("T")[0],
-    end: sunday.toISOString().split("T")[0]
-  };
+/* ================= OPEN CLASS ================= */
+function openMyClass(){
+  document.getElementById("class").classList.remove("hidden");
 }
 
-async function ensureTOD(){
-
-  const { start, end } = getWeekRange();
-
-  const { data: exists } = await supabaseClient
-    .from("tod_rotation")
-    .select("id")
-    .eq("week_start", start)
-    .maybeSingle();
-
-  if(exists) return;
-
-  const { data: teachers } = await supabaseClient
-    .from("profiles")
-    .select("id")
-    .eq("role", "teacher");
-
-  if(!teachers?.length) return;
-
-  const random = teachers[Math.floor(Math.random() * teachers.length)];
-
-  await supabaseClient
-    .from("tod_rotation")
-    .insert([{
-      teacher_id: random.id,
-      week_start: start,
-      week_end: end
-    }]);
-}
-
-async function loadTOD(){
-
-  const { start } = getWeekRange();
-
-  const { data: row } = await supabaseClient
-    .from("tod_rotation")
-    .select("teacher_id")
-    .eq("week_start", start)
-    .maybeSingle();
-
-  if(!row){
-    document.getElementById("todText").innerText =
-      "T.O.D: Not assigned this week";
-    return;
-  }
-
-  const { data: t } = await supabaseClient
-    .from("profiles")
-    .select("full_name")
-    .eq("id", row.teacher_id)
-    .maybeSingle();
-
-  const { data:{ user } } = await supabaseClient.auth.getUser();
-
-  const text = row.teacher_id === user.id
-    ? "YOU ARE A T.O.D THIS WEEK"
-    : "T.O.D: " + (t?.full_name || "Unknown");
-
-  document.getElementById("todText").innerText = text;
-}
-
-function subscribeTODRealtime(){
-
-  supabaseClient
-    .channel('tod-live')
-    .on('postgres_changes',
-      {
-        event: '*',
-        schema: 'public',
-        table: 'tod_rotation'
-      },
-      () => {
-
-        const el = document.getElementById("todText");
-
-        el.classList.add("tod-flash");
-
-        loadTOD();
-
-        setTimeout(()=>{
-          el.classList.remove("tod-flash");
-        }, 800);
-
-      }
-    )
-    .subscribe();
-}
-
-
-/* =========================
-   AUTH FUNCTIONS
-========================= */
-
-async function logout(){
-  await supabaseClient.auth.signOut();
-  location.href = "../index.html";
-}
-
-async function changePassword(){
-
-  const current = document.getElementById("currentPassword").value.trim();
-  const newPass = document.getElementById("newPassword").value.trim();
-  const confirm = document.getElementById("confirmPassword").value.trim();
-
-  const msg = document.getElementById("passwordMsg");
-
-  if(!current || !newPass || !confirm){
-    msg.innerText = "Fill all fields";
-    msg.style.color = "red";
-    return;
-  }
-
-  if(newPass !== confirm){
-    msg.innerText = "Passwords do not match";
-    msg.style.color = "red";
-    return;
-  }
-
-  const { data:{ user } } = await supabaseClient.auth.getUser();
-
-  const { error: loginError } = await supabaseClient.auth.signInWithPassword({
-    email: user.email,
-    password: current
-  });
-
-  if(loginError){
-    msg.innerText = "Current password is wrong";
-    msg.style.color = "red";
-    return;
-  }
-
-  const { error } = await supabaseClient.auth.updateUser({
-    password: newPass
-  });
-
-  if(error){
-    msg.innerText = error.message;
-    msg.style.color = "red";
-    return;
-  }
-
-  msg.innerText = "Password updated successfully";
-  msg.style.color = "green";
-
-  document.getElementById("currentPassword").value = "";
-  document.getElementById("newPassword").value = "";
-  document.getElementById("confirmPassword").value = "";
-}
-
-
-/* =========================
-   NAVIGATION
-========================= */
-
-function openResults(){
-  window.location.href = "results.html";
-}
-
-
-/* =========================
-   SOUND SYSTEM
-========================= */
-
-let soundEnabled = true;
-
+/* ================= SOUND ================= */
 const SoundManager = {
+
+  toggle(){
+    soundEnabled = !soundEnabled;
+    updateSoundUI();
+  },
 
   play(){
     if(!soundEnabled) return;
 
     const audio = document.getElementById("uiClickSound");
-    if(!audio) return;
-
-    audio.currentTime = 0;
-    audio.play().catch(()=>{});
-  },
-
-  toggle(){
-    soundEnabled = !soundEnabled;
-    updateSoundUI();
+    if(audio){
+      audio.currentTime = 0;
+      audio.play().catch(()=>{});
+    }
   }
 };
 
-function updateSoundUI(){
-
-  const icon = document.getElementById("soundIcon");
-  if(!icon) return;
-
-  icon.innerHTML = soundEnabled ? "🔊" : "🔇";
-
-  icon.style.background = soundEnabled ? "#1e3a8a" : "#6b7280";
-}
-
 document.addEventListener("click", (e)=>{
-
-  if(
-    e.target.closest("button") ||
-    e.target.closest("select") ||
-    e.target.closest("input") ||
-    e.target.closest(".nav-item")
-  ){
+  if(e.target.closest("button") || e.target.closest("select") || e.target.closest(".nav-item")){
     SoundManager.play();
   }
-
 });
+
+function updateSoundUI(){
+  document.getElementById("soundIcon").innerText =
+    soundEnabled ? "🔊" : "🔇";
+}
+
+/* ================= LOGOUT ================= */
+async function logout(){
+  await supabaseClient.auth.signOut();
+  location.href = "../index.html";
+}
+
+/* ================= NAV RESULT PAGE ================= */
+function openResults(){
+  location.href = "results.html";
+}
+
+/* ================= INIT APP ================= */
+init();
+
 </script>
+<!-- ================= AUDIO ================= -->
+<audio id="uiClickSound">
+  <source src="" type="audio/mpeg">
+</audio>
+
+<!-- ================= JS WILL COME LATER ================= -->
 
 </body>
 </html>
