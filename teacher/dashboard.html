@@ -939,11 +939,14 @@ await loadMessages();
   }
   
   async function loadMessages(){
-  alert("Loading messages");
-  const { data } = await supabaseClient
+
+  const { data, error } = await supabaseClient
     .from("chats")
     .select("*")
     .order("created_at");
+  alert("Messages found: " + (data ? data.length : 0));
+  console.log("CHAT DATA:", data);
+  console.log("CHAT ERROR:", error);
 
   const box =
     document.getElementById("chatMessages");
@@ -958,28 +961,25 @@ await loadMessages();
     box.innerHTML += `
       <div style="
         display:flex;
-        justify-content:
-        ${mine ? "flex-end" : "flex-start"};
+        justify-content:${mine ? "flex-end" : "flex-start"};
         margin-bottom:10px;
       ">
         <div style="
           max-width:80%;
           padding:10px;
           border-radius:12px;
-          background:
-          ${mine ? "#1e3a8a" : "#e5e7eb"};
-          color:
-          ${mine ? "#fff" : "#111"};
+          background:${mine ? "#1e3a8a" : "#e5e7eb"};
+          color:${mine ? "#fff" : "#111"};
         ">
           <div style="
             font-size:11px;
             font-weight:bold;
             margin-bottom:4px;
           ">
-            ${msg.sender_name}
+            ${msg.sender_name || "Unknown"}
           </div>
 
-          ${msg.message}
+          ${msg.message || ""}
         </div>
       </div>
     `;
