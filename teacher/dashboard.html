@@ -523,7 +523,9 @@ function switchPage(page, el){
       p.style.transform = "translateY(10px) scale(0.98)";
       setTimeout(()=>p.classList.remove('active'), 150);
     });
-
+if(page === "chat"){
+  loadMessages();
+}
   setTimeout(()=>{
 
     document.getElementById(page).classList.add('active');
