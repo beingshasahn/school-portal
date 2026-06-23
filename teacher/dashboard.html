@@ -83,6 +83,7 @@ body{
 
   #marksCard {
   transition: all 0.3s ease;
+    marksCard.style.transform = "translateY(10px)";
   }
   
 /* EMPTY */
@@ -607,21 +608,38 @@ await loadTOD();
 function handleClassChange(){
   selectedClass = document.getElementById("class").value;
   selectedSubject = null;
+
   document.getElementById("students").innerHTML = "";
 
-  if(selectedClass) loadSubjects(selectedClass);
-}
-
-function handleClassChange(){
-  selectedClass = document.getElementById("class").value;
-  selectedSubject = null;
-  document.getElementById("students").innerHTML = "";
-
-  // hide marks form again
+  // HIDE FORM
   document.getElementById("marksCard").classList.add("hidden");
 
-  if(selectedClass) loadSubjects(selectedClass);
+  if(selectedClass){
+    loadSubjects(selectedClass);
+  }
 }
+
+  function handleSubjectChange(){
+  selectedSubject = document.getElementById("subject").value;
+
+  if(!selectedSubject) return;
+
+  // show marks form
+  const marksCard = document.getElementById("marksCard");
+
+marksCard.style.opacity = "0";
+
+setTimeout(()=>{
+  marksCard.classList.remove("hidden");
+  marksCard.style.opacity = "1";
+}, 100);
+
+  // clear table then load students
+  document.getElementById("students").innerHTML = "";
+
+  loadStudents(selectedClass);
+  }
+
 
 function loadSubjects(class_id){
 
