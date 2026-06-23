@@ -65,7 +65,7 @@ th, td{
 
 <body>
 
-<div class="header">RESULTS DASHBOARD (VIEW ONLY)</div>
+<div class="header">KOROSHO ENGLISH MEDIUM PRE AND PRIMARY SCHOOL <br> RESULTS DASHBOARD (VIEW ONLY)</div>
 
 <select id="class" onchange="onClassChange()">
   <option value="">Select Class</option>
@@ -182,7 +182,7 @@ async function checkPublishStatus(){
 
   if(!isPublished){
     document.getElementById("status").innerText =
-      "⚠ RESULTS NOT PUBLISHED";
+      "⚠ RESULTS ARE NOT YET PUBLISHED BY THE ACADEMIC TEACHER";
     return false;
   }
 
@@ -338,7 +338,7 @@ document.getElementById("subtbody").innerHTML =
   subjectRows.length
     ? subjectRows.join("")
     : `<tr><td colspan="7" style="text-align:center;">
-        NO SUBJECT PERFORMANCE DATA
+        NO SUBJECT PERFORMANCE DATA AVAILABLE YET!
       </td></tr>`;
 }
 function startRealtime(){
