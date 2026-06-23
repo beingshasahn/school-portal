@@ -442,7 +442,7 @@ async function loadReport(){
       count++;
 
       const subName = formatSubject(sub.subject_name);
-detail.push(subName + "-" + grade(m));
+detail.push(subName + " - " + grade(m));
     });
 
     if(count===0) return;
@@ -456,7 +456,7 @@ detail.push(subName + "-" + grade(m));
       adm: stu.admission_no,
       prem: stu.prem_no,
       sex: stu.gender==="Female"?"F":"M",
-      detail: detail.join(" ")
+      detail: detail.join(", ")
     });
   });
 
