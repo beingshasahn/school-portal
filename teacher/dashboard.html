@@ -333,17 +333,14 @@ th,td{
 
     <div>
       <label style="font-weight:bold;">Class</label>
-      <select id="class" onchange="handleClassChange()"></select>
+      <select id="class" class="hidden" onchange="handleClassChange()"></select>
     </div>
 
     <div>
       <label id="subjectLabel" class="hidden" style="font-weight:bold;">
         Subject
       </label>
-      <select id="subject"
-              class="hidden"
-              onchange="handleSubjectChange()">
-      </select>
+      <select id="subject" class="hidden" onchange="handleSubjectChange()"></select>
     </div>
 
   </div>
@@ -611,8 +608,12 @@ function handleClassChange(){
 
   document.getElementById("students").innerHTML = "";
 
-  // HIDE FORM
+  // hide form again
   document.getElementById("marksCard").classList.add("hidden");
+
+  // 🔥 HII NDIO STEP 3
+  document.getElementById("subject").classList.remove("hidden");
+  document.getElementById("subjectLabel").classList.remove("hidden");
 
   if(selectedClass){
     loadSubjects(selectedClass);
