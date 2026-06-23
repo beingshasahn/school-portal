@@ -902,16 +902,29 @@ async function logout(){
   const text =
     document.getElementById("chatInput").value;
 
-  if(!text.trim()) return;
+  if(!text.trim()){
+    alert("Type a message");
+    return;
+  }
 
-  await supabaseClient
+  const { data, error } = await supabaseClient
     .from("chats")
     .insert({
       sender_id: teacherId,
-      sender_name:
-        document.getElementById("teacherInfo").innerText,
+      sender_name: teacherName,
       message: text
-    });
+    })
+    .select();
+
+  console.log(data);
+  console.log(error);
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  alert("Message sent successfully");
 
   document.getElementById("chatInput").value = "";
   }
