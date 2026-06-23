@@ -277,7 +277,11 @@ th,td{
     <h4 id="subjectLabel" class="hidden">Subject</h4>
     <select id="subject" class="hidden" onchange="handleSubjectChange()"></select>
   </div>
-
+<div class="card" id="selectSubjectMessage">
+  <p style="text-align:center;color:#666;">
+    Please select a class and subject to enter marks.
+  </p>
+</div>
   <div class="card hidden" id="studentsCard">
   <h3>Students</h3>
   <table>
@@ -486,9 +490,11 @@ function handleClassChange(){
 
   document.getElementById("students").innerHTML = "";
 
-  // Ficha students form
   document.getElementById("studentsCard")
     .classList.add("hidden");
+
+  document.getElementById("selectSubjectMessage")
+    .style.display = "block";
 
   if(selectedClass){
     loadSubjects(selectedClass);
@@ -500,16 +506,24 @@ function handleSubjectChange(){
   selectedSubject = document.getElementById("subject").value;
 
   if(!selectedSubject){
+
     document.getElementById("studentsCard")
       .classList.add("hidden");
+
+    document.getElementById("selectSubjectMessage")
+      .style.display = "block";
+
     return;
   }
 
   document.getElementById("studentsCard")
     .classList.remove("hidden");
 
+  document.getElementById("selectSubjectMessage")
+    .style.display = "none";
+
   loadStudents(selectedClass);
-}
+    }
 
 function loadSubjects(class_id){
 
