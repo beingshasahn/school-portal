@@ -45,16 +45,16 @@ body{
 }
 
 .mark-input{
-  width:85px;
+  width:60px;
+  padding:6px;
   text-align:center;
-  font-weight:700;
-  font-size:15px;
-  border:2px solid #e5e7eb;
-  border-radius:10px;
+  font-weight:600;
+  font-size:12px;
+  border:1px solid #d1d5db;
+  border-radius:8px;
   background:#fff;
   transition:all .25s ease;
 }
-
 .mark-input:focus{
   outline:none;
   border-color:#1e3a8a;
@@ -64,11 +64,13 @@ body{
 .student-name{
   font-weight:600;
   color:#111827;
+  font-size:12px;
 }
 
 .adm-no{
   color:#6b7280;
   font-weight:600;
+  font-size:10px;
 }
 
 .students-table thead{
@@ -83,8 +85,9 @@ body{
 .students-table{
   overflow:hidden;
   border-radius:12px;
-}
-
+  width:100%;
+  table-layout:fixed;
+  }
   
   #toast{
   position:fixed;
@@ -371,9 +374,9 @@ th,td{
   <table class="students-table">
     <thead>
       <tr>
-        <th>Adm</th>
-        <th>Name</th>
-        <th>Marks</th>
+        <th style="width:22%">Adm</th>
+<th style="width:53%">Student Name</th>
+<th style="width:25%">Marks</th>
       </tr>
     </thead>
     <tbody id="students"></tbody>
