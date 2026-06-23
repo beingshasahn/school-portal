@@ -416,10 +416,6 @@ th,td{
   <div class="card">
     <h3>School Chat</h3>
 
-    <select id="chatUser">
-      <option value="">Select User</option>
-    </select>
-
     <div id="chatMessages" style="
       height:300px;
       overflow-y:auto;
@@ -557,15 +553,15 @@ const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 supabaseClient
-  .channel("school-chat")
+  .channel("school-group-chat")
   .on(
     "postgres_changes",
     {
-      event: "INSERT",
-      schema: "public",
-      table: "chats"
+      event:"INSERT",
+      schema:"public",
+      table:"chats"
     },
-    () => {
+    ()=>{
       loadMessages();
     }
   )
@@ -903,41 +899,28 @@ async function logout(){
 
   async function sendMessage(){
 
-  const receiver =
-    document.getElementById("chatUser").value;
-
   const text =
     document.getElementById("chatInput").value;
 
-  if(!receiver || !text) return;
+  if(!text.trim()) return;
 
   await supabaseClient
     .from("chats")
     .insert({
       sender_id: teacherId,
-      receiver_id: receiver,
+      sender_name:
+        document.getElementById("teacherInfo").innerText,
       message: text
     });
 
   document.getElementById("chatInput").value = "";
-
-  loadMessages();
   }
   
   async function loadMessages(){
 
-  const receiver =
-    document.getElementById("chatUser").value;
-
-  if(!receiver) return;
-
   const { data } = await supabaseClient
     .from("chats")
     .select("*")
-    .or(
-      `and(sender_id.eq.${teacherId},receiver_id.eq.${receiver}),
-       and(sender_id.eq.${receiver},receiver_id.eq.${teacherId})`
-    )
     .order("created_at");
 
   const box =
@@ -947,51 +930,40 @@ async function logout(){
 
   (data || []).forEach(msg=>{
 
-    const mine = msg.sender_id === teacherId;
+    const mine =
+      msg.sender_id === teacherId;
 
-box.innerHTML += `
-<div style="
-  display:flex;
-  justify-content:${mine ? "flex-end" : "flex-start"};
-  margin-bottom:8px;
-">
-  <div style="
-    max-width:75%;
-    padding:10px;
-    border-radius:12px;
-    background:${mine ? "#1e3a8a" : "#e5e7eb"};
-    color:${mine ? "#fff" : "#111"};
-  ">
-    ${msg.message}
-  </div>
-</div>
-`;
+    box.innerHTML += `
+      <div style="
+        display:flex;
+        justify-content:
+        ${mine ? "flex-end" : "flex-start"};
+        margin-bottom:10px;
+      ">
+        <div style="
+          max-width:80%;
+          padding:10px;
+          border-radius:12px;
+          background:
+          ${mine ? "#1e3a8a" : "#e5e7eb"};
+          color:
+          ${mine ? "#fff" : "#111"};
+        ">
+          <div style="
+            font-size:11px;
+            font-weight:bold;
+            margin-bottom:4px;
+          ">
+            ${msg.sender_name}
+          </div>
 
-  });
-
-  }
-  async function loadChatUsers(){
-
-  const { data } = await supabaseClient
-    .from("profiles")
-    .select("id,full_name,role")
-    .neq("id", teacherId);
-
-  const sel = document.getElementById("chatUser");
-
-  sel.innerHTML =
-    `<option value="">Select User</option>`;
-
-  (data || []).forEach(user=>{
-
-    sel.innerHTML += `
-      <option value="${user.id}">
-        ${user.full_name} (${user.role})
-      </option>
+          ${msg.message}
+        </div>
+      </div>
     `;
-
   });
 
+  box.scrollTop = box.scrollHeight;
   }
   
 init();
