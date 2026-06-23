@@ -556,7 +556,20 @@ const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
 
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-
+supabaseClient
+  .channel("school-chat")
+  .on(
+    "postgres_changes",
+    {
+      event: "INSERT",
+      schema: "public",
+      table: "chats"
+    },
+    () => {
+      loadMessages();
+    }
+  )
+  .subscribe();
 /* AUTH */
 async function protect(roleRequired){
 
@@ -612,6 +625,7 @@ async function init(){
     `${greeting}, ${name}`;
 
   await loadAssignments();
+await loadChatUsers();
 }
 
 function handleClassChange(){
@@ -839,6 +853,7 @@ async function logout(){
   await supabaseClient.auth.signOut();
   location.href="../index.html";
 }
+  
   function openResults(){
   window.location.href = "results.html";
   }
@@ -908,6 +923,7 @@ async function logout(){
 
   loadMessages();
   }
+  
   async function loadMessages(){
 
   const receiver =
@@ -931,10 +947,47 @@ async function logout(){
 
   (data || []).forEach(msg=>{
 
-    box.innerHTML += `
-      <div style="margin-bottom:8px">
-        ${msg.message}
-      </div>
+    const mine = msg.sender_id === teacherId;
+
+box.innerHTML += `
+<div style="
+  display:flex;
+  justify-content:${mine ? "flex-end" : "flex-start"};
+  margin-bottom:8px;
+">
+  <div style="
+    max-width:75%;
+    padding:10px;
+    border-radius:12px;
+    background:${mine ? "#1e3a8a" : "#e5e7eb"};
+    color:${mine ? "#fff" : "#111"};
+  ">
+    ${msg.message}
+  </div>
+</div>
+`;
+
+  });
+
+  }
+  async function loadChatUsers(){
+
+  const { data } = await supabaseClient
+    .from("profiles")
+    .select("id,full_name,role")
+    .neq("id", teacherId);
+
+  const sel = document.getElementById("chatUser");
+
+  sel.innerHTML =
+    `<option value="">Select User</option>`;
+
+  (data || []).forEach(user=>{
+
+    sel.innerHTML += `
+      <option value="${user.id}">
+        ${user.full_name} (${user.role})
+      </option>
     `;
 
   });
