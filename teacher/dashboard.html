@@ -333,21 +333,7 @@ th,td{
 
   </div>
 </div>
-<div id="toast" style="
-  position:fixed;
-  top:80px;
-  left:50%;
-  transform:translateX(-50%);
-  background:#1e3a8a;
-  color:white;
-  padding:12px 20px;
-  border-radius:10px;
-  font-size:14px;
-  z-index:9999;
-  opacity:0;
-  pointer-events:none;
-  transition:all .4s ease;
-">
+<div id="toast">
   Please select a subject first
 </div>
   
@@ -379,10 +365,6 @@ th,td{
     <h4 id="subjectLabel" class="hidden">Subject</h4>
     <select id="subject" class="hidden" onchange="handleSubjectChange()"></select>
   </div>
-<div class="card" id="selectSubjectMessage">
-  <p style="text-align:center;color:#666;">
-    Please select a class and subject to enter marks.
-  </p>
 </div>
   <div class="card hidden" id="studentsCard">
   <h3>Students</h3>
@@ -612,17 +594,11 @@ function handleSubjectChange(){
     document.getElementById("studentsCard")
       .classList.add("hidden");
 
-    document.getElementById("selectSubjectMessage")
-      .style.display = "block";
-
     return;
   }
 
   document.getElementById("studentsCard")
     .classList.remove("hidden");
-
-  document.getElementById("selectSubjectMessage")
-    .style.display = "none";
 
   loadStudents(selectedClass);
     }
@@ -733,13 +709,14 @@ async function autoSave(studentId,value){
 
   if(value.trim() === ""){
 
-    await supabaseClient
-      .from("results")
-      .delete()
-      .eq("student_id", studentId)
-      .eq("subject_id", selectedSubject);
+  await supabaseClient
+    .from("results")
+    .delete()
+    .eq("student_id", studentId)
+    .eq("subject_id", selectedSubject);
 
-    return;
+  showSaved();
+  return;
   }
 
   await supabaseClient
