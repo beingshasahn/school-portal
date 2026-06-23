@@ -13,11 +13,79 @@
   font-family:Segoe UI, Arial;
 }
 
+  #saveStatus{
+  position:fixed;
+  bottom:80px;
+  right:15px;
+  background:#10b981;
+  color:white;
+  padding:10px 15px;
+  border-radius:10px;
+  opacity:0;
+  transition:.3s;
+  font-size:13px;
+  font-weight:600;
+  z-index:9999;
+  }
+  
 body{
   margin:0;
   background:#f5f6fa;
 }
 
+
+  /* STUDENTS TABLE PREMIUM */
+
+#students tr{
+  transition:all .25s ease;
+}
+
+#students tr:hover{
+  background:#f8fafc;
+}
+
+.mark-input{
+  width:85px;
+  text-align:center;
+  font-weight:700;
+  font-size:15px;
+  border:2px solid #e5e7eb;
+  border-radius:10px;
+  background:#fff;
+  transition:all .25s ease;
+}
+
+.mark-input:focus{
+  outline:none;
+  border-color:#1e3a8a;
+  box-shadow:0 0 0 4px rgba(30,58,138,.15);
+}
+
+.student-name{
+  font-weight:600;
+  color:#111827;
+}
+
+.adm-no{
+  color:#6b7280;
+  font-weight:600;
+}
+
+.students-table thead{
+  background:#1e3a8a;
+  color:white;
+}
+
+.students-table thead th{
+  border:none;
+}
+
+.students-table{
+  overflow:hidden;
+  border-radius:12px;
+}
+
+  
   #toast{
   position:fixed;
   top:80px;
@@ -318,7 +386,7 @@ th,td{
 </div>
   <div class="card hidden" id="studentsCard">
   <h3>Students</h3>
-  <table>
+  <table class="students-table">
     <thead>
       <tr>
         <th>Adm</th>
@@ -417,7 +485,7 @@ th,td{
     <span>👤</span>Profile
   </div>
 </div>
-
+<div id="saveStatus"></div>
 <script>
 
 /* PAGE SWITCHER */
@@ -606,16 +674,25 @@ async function loadStudents(class_id){
 
   (students || []).forEach(s=>{
     tbody.innerHTML += `
-      <tr>
-        <td>${s.admission_no}</td>
-        <td>${s.student_name}</td>
-        <td>
-          <input type="number"
-            value="${marksMap[s.id] ?? ''}"
-            oninput="autoSave('${s.id}',this.value)">
-        </td>
-      </tr>
-    `;
+<tr>
+  <td class="adm-no">${s.admission_no}</td>
+
+  <td class="student-name">
+    ${s.student_name}
+  </td>
+
+  <td>
+    <input
+      class="mark-input"
+      type="number"
+      min="0"
+      max="100"
+      placeholder="0-100"
+      value="${marksMap[s.id] ?? ''}"
+      oninput="autoSave('${s.id}',this.value)">
+  </td>
+</tr>
+`;
   });
 }
 
@@ -675,6 +752,7 @@ async function autoSave(studentId,value){
     }],{
       onConflict:"student_id,subject_id"
     });
+  showSaved();
 }
 async function openMyClass(){
 
@@ -755,7 +833,17 @@ async function logout(){
   },2500);
 
   }
-  
+  function showSaved(){
+
+  const s = document.getElementById("saveStatus");
+
+  s.innerText = "✓ Marks Saved";
+  s.style.opacity = "1";
+
+  setTimeout(()=>{
+    s.style.opacity = "0";
+  },1500);
+  }
 
   function updateSoundUI(){
 
