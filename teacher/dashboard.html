@@ -137,8 +137,11 @@ body{
 .chat-messages{
   flex:1;
   overflow-y:auto;
-  padding:12px 0;
+  padding:12px;
   margin-top:10px;
+  background:#f8fafc;
+  border-radius:12px;
+  border:1px solid #e5e7eb;
 }
 
 .chat-bubble{
@@ -149,7 +152,19 @@ body{
   margin-bottom:10px;
   box-shadow:0 2px 8px rgba(0,0,0,.04);
 }
+.chat-bubble:hover{
+  transform:translateY(-1px);
+  transition:.2s;
+}
 
+.chat-messages::-webkit-scrollbar{
+  width:6px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb{
+  background:#cbd5e1;
+  border-radius:10px;
+}
 .chat-name{
   font-size:12px;
   font-weight:700;
@@ -1054,34 +1069,49 @@ await loadMessages();
   
   async function loadMessages(){
 
-  const time =
-new Date(msg.created_at)
-.toLocaleTimeString([],{
-hour:'2-digit',
-minute:'2-digit'
-});
+  const { data, error } = await supabaseClient
+    .from("chats")
+    .select("*")
+    .order("created_at",{ ascending:true });
 
-box.innerHTML += `
-<div class="chat-bubble">
+  if(error){
+    console.log(error);
+    return;
+  }
 
-  <div class="chat-name">
-    ${msg.sender_name}
-  </div>
+  const box = document.getElementById("chatMessages");
 
-  <div class="chat-text">
-    ${msg.message}
-  </div>
+  box.innerHTML = "";
 
-  <div class="chat-time">
-    ${time}
-  </div>
+  (data || []).forEach(msg=>{
 
-</div>
-`;
+    const time = new Date(msg.created_at)
+      .toLocaleTimeString([],{
+        hour:"2-digit",
+        minute:"2-digit"
+      });
+
+    box.innerHTML += `
+      <div class="chat-bubble">
+
+        <div class="chat-name">
+          ${msg.sender_name || "Unknown"}
+        </div>
+
+        <div class="chat-text">
+          ${msg.message || ""}
+        </div>
+
+        <div class="chat-time">
+          ${time}
+        </div>
+
+      </div>
+    `;
   });
 
   box.scrollTop = box.scrollHeight;
-  }
+        }
 
   document
 .getElementById("chatInput")
