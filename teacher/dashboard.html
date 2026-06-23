@@ -360,48 +360,51 @@ th,td{
 
 <!-- PROFILE -->
 <div id="profile" class="page">
+
+  <div style="display:flex;justify-content:flex-end;padding:10px 10px 0 10px;">
+    <div onclick="logout()" style="
+      width:40px;
+      height:40px;
+      border-radius:50%;
+      background:#ef4444;
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      font-size:20px;
+    ">
+      ⎋
+    </div>
+  </div>
+
   <div class="card">
     <h3>Profile</h3>
     <p>Teacher profile settings</p>
   </div>
 
   <div class="card">
-    <div class="card">
-  <h3>🔑 Change Password</h3>
+    <h3>🔑 Change Password</h3>
 
-  <input type="password" id="currentPassword" placeholder="Current Password">
-  <input type="password" id="newPassword" placeholder="New Password">
-  <input type="password" id="confirmPassword" placeholder="Confirm Password">
+    <input type="password" id="currentPassword" placeholder="Current Password">
+    <input type="password" id="newPassword" placeholder="New Password">
+    <input type="password" id="confirmPassword" placeholder="Confirm Password">
 
-  <button onclick="changePassword()" style="
-    width:100%;
-    margin-top:10px;
-    padding:10px;
-    border:none;
-    background:#1e3a8a;
-    color:#fff;
-    border-radius:8px;
-  ">
-    Update Password
-  </button>
+    <button onclick="changePassword()" style="
+      width:100%;
+      margin-top:10px;
+      padding:10px;
+      border:none;
+      background:#1e3a8a;
+      color:#fff;
+      border-radius:8px;
+    ">
+      Update Password
+    </button>
 
-  <div id="passwordMsg" style="margin-top:10px;"></div>
-    </div>
-    <h3>Sound Settings</h3>
-
-  <button onclick="logout()" style="
-    margin-top:10px;
-    width:100%;
-    padding:10px;
-    border:none;
-    background:#ef4444;
-    color:#fff;
-    border-radius:8px;
-    cursor:pointer;
-  ">
-    Logout
-  </button>
+    <div id="passwordMsg" style="margin-top:10px;"></div>
   </div>
+
 </div>
 
 <!-- BOTTOM NAV -->
