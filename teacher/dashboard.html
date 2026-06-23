@@ -333,14 +333,14 @@ th,td{
 
     <div>
       <label style="font-weight:bold;">Class</label>
-      <select id="class" class="hidden" onchange="handleClassChange()"></select>
+      <select id="class" onchange="handleClassChange()"></select>
     </div>
 
     <div>
-      <label id="subjectLabel" class="hidden" style="font-weight:bold;">
+      <label id="subjectLabel">
         Subject
       </label>
-      <select id="subject" class="hidden" onchange="handleSubjectChange()"></select>
+      <select id="subject" onchange="handleSubjectChange()"></select>
     </div>
 
   </div>
@@ -608,14 +608,10 @@ function handleClassChange(){
 
   document.getElementById("students").innerHTML = "";
 
-  // hide form again
-  document.getElementById("marksCard").classList.add("hidden");
-
-  // 🔥 HII NDIO STEP 3
-  document.getElementById("subject").classList.remove("hidden");
-  document.getElementById("subjectLabel").classList.remove("hidden");
-
+  // SHOW SUBJECT DROPDOWN ONLY AFTER CLASS SELECT
   if(selectedClass){
+    document.getElementById("subject").style.display = "block";
+    document.getElementById("subjectLabel").style.display = "block";
     loadSubjects(selectedClass);
   }
 }
@@ -625,23 +621,18 @@ function handleClassChange(){
 
   if(!selectedSubject) return;
 
-  // show marks form
   const marksCard = document.getElementById("marksCard");
 
-marksCard.style.opacity = "0";
+  marksCard.style.opacity = "0";
 
-setTimeout(()=>{
-  marksCard.classList.remove("hidden");
-  marksCard.style.opacity = "1";
-}, 100);
-
-  // clear table then load students
-  document.getElementById("students").innerHTML = "";
+  setTimeout(()=>{
+    marksCard.classList.remove("hidden");
+    marksCard.style.opacity = "1";
+  }, 100);
 
   loadStudents(selectedClass);
   }
-
-
+  
 function loadSubjects(class_id){
 
   const sub = document.getElementById("subject");
@@ -772,7 +763,13 @@ async function openMyClass(){
     return;
   }
 
-  location.href = "classteacher.html";
+  // SHOW FORM PROPERLY
+  document.getElementById("marksCard").classList.remove("hidden");
+  document.getElementById("class").style.display = "block";
+
+  // reset UI
+  document.getElementById("subject").style.display = "none";
+  document.getElementById("subjectLabel").style.display = "none";
 }
 
 
