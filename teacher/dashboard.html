@@ -278,18 +278,18 @@ th,td{
     <select id="subject" class="hidden" onchange="handleSubjectChange()"></select>
   </div>
 
-  <div class="card">
-    <h3>Students</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Adm</th>
-          <th>Name</th>
-          <th>Marks</th>
-        </tr>
-      </thead>
-      <tbody id="students"></tbody>
-    </table>
+  <div class="card hidden" id="studentsCard">
+  <h3>Students</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Adm</th>
+        <th>Name</th>
+        <th>Marks</th>
+      </tr>
+    </thead>
+    <tbody id="students"></tbody>
+  </table>
   </div>
 
 </div>
@@ -480,15 +480,34 @@ async function init(){
 }
 
 function handleClassChange(){
+
   selectedClass = document.getElementById("class").value;
   selectedSubject = null;
+
   document.getElementById("students").innerHTML = "";
 
-  if(selectedClass) loadSubjects(selectedClass);
+  // Ficha students form
+  document.getElementById("studentsCard")
+    .classList.add("hidden");
+
+  if(selectedClass){
+    loadSubjects(selectedClass);
+  }
 }
 
 function handleSubjectChange(){
+
   selectedSubject = document.getElementById("subject").value;
+
+  if(!selectedSubject){
+    document.getElementById("studentsCard")
+      .classList.add("hidden");
+    return;
+  }
+
+  document.getElementById("studentsCard")
+    .classList.remove("hidden");
+
   loadStudents(selectedClass);
 }
 
