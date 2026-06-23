@@ -248,7 +248,24 @@ th,td{
 
   </div>
 </div>
-
+<div id="toast" style="
+  position:fixed;
+  top:80px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#1e3a8a;
+  color:white;
+  padding:12px 20px;
+  border-radius:10px;
+  font-size:14px;
+  z-index:9999;
+  opacity:0;
+  pointer-events:none;
+  transition:all .4s ease;
+">
+  Please select a subject first
+</div>
+  
 <!-- HOME -->
 <div id="home" class="page active">
 
@@ -493,11 +510,11 @@ function handleClassChange(){
   document.getElementById("studentsCard")
     .classList.add("hidden");
 
-  document.getElementById("selectSubjectMessage")
-    .style.display = "block";
-
   if(selectedClass){
+
     loadSubjects(selectedClass);
+
+    showToast("Now select a subject");
   }
 }
 
@@ -546,7 +563,10 @@ function loadSubjects(class_id){
 
 async function loadStudents(class_id){
 
-  if(!selectedSubject) return;
+  if(!selectedSubject){
+    showToast("Please select a subject first");
+    return;
+  }
 
   const { data: students } = await supabaseClient
     .from("students")
@@ -702,6 +722,21 @@ async function logout(){
 }
   function openResults(){
   window.location.href = "results.html";
+  }
+
+  function showToast(message){
+
+  const toast = document.getElementById("toast");
+
+  toast.innerText = message;
+  toast.style.opacity = "1";
+  toast.style.top = "100px";
+
+  setTimeout(()=>{
+    toast.style.opacity = "0";
+    toast.style.top = "80px";
+  },2500);
+
   }
   
 
