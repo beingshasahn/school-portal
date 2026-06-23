@@ -238,44 +238,46 @@ async function loadReport(){
   /* ================= STUDENT LOOP ================= */
   filtered.forEach(stu=>{
 
-    let total = 0;
-    let count = 0;
-    let detail = [];
+  let total = 0;
+  let count = 0;
+  let detail = [];
 
-    subjects.forEach(sub=>{
-      let r = results.find(x =>
-        String(x.student_id) === String(stu.id) &&
-        String(x.subject_id) === String(sub.id)
-      );
+  subjects.forEach(sub=>{
 
-      if(!r) return;
+    let r = results.find(x =>
+      String(x.student_id) === String(stu.id) &&
+      String(x.subject_id) === String(sub.id)
+    );
 
-      let m = Number(r.marks);
+    if(!r) return;
 
-      total += m;
-      count++;
+    let m = Number(r.marks);
 
-      const shortName = formatSubject(sub.subject_name);
-detail.push(shortName + " - " + grade(m));
+    total += m;
+    count++;
 
-    if(count === 0) return;
-
-    let avg = total / count;
-    let g = grade(avg);
-
-    detail.push("AVERAGE-" + g);
-
-    gradePerf[stu.gender || "Male"][g]++;
-
-    final.push({
-      adm: stu.admission_no,
-      prem: stu.prem_no,
-      name: stu.student_name || "-",
-      sex: stu.gender === "Female" ? "F" : "M",
-      detail: detail.join(", ")
-    });
-
+    const shortName = formatSubject(sub.subject_name);
+    detail.push(shortName + " - " + grade(m));
   });
+
+  if(count === 0) return;
+
+  let avg = total / count;
+  let g = grade(avg);
+
+  detail.push("AVERAGE - " + g);
+
+  gradePerf[stu.gender || "Male"][g]++;
+
+  final.push({
+    adm: stu.admission_no,
+    prem: stu.prem_no,
+    name: stu.student_name || "-",
+    sex: stu.gender === "Female" ? "F" : "M",
+    detail: detail.join(", ")
+  });
+
+});
 
   /* ================= TABLE 2 ================= */
   document.getElementById("tbody").innerHTML =
