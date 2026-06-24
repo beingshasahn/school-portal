@@ -901,27 +901,23 @@ More
 
 </div>
 
-
-
 </div>
-
-
-
-
-
-
 
 <script>
 
+let previewData = [];
+let editingId = null;
 
-let previewData=[];
-let editingId=null;
+
+/* SUPABASE */
 
 const supabaseUrl =
 "https://bslofdobcvxkjphbjyzb.supabase.co";
 
+
 const supabaseKey =
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
+
 
 const supabaseClient =
 supabase.createClient(
@@ -929,9 +925,15 @@ supabaseUrl,
 supabaseKey
 );
 
+
+
 init();
 
+
+
 async function init(){
+
+try{
 
 await loadClasses();
 
@@ -939,59 +941,112 @@ await loadStudents();
 
 await loadStats();
 
+
+}catch(error){
+
+console.log(error);
+
+alert(
+"System failed to load data"
+);
+
 }
 
+}
+
+
+
+
+
+
+/* LOAD DASHBOARD NUMBERS */
 
 async function loadStats(){
 
-let s =
+
+try{
+
+
+let students =
 await supabaseClient
 .from("students")
-.select("*",{count:"exact",head:true});
+.select("*",
+{
+count:"exact",
+head:true
+});
 
-studentCount.innerHTML =
-s.count || 0;
+
+document.getElementById(
+"studentCount"
+).innerHTML =
+students.count || 0;
 
 
 
 
-let c =
+let classes =
 await supabaseClient
 .from("classes")
-.select("*",{count:"exact",head:true});
+.select("*",
+{
+count:"exact",
+head:true
+});
+
+
+document.getElementById(
+"classCount"
+).innerHTML =
+classes.count || 0;
 
 
 
-classCount.innerHTML =
-c.count || 0;
 
-
-
-
-
-let t =
+let teachers =
 await supabaseClient
 .from("teachers")
-.select("*",{count:"exact",head:true});
+.select("*",
+{
+count:"exact",
+head:true
+});
+
+
+document.getElementById(
+"teacherCount"
+).innerHTML =
+teachers.count || 0;
 
 
 
-teacherCount.innerHTML =
-t.count || 0;
 
 
-
-
-let sub =
+let subjects =
 await supabaseClient
 .from("subjects")
-.select("*",{count:"exact",head:true});
+.select("*",
+{
+count:"exact",
+head:true
+});
+
+
+document.getElementById(
+"subjectCount"
+).innerHTML =
+subjects.count || 0;
 
 
 
-subjectCount.innerHTML =
-sub.count || 0;
+}catch(e){
 
+console.log(
+"Stats error",
+e
+);
+
+}
 
 
 }
@@ -999,38 +1054,69 @@ sub.count || 0;
 
 
 
+
+
+
+/* LOAD CLASSES */
 
 
 async function loadClasses(){
 
 
-let {data}=await supabaseClient
+const {
+data,
+error
+}=await supabaseClient
 .from("classes")
 .select("*")
 .order("class_name");
 
 
 
-class.innerHTML =
+if(error){
+
+console.log(error.message);
+
+return;
+
+}
+
+
+
+const classSelect =
+document.getElementById("class");
+
+
+const importSelect =
+document.getElementById("import_class");
+
+
+
+classSelect.innerHTML =
 `
 <option value="">
 Select Class
 </option>
 `;
 
-import_class.innerHTML =
+
+
+importSelect.innerHTML =
 `
-<option>
+<option value="">
 Select Class
 </option>
 `;
 
 
 
+
+
 data.forEach(c=>{
 
 
-class.innerHTML+=`
+classSelect.innerHTML +=
+`
 
 <option value="${c.id}">
 ${c.class_name}
@@ -1040,7 +1126,8 @@ ${c.class_name}
 
 
 
-import_class.innerHTML+=`
+importSelect.innerHTML +=
+`
 
 <option value="${c.id}">
 ${c.class_name}
@@ -1053,34 +1140,51 @@ ${c.class_name}
 });
 
 
+
 }
 
-  // ADD / UPDATE STUDENT
+
+
+
+
+
+
+
+
+/* ADD STUDENT */
 
 
 async function addStudent(){
 
 
-let student_name =
-document.getElementById("name").value.trim();
+const student_name =
+document.getElementById("name")
+.value.trim();
 
 
-let prem_no =
-document.getElementById("prem_no").value.trim();
+const prem_no =
+document.getElementById("prem_no")
+.value.trim();
 
 
-let gender =
-document.getElementById("gender").value;
+const gender =
+document.getElementById("gender")
+.value;
 
 
-let class_id =
-document.getElementById("class").value;
+
+const class_id =
+document.getElementById("class")
+.value;
+
 
 
 
 if(!student_name || !class_id){
 
-alert("Please fill required fields");
+alert(
+"Please fill required fields"
+);
 
 return;
 
@@ -1092,7 +1196,8 @@ return;
 if(editingId){
 
 
-await supabaseClient
+
+const {error}=await supabaseClient
 .from("students")
 .update({
 
@@ -1102,7 +1207,20 @@ gender,
 class_id
 
 })
-.eq("id",editingId);
+.eq(
+"id",
+editingId
+);
+
+
+
+if(error){
+
+alert(error.message);
+return;
+
+}
+
 
 
 
@@ -1110,18 +1228,17 @@ editingId=null;
 
 
 
+
 }else{
 
 
 
-await supabaseClient
+const {error}=await supabaseClient
 .from("students")
 .insert([{
 
-
 admission_no:
 generateAdmissionNo(),
-
 
 student_name,
 
@@ -1136,19 +1253,34 @@ class_id
 
 
 
+if(error){
+
+alert(error.message);
+
+return;
+
+}
+
+
 }
 
 
 
 resetForm();
 
-loadStudents();
 
-loadStats();
+await loadStudents();
+
+await loadStats();
 
 
 
 }
+
+
+
+
+
 
 
 
@@ -1157,13 +1289,23 @@ loadStats();
 function resetForm(){
 
 
-document.getElementById("name").value="";
+editingId=null;
 
-document.getElementById("prem_no").value="";
 
-document.getElementById("gender").value="";
+document.getElementById("name")
+.value="";
 
-document.getElementById("class").value="";
+
+document.getElementById("prem_no")
+.value="";
+
+
+document.getElementById("gender")
+.value="";
+
+
+document.getElementById("class")
+.value="";
 
 
 }
@@ -1172,38 +1314,52 @@ document.getElementById("class").value="";
 
 
 
-// LOAD STUDENTS
+
+
+
+
+/* LOAD STUDENTS */
 
 
 async function loadStudents(){
 
 
-let {data,error}=await supabaseClient
-
+const {
+data,
+error
+}=await supabaseClient
 .from("students")
-
 .select("*")
+.order(
+"id",
+{
+ascending:false
+}
+);
 
-.order("id",{ascending:false});
+
+
+if(error){
+
+console.log(error.message);
+
+alert(error.message);
+
+return;
+
+}
 
 
 
-if(error)return;
-
-
-
-let table =
+const table =
 document.getElementById("table");
-
 
 
 table.innerHTML="";
 
 
 
-
-for(let s of data){
-
+for(const s of data){
 
 
 let cname="";
@@ -1213,59 +1369,54 @@ let cname="";
 if(s.class_id){
 
 
-let {data:c}=await supabaseClient
-
+const result =
+await supabaseClient
 .from("classes")
-
 .select("class_name")
-
-.eq("id",s.class_id)
-
+.eq(
+"id",
+s.class_id
+)
 .single();
 
 
 
 cname =
-c?.class_name || "";
-
+result.data?.class_name || "";
 
 
 }
 
 
 
-
-table.innerHTML+=`
+table.innerHTML +=
+`
 
 <tr>
 
-
 <td>
-<span class="badge">
 ${s.admission_no || ""}
-</span>
 </td>
 
 
-
-<td>${s.prem_no||""}</td>
-
-
-
-<td>${s.student_name||""}</td>
-
-
-
-<td>${s.gender||""}</td>
-
+<td>
+${s.prem_no || ""}
+</td>
 
 
 <td>
-<span class="badge">
+${s.student_name || ""}
+</td>
+
+
+<td>
+${s.gender || ""}
+</td>
+
+
+<td>
 ${cname}
-</span>
 </td>
-
 
 
 
@@ -1273,39 +1424,20 @@ ${cname}
 
 
 <button
-onclick='editStudent(${JSON.stringify(s)})'
-style="
-background:#f0ad4e;
-color:white;
-border:0;
-padding:6px;
-border-radius:6px">
-
+onclick='editStudent(${JSON.stringify(s)})'>
 Edit
-
 </button>
 
 
 
 <button
-
-onclick="deleteStudent('${s.id}')"
-
-style="
-background:red;
-color:white;
-border:0;
-padding:6px;
-border-radius:6px">
-
+onclick="deleteStudent('${s.id}')">
 Delete
-
 </button>
 
 
 
 </td>
-
 
 
 </tr>
@@ -1314,432 +1446,109 @@ Delete
 
 }
 
-
-
-
 }
 
-
-
-
-
-
-
-
-// EDIT
-
+/* EDIT */
 
 function editStudent(s){
 
+editingId =
+s.id;
 
-editingId=s.id;
+document.getElementById("name")
+.value =
+s.student_name || "";
 
+document.getElementById("prem_no")
+.value =
+s.prem_no || "";
+  
+document.getElementById("gender")
+.value =
+s.gender || "";
 
-name.value=s.student_name;
-
-
-prem_no.value=s.prem_no;
-
-
-gender.value=s.gender;
-
-
-document.getElementById("class").value=
-s.class_id;
-
-
-
-window.scrollTo({
-
+document.getElementById("class")
+.value =
+s.class_id || "";
+window.scrollTo(
+{
 top:0,
 behavior:"smooth"
-
-});
-
-
+}
+);
 }
 
-
-
-
-
-
-
-// DELETE
-
-
+/* DELETE */
 async function deleteStudent(id){
-
 
 if(!confirm(
 "Delete this student?"
 ))
 return;
 
-
-
-await supabaseClient
-
+const {error}=await supabaseClient
 .from("students")
-
 .delete()
+.eq(
+"id",
+id
+);
 
-.eq("id",id);
+if(error){
+alert(error.message);
+return;
 
-
-
+}
 loadStudents();
-
 loadStats();
-
 
 }
 
 
-
-
-
-
-
-
-// SEARCH
-
+/* SEARCH */
 
 function searchStudent(){
-
 
 let value =
 document.getElementById("search")
 .value.toLowerCase();
 
-
-
-let rows =
-document.querySelectorAll("#table tr");
-
-
-
-rows.forEach(r=>{
-
-
-let text =
-r.innerText.toLowerCase();
-
-
-
-r.style.display =
-text.includes(value)
-?""
-:"none";
-
-
+document
+.querySelectorAll("#table tr")
+.forEach(row=>{
+row.style.display =
+row.innerText
+.toLowerCase()
+.includes(value)
+?
+""
+:
+"none";
 
 });
 
-
 }
 
 
-
-
-
-
-
-
-
-// TEMPLATE
-
-
-function downloadTemplate(){
-
-
-
-let data=[
-
-{
-
-prem_no:"001",
-
-student_name:"Student Name",
-
-gender:"Male"
-
-}
-
-];
-
-
-
-let ws =
-XLSX.utils.json_to_sheet(data);
-
-
-
-let wb =
-XLSX.utils.book_new();
-
-
-
-XLSX.utils.book_append_sheet(
-wb,
-ws,
-"Students"
-);
-
-
-
-XLSX.writeFile(
-wb,
-"students_template.xlsx"
-);
-
-
-
-}
-
-
-
-
-
-
-
-
-// IMPORT EXCEL
-
-
-async function importExcel(){
-
-
-
-let cls =
-document.getElementById("import_class")
-.value;
-
-
-
-let file =
-document.getElementById("excelFile")
-.files[0];
-
-
-
-if(!cls || !file){
-
-alert("Select class and file");
-
-return;
-
-}
-
-
-
-
-let reader =
-new FileReader();
-
-
-
-
-reader.onload=function(e){
-
-
-
-let wb =
-XLSX.read(
-
-new Uint8Array(e.target.result),
-
-{
-type:"array"
-}
-
-);
-
-
-
-let sheet =
-wb.Sheets[
-wb.SheetNames[0]
-];
-
-
-
-let rows =
-XLSX.utils.sheet_to_json(sheet);
-
-
-
-
-previewData =
-rows.map(r=>({
-
-
-
-admission_no:
-generateAdmissionNo(),
-
-
-
-prem_no:
-r.prem_no || "",
-
-
-
-student_name:
-r.student_name || "",
-
-
-
-gender:
-r.gender || "",
-
-
-
-class_id:
-cls
-
-
-
-}));
-
-
-
-showPreview();
-
-
-
-};
-
-
-
-reader.readAsArrayBuffer(file);
-
-
-
-}
-
-
-
-
-
-
-
-
-function showPreview(){
-
-
-
-previewTable.innerHTML="";
-
-
-
-previewData.forEach(r=>{
-
-
-previewTable.innerHTML+=`
-
-<tr>
-
-<td>${r.prem_no}</td>
-
-<td>${r.student_name}</td>
-
-<td>${r.gender}</td>
-
-</tr>
-
-`;
-
-
-
-});
-
-
-
-previewSection.style.display="block";
-
-
-}
-
-
-
-
-
-
-
-
-
-async function confirmImport(){
-
-
-
-await supabaseClient
-
-.from("students")
-
-.insert(previewData);
-
-
-
-alert(
-"Students imported successfully"
-);
-
-
-
-previewData=[];
-
-
-
-previewSection.style.display="none";
-
-
-
-loadStudents();
-
-loadStats();
-
-
-
-}
-
-
-
-
-
-
-
-// ADMISSION NUMBER
-
+/* GENERATE NUMBER */
 
 function generateAdmissionNo(){
-
-
 
 let year =
 new Date()
 .getFullYear();
-
-
-
-let number =
+let random =
 Math.floor(
-10000 + Math.random()*90000
+10000 +
+Math.random()*90000
 );
 
-
-
-return `KEMPS/${year}/${number}`;
-
-
+return
+`KEMPS/${year}/${random}`;
 
 }
 
-
-
-
-</script>
-
+  </script>
 
 </body>
 </html>
