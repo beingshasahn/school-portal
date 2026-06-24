@@ -15,17 +15,15 @@
 
 *{
 box-sizing:border-box;
-font-family:"Segoe UI",Arial,sans-serif;
+font-family:Segoe UI,Arial,sans-serif;
 }
 
 
 body{
-
 margin:0;
 background:#f4f6fb;
 display:flex;
 min-height:100vh;
-
 }
 
 
@@ -36,13 +34,14 @@ min-height:100vh;
 width:260px;
 background:#0b2d5c;
 color:white;
-padding:20px;
 position:fixed;
 height:100vh;
+padding:20px;
+
 }
 
 
-.brand{
+.logo{
 
 text-align:center;
 margin-bottom:25px;
@@ -50,15 +49,15 @@ margin-bottom:25px;
 }
 
 
-.brand h2{
+.logo h2{
 
 font-size:18px;
-margin:5px 0;
+margin:0;
 
 }
 
 
-.brand small{
+.logo span{
 
 color:#d4af37;
 
@@ -66,43 +65,41 @@ color:#d4af37;
 
 
 
-.menu-title{
+.sidebar a{
+
+display:block;
+padding:12px;
+margin:7px 0;
+border-radius:10px;
+color:white;
+text-decoration:none;
+
+}
+
+
+.sidebar a:hover,
+.active{
+
+background:#ffffff22;
+
+}
+
+
+
+
+.section{
 
 font-size:11px;
-opacity:.7;
+opacity:.6;
 margin-top:20px;
 
 }
 
 
 
-.sidebar a{
-
-display:flex;
-gap:10px;
-align-items:center;
-padding:12px;
-margin:6px 0;
-color:white;
-text-decoration:none;
-border-radius:10px;
-
-}
-
-
-
-.sidebar a:hover,
-.sidebar a.active{
-
-background:rgba(255,255,255,.18);
-
-}
-
-
-
-
 
 /* MAIN */
+
 
 .main{
 
@@ -115,14 +112,13 @@ padding-bottom:90px;
 
 
 
-/* TOP BAR */
 
 
-.topbar{
+.header{
 
 background:white;
-border-radius:15px;
 padding:18px;
+border-radius:18px;
 display:flex;
 justify-content:space-between;
 align-items:center;
@@ -131,27 +127,18 @@ box-shadow:0 5px 15px #0001;
 }
 
 
-.topbar h2{
 
-margin:0;
-
-}
-
-
-
-.profile{
+.admin{
 
 background:#0b2d5c;
 color:white;
-padding:10px 15px;
+padding:10px 18px;
 border-radius:20px;
 
 }
 
 
 
-
-/* CARDS */
 
 
 .cards{
@@ -175,11 +162,11 @@ box-shadow:0 5px 15px #0001;
 }
 
 
-.card h3{
 
-margin:0;
-font-size:28px;
+.card h1{
+
 color:#0b2d5c;
+margin:0;
 
 }
 
@@ -193,8 +180,6 @@ color:#777;
 
 
 
-
-/* CONTENT */
 
 
 .panel{
@@ -210,7 +195,7 @@ box-shadow:0 5px 15px #0001;
 
 
 
-.form-grid{
+.grid{
 
 display:grid;
 grid-template-columns:repeat(4,1fr);
@@ -220,14 +205,17 @@ gap:12px;
 
 
 
+
 input,select{
 
+width:100%;
 padding:12px;
 border:1px solid #ddd;
 border-radius:10px;
-width:100%;
 
 }
+
+
 
 
 
@@ -235,7 +223,7 @@ button{
 
 background:#0b2d5c;
 color:white;
-border:none;
+border:0;
 padding:11px 18px;
 border-radius:10px;
 cursor:pointer;
@@ -244,12 +232,18 @@ cursor:pointer;
 
 
 
-button:hover{
+.green{
 
-opacity:.9;
+background:#198754;
 
 }
 
+
+.red{
+
+background:#dc3545;
+
+}
 
 
 .gold{
@@ -260,16 +254,6 @@ background:#d4af37;
 
 
 
-.danger{
-
-background:#dc3545;
-
-}
-
-
-
-
-/* TABLE */
 
 
 .table-box{
@@ -309,7 +293,6 @@ font-size:14px;
 
 
 
-/* SEARCH */
 
 
 .search{
@@ -320,7 +303,6 @@ margin-bottom:15px;
 
 
 
-/* BOTTOM NAV */
 
 
 .bottom-nav{
@@ -340,20 +322,17 @@ z-index:1000;
 
 
 
-.nav-item{
+.nav{
 
-flex:1;
-max-width:120px;
+width:120px;
 text-align:center;
 padding:10px;
 color:#777;
-font-size:13px;
 
 }
 
 
-
-.nav-item span{
+.nav span{
 
 display:block;
 font-size:22px;
@@ -361,7 +340,8 @@ font-size:22px;
 }
 
 
-.nav-item.active{
+
+.nav.active{
 
 color:#0b2d5c;
 font-weight:bold;
@@ -381,6 +361,7 @@ display:none;
 }
 
 
+
 .main{
 
 margin:0;
@@ -398,7 +379,7 @@ grid-template-columns:repeat(2,1fr);
 
 
 
-.form-grid{
+.grid{
 
 grid-template-columns:1fr;
 
@@ -406,7 +387,7 @@ grid-template-columns:1fr;
 
 
 
-.topbar{
+.header{
 
 flex-direction:column;
 gap:10px;
@@ -427,8 +408,8 @@ overflow:auto;
 }
 
 
-</style>
 
+</style>
 
 </head>
 
@@ -436,81 +417,50 @@ overflow:auto;
 <body>
 
 
-
-<!-- SIDEBAR -->
-
-
 <div class="sidebar">
 
 
-<div class="brand">
+<div class="logo">
 
 <h2>KOROSHO ENGLISH</h2>
-<small>ADMIN PORTAL</small>
+<span>ADMIN SYSTEM</span>
 
 </div>
 
 
 
-<a class="active">
-🏠 Dashboard
-</a>
+<a class="active">🏠 Dashboard</a>
 
 
-<div class="menu-title">
+<div class="section">
 ACADEMIC
 </div>
 
 
-<a>
-👨‍🎓 Students
-</a>
+<a>👨‍🎓 Students</a>
 
+<a>👨‍🏫 Teachers</a>
 
-<a>
-👨‍🏫 Teachers
-</a>
+<a>🏫 Classes</a>
 
+<a>📚 Subjects</a>
 
-<a>
-🏫 Classes
-</a>
+<a>📝 Exams & Marks</a>
 
-
-<a>
-📚 Subjects
-</a>
-
-
-<a>
-📝 Exams & Marks
-</a>
-
-
-<a>
-📊 Results
-</a>
+<a>📊 Results</a>
 
 
 
-<div class="menu-title">
+<div class="section">
 SYSTEM
 </div>
 
 
-<a>
-👥 Users
-</a>
+<a>👥 Users</a>
 
+<a>📄 Reports</a>
 
-<a>
-📄 Reports
-</a>
-
-
-<a>
-⚙ Settings
-</a>
+<a>⚙ Settings</a>
 
 
 </div>
@@ -523,7 +473,7 @@ SYSTEM
 
 
 
-<div class="topbar">
+<div class="header">
 
 
 <div>
@@ -531,17 +481,17 @@ SYSTEM
 <h2>Admin Dashboard</h2>
 
 <small>
-School Management System
+School Management Portal
 </small>
 
+
 </div>
 
 
-<div class="profile">
-
+<div class="admin">
 Administrator
-
 </div>
+
 
 
 </div>
@@ -555,42 +505,34 @@ Administrator
 
 <div class="card">
 
-<h3 id="totalStudents">0</h3>
-
+<h1 id="studentsCount">0</h1>
 <p>Students</p>
 
 </div>
 
 
-
 <div class="card">
 
-<h3 id="totalTeachers">0</h3>
-
+<h1 id="teachersCount">0</h1>
 <p>Teachers</p>
 
 </div>
 
 
-
 <div class="card">
 
-<h3 id="totalClasses">0</h3>
-
+<h1 id="classesCount">0</h1>
 <p>Classes</p>
 
 </div>
 
 
-
 <div class="card">
 
-<h3 id="totalSubjects">0</h3>
-
+<h1 id="subjectsCount">0</h1>
 <p>Subjects</p>
 
 </div>
-
 
 
 </div>
@@ -602,10 +544,10 @@ Administrator
 <div class="panel">
 
 
-<h3>Student Management</h3>
+<h3>Add Student</h3>
 
 
-<div class="form-grid">
+<div class="grid">
 
 
 <input id="name" placeholder="Student Name">
@@ -620,13 +562,9 @@ Administrator
 Gender
 </option>
 
-<option>
-Male
-</option>
+<option>Male</option>
 
-<option>
-Female
-</option>
+<option>Female</option>
 
 </select>
 
@@ -634,12 +572,11 @@ Female
 
 <select id="class">
 
-<option>
+<option value="">
 Select Class
 </option>
 
 </select>
-
 
 
 </div>
@@ -649,11 +586,8 @@ Select Class
 
 
 <button onclick="addStudent()">
-
 Save Student
-
 </button>
-
 
 
 </div>
@@ -662,17 +596,14 @@ Save Student
 
 
 
-
 <div class="panel">
 
 
-<h3>Import Students</h3>
+<h3>Students Import</h3>
 
 
 <button class="gold" onclick="downloadTemplate()">
-
 Download Template
-
 </button>
 
 
@@ -688,11 +619,8 @@ Select Class
 <input type="file" id="excelFile">
 
 
-
 <button onclick="importExcel()">
-
-Preview Import
-
+Preview
 </button>
 
 
@@ -702,43 +630,32 @@ Preview Import
 
 <table>
 
-<tbody id="previewTable">
-
-</tbody>
+<tbody id="previewTable"></tbody>
 
 </table>
 
 
-<button class="gold" onclick="confirmImport()">
-
+<button class="green" onclick="confirmImport()">
 Confirm Import
-
 </button>
 
 
 </div>
 
 
-
 </div>
 
-
-
-
-
-
-<div class="panel">
+  <div class="panel">
 
 
 <h3>Students List</h3>
 
 
-
-<input class="search"
-placeholder="Search student..."
+<input 
+class="search"
+placeholder="Search student by name or prem no..."
 onkeyup="searchStudent(this.value)"
 >
-
 
 
 
@@ -752,7 +669,7 @@ onkeyup="searchStudent(this.value)"
 
 <tr>
 
-<th>Admission</th>
+<th>Admission No</th>
 <th>Prem No</th>
 <th>Name</th>
 <th>Gender</th>
@@ -775,15 +692,11 @@ onkeyup="searchStudent(this.value)"
 </div>
 
 
-
 </div>
 
 
 
-
-
 </div>
-
 
 
 
@@ -791,48 +704,59 @@ onkeyup="searchStudent(this.value)"
 <div class="bottom-nav">
 
 
-<div class="nav-item active">
+<div class="nav active">
 <span>🏠</span>
 Home
 </div>
 
 
-<div class="nav-item">
+<div class="nav">
 <span>🎓</span>
 Students
 </div>
 
 
-<div class="nav-item">
+<div class="nav">
 <span>📝</span>
 Marks
 </div>
 
 
-<div class="nav-item">
+<div class="nav">
 <span>📊</span>
 Results
 </div>
 
 
-<div class="nav-item">
+<div class="nav">
 <span>☰</span>
 More
 </div>
 
-  </div>
 
-  <script>
+</div>
 
 
-let previewData=[];
+
+
+
+<script>
+
+
 let editingId=null;
+let previewData=[];
 let allStudents=[];
 
 
-const supabaseUrl="https://bslofdobcvxkjphbjyzb.supabase.co";
 
-const supabaseKey="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
+const supabaseUrl=
+"https://bslofdobcvxkjphbjyzb.supabase.co";
+
+
+
+const supabaseKey=
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
+
 
 
 const supabaseClient =
@@ -843,7 +767,9 @@ supabaseKey
 
 
 
+
 window.onload=async()=>{
+
 
 await loadClasses();
 
@@ -851,15 +777,16 @@ await loadStudents();
 
 await loadSummary();
 
+
 };
 
 
 
 
-// SUMMARY CARDS
 
 
 async function loadSummary(){
+
 
 
 let students =
@@ -868,9 +795,9 @@ await supabaseClient
 .select("*",{count:"exact"});
 
 
-document.getElementById("totalStudents")
-.innerHTML=
+studentsCount.innerHTML =
 students.count || 0;
+
 
 
 
@@ -880,13 +807,13 @@ await supabaseClient
 .select("*",{count:"exact"});
 
 
-document.getElementById("totalClasses")
-.innerHTML=
+classesCount.innerHTML =
 classes.count || 0;
 
 
 
 try{
+
 
 let teachers =
 await supabaseClient
@@ -894,8 +821,7 @@ await supabaseClient
 .select("*",{count:"exact"});
 
 
-document.getElementById("totalTeachers")
-.innerHTML=
+teachersCount.innerHTML =
 teachers.count || 0;
 
 
@@ -904,7 +830,9 @@ teachers.count || 0;
 
 
 
+
 try{
+
 
 let subjects =
 await supabaseClient
@@ -912,8 +840,7 @@ await supabaseClient
 .select("*",{count:"exact"});
 
 
-document.getElementById("totalSubjects")
-.innerHTML=
+subjectsCount.innerHTML =
 subjects.count || 0;
 
 
@@ -921,7 +848,9 @@ subjects.count || 0;
 
 
 
+
 }
+
 
 
 
@@ -932,33 +861,43 @@ subjects.count || 0;
 async function loadClasses(){
 
 
-let {data}=await supabaseClient
+
+let {data,error}=await supabaseClient
 .from("classes")
 .select("*")
 .order("class_name");
 
 
 
-let ids=[
-"class",
-"import_class"
-];
+if(error)return;
 
 
 
-ids.forEach(i=>{
 
-document.getElementById(i).innerHTML=
+let box =
+document.getElementById("class");
+
+
+let importBox =
+document.getElementById("import_class");
+
+
+
+box.innerHTML =
 `<option value="">Select Class</option>`;
 
-});
+
+importBox.innerHTML =
+`<option value="">Select Class</option>`;
+
+
 
 
 
 data.forEach(c=>{
 
 
-document.getElementById("class").innerHTML+=
+box.innerHTML +=
 `
 <option value="${c.id}">
 ${c.class_name}
@@ -967,17 +906,21 @@ ${c.class_name}
 
 
 
-document.getElementById("import_class").innerHTML+=
+importBox.innerHTML +=
 `
 <option value="${c.id}">
 ${c.class_name}
 </option>
 `;
+
+
 
 });
 
 
+
 }
+
 
 
 
@@ -988,31 +931,36 @@ async function addStudent(){
 
 
 
-let student_name=
-name.value;
+let student_name =
+document.getElementById("name").value;
 
 
-let prem_no=
-prem_no.value;
+
+let prem =
+document.getElementById("prem_no").value;
 
 
-let gender=
+
+let genderValue =
 document.getElementById("gender").value;
 
 
-let class_id=
+
+let classValue =
 document.getElementById("class").value;
 
 
 
 
-if(!student_name || !class_id){
+
+if(!student_name || !classValue){
 
 alert("Fill required fields");
 
 return;
 
 }
+
 
 
 
@@ -1025,17 +973,22 @@ await supabaseClient
 .from("students")
 .update({
 
-student_name,
-prem_no,
-gender,
-class_id
+student_name:student_name,
+
+prem_no:prem,
+
+gender:genderValue,
+
+class_id:classValue
+
 
 })
 .eq("id",editingId);
 
 
 
-}else{
+}
+else{
 
 
 await supabaseClient
@@ -1047,27 +1000,37 @@ admission_no:
 generateAdmissionNo(),
 
 
-student_name,
+student_name:student_name,
 
-prem_no,
 
-gender,
+prem_no:prem,
 
-class_id
+
+gender:genderValue,
+
+
+class_id:classValue
 
 
 }]);
 
+
+
 }
+
+
 
 
 
 editingId=null;
 
 
-name.value="";
-prem_no.value="";
-gender.value="";
+document.getElementById("name").value="";
+
+document.getElementById("prem_no").value="";
+
+document.getElementById("gender").value="";
+
 document.getElementById("class").value="";
 
 
@@ -1077,7 +1040,11 @@ await loadStudents();
 await loadSummary();
 
 
+
 }
+
+
+
 
 
 
@@ -1086,10 +1053,15 @@ await loadSummary();
 async function loadStudents(){
 
 
-let {data}=await supabaseClient
+
+let {data,error}=await supabaseClient
 .from("students")
 .select("*")
 .order("id",{ascending:false});
+
+
+
+if(error)return;
 
 
 
@@ -1100,72 +1072,65 @@ allStudents=data || [];
 displayStudents(allStudents);
 
 
+
 }
 
 
 
 
 
-function displayStudents(data){
+
+async function displayStudents(data){
+
+
+
+let table =
+document.getElementById("table");
+
 
 
 table.innerHTML="";
 
 
 
-data.forEach(s=>{
+for(let s of data){
 
 
-let cname="";
-
-
-
-getClassName(s.class_id)
-.then(c=>{
-
-let row=document
-.getElementById("row"+s.id);
-
-if(row)
-row.children[4].innerHTML=c;
-
-
-});
+let cname =
+await getClassName(s.class_id);
 
 
 
-table.innerHTML+=`
+table.innerHTML +=
 
-<tr id="row${s.id}">
+`
 
-<td>${s.admission_no||""}</td>
+<tr>
 
-<td>${s.prem_no||""}</td>
 
-<td>${s.student_name||""}</td>
+<td>${s.admission_no || ""}</td>
 
-<td>${s.gender||""}</td>
+<td>${s.prem_no || ""}</td>
 
-<td>
-Loading...
-</td>
+<td>${s.student_name || ""}</td>
+
+<td>${s.gender || ""}</td>
+
+<td>${cname}</td>
+
 
 
 <td>
 
 
 <button onclick='editStudent(${JSON.stringify(s)})'>
-
 Edit
-
 </button>
 
 
-<button class="danger"
+<button class="red"
 onclick="deleteStudent('${s.id}')">
-
 Delete
-
 </button>
 
 
@@ -1174,11 +1139,17 @@ Delete
 
 </tr>
 
+
 `;
 
-});
+
 
 }
+
+
+
+}
+
 
 
 
@@ -1200,44 +1171,7 @@ let {data}=await supabaseClient
 
 return data?.class_name || "";
 
-
 }
-
-
-
-
-
-
-
-function searchStudent(value){
-
-
-value=value.toLowerCase();
-
-
-
-let result =
-allStudents.filter(s=>
-
-s.student_name
-.toLowerCase()
-.includes(value)
-
-||
-(s.prem_no||"")
-.includes(value)
-
-);
-
-
-
-displayStudents(result);
-
-
-}
-
-
-
 
 
 
@@ -1276,7 +1210,6 @@ async function deleteStudent(id){
 
 
 if(!confirm("Delete this student?"))
-
 return;
 
 
@@ -1299,30 +1232,88 @@ loadSummary();
 
 
 
+function searchStudent(text){
 
+
+text=text.toLowerCase();
+
+
+
+let result =
+allStudents.filter(s=>
+
+(s.student_name||"")
+.toLowerCase()
+.includes(text)
+
+||
+
+(s.prem_no||"")
+.toLowerCase()
+.includes(text)
+
+
+);
+
+
+
+displayStudents(result);
+
+
+
+}
+
+
+
+
+
+
+function generateAdmissionNo(){
+
+
+let year =
+new Date()
+.getFullYear();
+
+
+
+let num =
+Math.floor(
+10000+Math.random()*90000
+);
+
+
+
+return `KEMPS/${year}/${num}`;
+
+
+}
+  // ===============================
+// EXCEL IMPORT SYSTEM
+// ===============================
 
 
 function downloadTemplate(){
 
 
-let data=[{
+let data=[
 
+{
 prem_no:"001",
-
-student_name:"Example Student",
-
+student_name:"Student Name",
 gender:"Male"
+}
 
-}];
+];
 
 
 
-let ws=
+let ws =
 XLSX.utils.json_to_sheet(data);
 
 
 
-let wb=
+let wb =
 XLSX.utils.book_new();
 
 
@@ -1341,8 +1332,8 @@ wb,
 );
 
 
-}
 
+}
 
 
 
@@ -1353,19 +1344,20 @@ async function importExcel(){
 
 
 
-let cls=
+let classId =
 document.getElementById("import_class").value;
 
 
-let file=
+
+let file =
 document.getElementById("excelFile")
 .files[0];
 
 
 
-if(!cls||!file){
+if(!classId || !file){
 
-alert("Select class and file");
+alert("Select class and Excel file");
 
 return;
 
@@ -1373,14 +1365,19 @@ return;
 
 
 
-let reader=new FileReader();
+
+
+let reader =
+new FileReader();
 
 
 
-reader.onload=e=>{
+
+reader.onload = function(e){
 
 
-let wb=
+
+let workbook =
 XLSX.read(
 new Uint8Array(e.target.result),
 {
@@ -1390,73 +1387,103 @@ type:"array"
 
 
 
-let sheet=
-wb.Sheets[wb.SheetNames[0]];
+
+let sheet =
+workbook.Sheets[
+workbook.SheetNames[0]
+];
 
 
 
-let rows=
+
+let rows =
 XLSX.utils.sheet_to_json(sheet);
 
 
 
 
+
 previewData =
-rows.map(r=>({
+rows.map(row=>({
+
 
 admission_no:
 generateAdmissionNo(),
 
 
 prem_no:
-r.prem_no || "",
+row.prem_no || "",
+
 
 
 student_name:
-r.student_name || "",
+row.student_name || "",
+
 
 
 gender:
-r.gender || "",
+row.gender || "",
 
 
-class_id:cls
+
+class_id:
+classId
 
 
 }));
 
 
 
-previewTable.innerHTML="";
+
+
+let preview =
+document.getElementById("previewTable");
 
 
 
-previewData.forEach(r=>{
+preview.innerHTML="";
 
 
-previewTable.innerHTML+=`
+
+
+
+previewData.forEach(s=>{
+
+
+preview.innerHTML +=
+
+
+`
 
 <tr>
 
-<td>${r.prem_no}</td>
+<td>${s.prem_no}</td>
 
-<td>${r.student_name}</td>
+<td>${s.student_name}</td>
 
-<td>${r.gender}</td>
+<td>${s.gender}</td>
+
 
 </tr>
 
+
 `;
+
 
 
 });
 
 
 
-previewSection.style.display="block";
 
 
-};
+document.getElementById("previewSection")
+.style.display="block";
+
+
+
+}
+
 
 
 
@@ -1476,24 +1503,46 @@ async function confirmImport(){
 
 
 
+if(previewData.length==0)
+return;
+
+
+
+let {error} =
 await supabaseClient
 .from("students")
 .insert(previewData);
 
 
 
-alert("Import completed");
+if(error){
+
+alert(error.message);
+
+return;
+
+}
+
+
+
+
+alert("Students imported successfully");
+
 
 
 previewData=[];
 
 
-previewSection.style.display="none";
+
+document.getElementById("previewSection")
+.style.display="none";
 
 
-loadStudents();
 
-loadSummary();
+await loadStudents();
+
+await loadSummary();
+
 
 
 }
@@ -1501,31 +1550,9 @@ loadSummary();
 
 
 
+</script>
 
 
-
-function generateAdmissionNo(){
-
-
-let year=
-new Date()
-.getFullYear();
-
-
-let number=
-Math.floor(
-10000+
-Math.random()*90000
-);
-
-
-
-return `KEMPS/${year}/${number}`;
-
-
-}
-
-  </script>
 </body>
+
 </html>
-  
