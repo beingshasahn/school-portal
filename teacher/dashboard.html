@@ -1274,14 +1274,7 @@ async function menuDelete(){
 <div class="chat-row ${mine ? "mine" : "other"}">
 
   <div class="chat-bubble"
-
-onclick="showMenu(event,{
-id:'${msg.id}',
-sender_id:'${msg.sender_id}',
-sender_name:${JSON.stringify(msg.sender_name)},
-message:${JSON.stringify(msg.message)}
-})"
->
+onclick="alert('Clicked')">
 
     <div class="chat-name">
       ${msg.sender_name || "Unknown"}
