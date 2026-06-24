@@ -1187,7 +1187,7 @@ await loadMessages();
 
   function showMenu(event,msg){
 
-  event.stopPropagation();
+  alert("Menu opened");
 
   selectedMessage = msg;
 
@@ -1196,12 +1196,9 @@ await loadMessages();
 
   menu.style.display = "block";
 
-  menu.style.left =
-    event.pageX + "px";
-
-  menu.style.top =
-    event.pageY + "px";
-      }
+  menu.style.left = "100px";
+  menu.style.top = "200px";
+  }
 
 function hideMenu(){
   document.getElementById("messageMenu")
