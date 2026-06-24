@@ -1185,9 +1185,9 @@ await loadMessages();
   }
   }
 
-  function showMenu(event,msg){
+ function showMenu(event,msg){
 
-  alert("Menu opened");
+  alert(msg.sender_name);
 
   selectedMessage = msg;
 
@@ -1195,10 +1195,9 @@ await loadMessages();
     document.getElementById("messageMenu");
 
   menu.style.display = "block";
-
   menu.style.left = "100px";
   menu.style.top = "200px";
-  }
+ }
 
 function hideMenu(){
   document.getElementById("messageMenu")
@@ -1274,7 +1273,14 @@ async function menuDelete(){
 <div class="chat-row ${mine ? "mine" : "other"}">
 
   <div class="chat-bubble"
-onclick="alert('Clicked')">
+
+onclick="showMenu(event,{
+id:'1',
+sender_id:'1',
+sender_name:'Test User',
+message:'Hello'
+})"
+>
 
     <div class="chat-name">
       ${msg.sender_name || "Unknown"}
