@@ -1260,20 +1260,21 @@ ${JSON.stringify(msg.message || "")}
     </div>
 
     <div
-      onclick="replyMessage(
-  '${msg.id}',
-  ${JSON.stringify(msg.sender_name || "")},
-  ${JSON.stringify(msg.message || "")}
-)"
-      style="
-        margin-top:6px;
-        color:#2563eb;
-        font-size:11px;
-        cursor:pointer;
-        font-weight:600;
-      ">
-      ↩ Reply
-    </div>
+      <div
+  onclick="replyMessage(
+    '${msg.id}',
+    '${(msg.sender_name || "").replace(/'/g,"\\'")}',
+    '${(msg.message || "").replace(/'/g,"\\'")}'
+  )"
+  style="
+    margin-top:6px;
+    color:#2563eb;
+    font-size:11px;
+    cursor:pointer;
+    font-weight:600;
+  ">
+  ↩ Reply
+</div>
 
   </div>
 
