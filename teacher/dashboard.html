@@ -1187,8 +1187,6 @@ await loadMessages();
 
  function showMenu(event,msg){
 
-  alert("Menu opened");
-
   selectedMessage = msg;
 
   const menu = document.getElementById("messageMenu");
@@ -1228,18 +1226,25 @@ async function menuCopy(){
 
 async function menuDelete(){
 
-  if(
-    selectedMessage.sender_id !== teacherId
-  ){
+  console.log(selectedMessage);
+
+  if(selectedMessage.sender_id !== teacherId){
     showToast("You can delete only your messages");
     return;
   }
 
-  await supabaseClient
+  const { error } = await supabaseClient
     .from("chats")
     .delete()
     .eq("id", selectedMessage.id);
 
+  if(error){
+    console.log(error);
+    alert(error.message);
+    return;
+  }
+
+  showToast("Message deleted");
   loadMessages();
   hideMenu();
 }
