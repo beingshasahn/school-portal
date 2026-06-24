@@ -1,392 +1,1133 @@
 <!DOCTYPE html>
 <html>
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Dashboard</title>
+
+<title>Admin Portal</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-*{box-sizing:border-box;font-family:Arial;}
+
+*{
+box-sizing:border-box;
+font-family:Segoe UI,Arial;
+}
 
 body{
-  margin:0;
-  display:flex;
-  min-height:100vh;
-  background:#f4f6f9;
+margin:0;
+background:#f5f6fa;
 }
 
-/* SIDEBAR */
-.sidebar{
-  width:250px;
-  background:#1e3c72;
-  color:white;
-  padding:20px;
-}
-
-.sidebar a{
-  display:block;
-  color:white;
-  text-decoration:none;
-  padding:10px;
-  margin:6px 0;
-  background:rgba(255,255,255,0.1);
-  border-radius:6px;
-}
-
-/* MAIN */
-.main{
-  flex:1;
-  padding:20px;
-}
-
-/* HEADER */
-.header{
-  background:white;
-  padding:15px;
-  border-radius:10px;
-  margin-bottom:10px;
-}
-
-/* WELCOME */
-#welcome{
-  margin:10px 0 20px 0;
-  font-weight:bold;
-}
-
-/* CARDS */
-.cards{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-  gap:10px;
-  margin-bottom:20px;
-}
-
-.card{
-  background:white;
-  padding:15px;
-  border-radius:10px;
-}
-
-/* TABLE */
-table{
-  width:100%;
-  border-collapse:collapse;
-  background:white;
-  border-radius:10px;
-  overflow:hidden;
-}
-
-th,td{
-  padding:10px;
-  border-bottom:1px solid #eee;
-}
-
-th{
-  background:#1e3c72;
-  color:white;
-}
-
-/* BUTTON */
-.deleteBtn{
-  background:red;
-  color:white;
-  border:none;
-  padding:6px 10px;
-  border-radius:6px;
-  cursor:pointer;
-}
-
-/* MODAL */
-#deleteModal{
-  display:none;
-  position:fixed;
-  top:0;left:0;
-  width:100%;height:100%;
-  background:rgba(0,0,0,0.5);
-  justify-content:center;
-  align-items:center;
-  z-index:9999;
-}
-
-.modal-box{
-  background:white;
-  padding:20px;
-  border-radius:10px;
-  width:320px;
-  text-align:center;
-}
-
-.modal-btn{
-  padding:8px 12px;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-  margin:5px;
-}
 
 /* TOP BAR */
+
 .topbar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+
+background:white;
+height:60px;
+padding:12px 15px;
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+border-bottom:1px solid #eee;
+
+position:sticky;
+top:0;
+z-index:10;
+
 }
 
-.logout{
-  background:red;
-  color:white;
-  border:none;
-  padding:8px 12px;
-  border-radius:6px;
-  cursor:pointer;
+
+.brand{
+
+display:flex;
+align-items:center;
+gap:8px;
+font-weight:bold;
+color:#111;
+
 }
+
+
+.brand-logo{
+
+width:32px;
+height:32px;
+
+background-image:url("https://bslofdobcvxkjphbjyzb.supabase.co/storage/v1/object/public/logos/school.png");
+
+background-size:contain;
+background-repeat:no-repeat;
+background-position:center;
+
+}
+
+
+
+.user{
+
+width:38px;
+height:38px;
+
+border-radius:50%;
+
+background:#1e3a8a;
+color:white;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+font-weight:bold;
+
+}
+
+
+
+/* PAGE */
+
+.page{
+
+padding:15px;
+
+animation:fade .3s;
+
+}
+
+
+@keyframes fade{
+
+from{
+opacity:0;
+transform:translateY(10px);
+}
+
+to{
+opacity:1;
+transform:translateY(0);
+}
+
+}
+
+
+
+/* CARDS */
+
+.card{
+
+background:white;
+
+padding:15px;
+
+border-radius:14px;
+
+margin-bottom:12px;
+
+box-shadow:
+0 2px 10px rgba(0,0,0,.06);
+
+}
+
+
+
+#welcome{
+
+font-weight:700;
+font-size:15px;
+
+}
+
+
+
+/* STAT CARDS */
+
+
+.cards{
+
+display:grid;
+
+grid-template-columns:
+repeat(auto-fit,minmax(140px,1fr));
+
+gap:12px;
+
+}
+
+
+
+.stat h2{
+
+margin:0;
+
+color:#1e3a8a;
+
+}
+
+
+.stat p{
+
+margin:5px 0;
+
+color:#666;
+
+font-size:13px;
+
+}
+
+
+
+/* TABLE */
+
+
+.table-card{
+
+overflow:auto;
+
+}
+
+
+table{
+
+width:100%;
+border-collapse:collapse;
+
+}
+
+
+th{
+
+background:#1e3a8a;
+color:white;
+
+padding:10px;
+
+}
+
+
+td{
+
+padding:10px;
+
+border-bottom:1px solid #eee;
+
+font-size:13px;
+
+}
+
+
+
+/* BUTTON */
+
+.deleteBtn{
+
+background:#ef4444;
+
+color:white;
+
+border:none;
+
+padding:7px 12px;
+
+border-radius:8px;
+
+cursor:pointer;
+
+}
+
+
+
+
+/* BOTTOM NAV */
+
+
+.bottom-nav{
+
+position:fixed;
+
+bottom:0;
+
+left:0;
+right:0;
+
+height:65px;
+
+background:white;
+
+display:flex;
+
+justify-content:space-around;
+
+align-items:center;
+
+border-top:1px solid #eee;
+
+}
+
+
+.nav-item{
+
+font-size:12px;
+
+text-align:center;
+
+color:#777;
+
+cursor:pointer;
+
+}
+
+
+.nav-item span{
+
+display:block;
+
+font-size:20px;
+
+}
+
+
+
+.nav-item.active{
+
+color:#f59e0b;
+
+font-weight:bold;
+
+}
+
+
+
+/* MODAL */
+
+
+#deleteModal{
+
+display:none;
+
+position:fixed;
+
+top:0;
+left:0;
+
+width:100%;
+height:100%;
+
+background:rgba(0,0,0,.5);
+
+align-items:center;
+justify-content:center;
+
+z-index:999;
+
+}
+
+
+
+.modal-box{
+
+background:white;
+
+padding:20px;
+
+width:320px;
+
+border-radius:15px;
+
+text-align:center;
+
+}
+
+
+.modal-btn{
+
+padding:9px 15px;
+
+border:none;
+
+border-radius:8px;
+
+margin:5px;
+
+cursor:pointer;
+
+}
+
+
+
+/* MOBILE */
+
+
+@media(max-width:700px){
+
+table{
+
+font-size:12px;
+
+}
+
+}
+
+
+
 </style>
+
+
 </head>
+
 
 <body>
 
-<div class="sidebar">
-  <h3>Admin Panel</h3>
 
-  <a href="dashboard.html">Dashboard</a>
-  <a href="teachers.html">Teachers</a>
-  <a href="students.html">Students</a>
-  <a href="classes.html">Classes</a>
-  <a href="subjects.html">Subjects</a>
-  <a href="assignments.html">Assignments</a>
-  <a href="../teacher/reports.html">Exam Results</a>
-</div>
-
-<div class="main">
+<!-- TOP -->
 
 <div class="topbar">
-  <div class="header">
-    <h2>KOROSHO ENGLISH MEDIUM SCHOOL</h2>
 
-  </div>
 
-  <button class="logout" onclick="logout()">Logout</button>
+<div class="brand">
+
+<span class="brand-logo"></span>
+
+KempsPortal Admin
+
 </div>
 
-<div id="welcome">Loading...</div>
+
+<div class="user" id="userInitials">
+
+AD
+
+</div>
+
+
+</div>
+
+
+
+
+
+<!-- HOME PAGE -->
+
+
+<div class="page">
+
+
+<div class="card">
+
+
+<h3 id="welcome">
+
+Loading...
+
+</h3>
+
+
+<p style="color:#777;font-size:13px">
+
+Manage school activities easily
+
+</p>
+
+
+</div>
+
+
+
+
 
 <div class="cards">
-  <div class="card"><h3 id="teachers">0</h3><p>Teachers</p></div>
-  <div class="card"><h3 id="students">0</h3><p>Students</p></div>
-  <div class="card"><h3 id="classes">0</h3><p>Classes</p></div>
-  <div class="card"><h3 id="subjects">0</h3><p>Subjects</p></div>
+
+
+<div class="card stat">
+
+<h2 id="teachers">
+0
+</h2>
+
+<p>Teachers</p>
+
 </div>
 
-<h3>Teachers Overview</h3>
+
+
+<div class="card stat">
+
+<h2 id="students">
+0
+</h2>
+
+<p>Students</p>
+
+</div>
+
+
+
+<div class="card stat">
+
+<h2 id="classes">
+0
+</h2>
+
+<p>Classes</p>
+
+</div>
+
+
+
+<div class="card stat">
+
+<h2 id="subjects">
+0
+</h2>
+
+<p>Subjects</p>
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div class="card table-card">
+
+
+<h3>
+
+Teachers Overview
+
+</h3>
+
+
 
 <table>
+
+
 <thead>
+
 <tr>
-  <th>No</th>
-  <th>Teacher</th>
-  <th>Classes</th>
-  <th>Subjects</th>
-  <th>Students</th>
-  <th>Action</th>
+
+<th>No</th>
+<th>Teacher</th>
+<th>Classes</th>
+<th>Subjects</th>
+<th>Students</th>
+<th>Action</th>
+
 </tr>
+
+
 </thead>
 
-<tbody id="teachersTable"></tbody>
+
+
+<tbody id="teachersTable">
+
+
+</tbody>
+
+
 </table>
 
+
+
 </div>
 
-<!-- MODAL -->
+
+
+</div>
+
+
+
+
+
+<!-- BOTTOM NAV -->
+
+
+<div class="bottom-nav">
+
+
+<div class="nav-item active">
+
+<span>🏠</span>
+
+Home
+
+</div>
+
+
+<div class="nav-item"
+onclick="location.href='teachers.html'">
+
+<span>👨‍🏫</span>
+
+Teachers
+
+</div>
+
+
+
+<div class="nav-item"
+onclick="location.href='students.html'">
+
+<span>👨‍🎓</span>
+
+Students
+
+</div>
+
+
+
+<div class="nav-item"
+onclick="logout()">
+
+<span>⚙️</span>
+
+Logout
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+<!-- DELETE MODAL -->
+
+
 <div id="deleteModal">
-  <div class="modal-box">
-    <h3>Delete Teacher?</h3>
-    <p id="deleteTeacherName" style="font-weight:bold;"></p>
 
-    <button id="confirmDeleteBtn" class="modal-btn" style="background:red;color:white;">
-      Delete
-    </button>
 
-    <button onclick="closeModal()" class="modal-btn" style="background:#ccc;">
-      Cancel
-    </button>
-  </div>
+<div class="modal-box">
+
+
+<h3>
+
+Delete Teacher?
+
+</h3>
+
+
+<p id="deleteTeacherName"></p>
+
+
+
+<button id="confirmDeleteBtn"
+class="modal-btn"
+style="background:red;color:white">
+
+Delete
+
+</button>
+
+
+
+<button onclick="closeModal()"
+class="modal-btn"
+style="background:#ddd">
+
+Cancel
+
+</button>
+
+
 </div>
 
+
+</div>
 <script>
 
-const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
-const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+const supabaseUrl =
+"https://bslofdobcvxkjphbjyzb.supabase.co";
 
-let selectedTeacherId = null;
-let selectedTeacherName = "";
+const supabaseKey =
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
 
-/* PROTECT (SAFE VERSION) */
+
+const supabaseClient =
+supabase.createClient(
+supabaseUrl,
+supabaseKey
+);
+
+
+
+let selectedTeacherId=null;
+
+
+
+/* PROTECT ADMIN */
+
 async function protect(){
 
-  const { data: { user } } = await supabaseClient.auth.getUser();
 
-  if(!user){
-    window.location.href = "../index.html";
-    return;
-  }
+const {data:{user}} =
+await supabaseClient.auth.getUser();
 
-  // SAFE PROFILE FETCH (no crash, no false logout)
-  const { data: profile, error } = await supabaseClient
-    .from("profiles")
-    .select("role, full_name")
-    .eq("id", user.id)
-    .maybeSingle();
 
-  console.log("USER:", user);
-  console.log("PROFILE:", profile);
-  console.log("ERROR:", error);
 
-  // ❌ HATU-LOGOUT AUTOMATICALLY HAPA TENA
-  if(error){
-    document.getElementById("welcome").innerText =
-      "Error loading profile";
-    return;
-  }
+if(!user){
 
-  if(profile?.role !== "admin"){
-  document.getElementById("welcome").innerText =
-    "Access denied (not admin)";
-  return;
+location.href="../index.html";
+return;
+
 }
 
-const name = profile?.full_name || "Teacher";
 
-const hour = new Date().getHours();
 
-let greeting = "Good morning";
+const {data:profile,error}=
 
-if(hour >= 12 && hour < 16){
-  greeting = "Good afternoon";
-}else if(hour >= 16){
-  greeting = "Good evening";
+await supabaseClient
+
+.from("profiles")
+
+.select("role,full_name")
+
+.eq("id",user.id)
+
+.maybeSingle();
+
+
+
+if(error){
+
+document.getElementById("welcome")
+.innerText="Profile loading error";
+
+return;
+
 }
 
-document.getElementById("welcome").innerText =
-  `${greeting}, ${name}`;
-  }
-  
-/* LOAD TEACHERS SAFE */
-async function loadTeachers(){
 
-  const { data: teachers = [] } = await supabaseClient
-    .from("profiles")
-    .select("*")
-    .eq("role","teacher");
 
-  const { data: assignments = [] } = await supabaseClient
-    .from("teacher_assignments")
-    .select("*, classes(class_name), subjects(subject_name)");
+if(profile?.role !== "admin"){
 
-  const { data: students = [] } = await supabaseClient
-    .from("students")
-    .select("*");
+document.getElementById("welcome")
+.innerText="Access denied";
 
-  const tbody = document.getElementById("teachersTable");
-  tbody.innerHTML = "";
+return;
 
-  teachers.forEach((t,index)=>{
-
-    const teacherAssignments = assignments.filter(a => a.teacher_id === t.id);
-
-    const classNames = [...new Set(teacherAssignments.map(a => a?.classes?.class_name))];
-    const subjectNames = [...new Set(teacherAssignments.map(a => a?.subjects?.subject_name))];
-
-    const classIds = teacherAssignments.map(a => a.class_id);
-    const studentCount = students.filter(s => classIds.includes(s.class_id)).length;
-
-    tbody.innerHTML += `
-      <tr>
-        <td>${index+1}</td>
-        <td>${t.full_name || t.email}</td>
-        <td>${classNames.join(", ")}</td>
-        <td>${subjectNames.join(", ")}</td>
-        <td>${studentCount}</td>
-        <td>
-          <button class="deleteBtn" onclick="openDeleteModal('${t.id}','${t.full_name || t.email}')">
-            Delete
-          </button>
-        </td>
-      </tr>
-    `;
-  });
 }
 
-/* STATS SAFE */
+
+
+let hour=new Date().getHours();
+
+let greet="Good morning";
+
+
+if(hour>=12 && hour<16){
+
+greet="Good afternoon";
+
+}
+
+else if(hour>=16){
+
+greet="Good evening";
+
+}
+
+
+
+document.getElementById("welcome")
+.innerText=
+
+`${greet}, ${profile.full_name || "Admin"}`;
+
+
+
+// initials
+
+let name =
+profile.full_name || "Admin";
+
+
+document.getElementById("userInitials")
+.innerText =
+name.substring(0,2).toUpperCase();
+
+
+
+}
+
+
+
+
+
+/* STATS */
+
+
 async function loadStats(){
 
-  const teachers = await supabaseClient.from("profiles").select("*",{count:"exact",head:true}).eq("role","teacher");
-  const students = await supabaseClient.from("students").select("*",{count:"exact",head:true});
-  const classes = await supabaseClient.from("classes").select("*",{count:"exact",head:true});
-  const subjects = await supabaseClient.from("subjects").select("*",{count:"exact",head:true});
 
-  document.getElementById("teachers").innerText = teachers.count || 0;
-  document.getElementById("students").innerText = students.count || 0;
-  document.getElementById("classes").innerText = classes.count || 0;
-  document.getElementById("subjects").innerText = subjects.count || 0;
+let teachers =
+await supabaseClient
+
+.from("profiles")
+
+.select("*",
+{count:"exact",head:true})
+
+.eq("role","teacher");
+
+
+
+let students =
+await supabaseClient
+
+.from("students")
+
+.select("*",
+{count:"exact",head:true});
+
+
+
+let classes =
+await supabaseClient
+
+.from("classes")
+
+.select("*",
+{count:"exact",head:true});
+
+
+
+let subjects =
+await supabaseClient
+
+.from("subjects")
+
+.select("*",
+{count:"exact",head:true});
+
+
+
+
+document.getElementById("teachers")
+.innerText =
+teachers.count || 0;
+
+
+document.getElementById("students")
+.innerText =
+students.count || 0;
+
+
+document.getElementById("classes")
+.innerText =
+classes.count || 0;
+
+
+document.getElementById("subjects")
+.innerText =
+subjects.count || 0;
+
+
 }
 
-/* MODAL */
-function openDeleteModal(id,name){
-  selectedTeacherId = id;
-  selectedTeacherName = name;
 
-  document.getElementById("deleteTeacherName").innerText = name;
-  document.getElementById("deleteModal").style.display = "flex";
-}
 
-function closeModal(){
-  document.getElementById("deleteModal").style.display = "none";
-  selectedTeacherId = null;
-}
 
-/* DELETE */
-document.getElementById("confirmDeleteBtn").addEventListener("click", async ()=>{
 
-  if(!selectedTeacherId) return;
 
-  await supabaseClient.from("teacher_assignments")
-    .delete()
-    .eq("teacher_id", selectedTeacherId);
+/* TEACHERS TABLE */
 
-  const { error } = await supabaseClient
-    .from("profiles")
-    .delete()
-    .eq("id", selectedTeacherId);
 
-  if(error){
-    alert(error.message);
-  } else {
-    alert("You have successfully deleted this teacher");
-    loadTeachers();
-    loadStats();
-  }
+async function loadTeachers(){
 
-  closeModal();
+
+const {data:teachers=[]}=
+
+await supabaseClient
+
+.from("profiles")
+
+.select("*")
+
+.eq("role","teacher");
+
+
+
+const {data:assignments=[]}=
+
+await supabaseClient
+
+.from("teacher_assignments")
+
+.select(`
+*,
+classes(class_name),
+subjects(subject_name)
+`);
+
+
+
+
+const {data:students=[]}=
+
+await supabaseClient
+
+.from("students")
+
+.select("*");
+
+
+
+
+
+let table =
+document.getElementById("teachersTable");
+
+
+table.innerHTML="";
+
+
+
+
+teachers.forEach((t,i)=>{
+
+
+let myAssignments =
+assignments.filter(a=>
+a.teacher_id===t.id
+);
+
+
+
+let classes =
+[
+...new Set(
+myAssignments.map(
+a=>a.classes?.class_name
+))
+];
+
+
+
+let subjects =
+[
+...new Set(
+myAssignments.map(
+a=>a.subjects?.subject_name
+))
+];
+
+
+
+let classIds =
+myAssignments.map(a=>a.class_id);
+
+
+
+let studentCount =
+students.filter(s=>
+classIds.includes(s.class_id)
+).length;
+
+
+
+
+
+table.innerHTML += `
+
+<tr>
+
+<td>${i+1}</td>
+
+<td>${t.full_name || t.email}</td>
+
+<td>${classes.join(", ")}</td>
+
+<td>${subjects.join(", ")}</td>
+
+<td>${studentCount}</td>
+
+
+<td>
+
+<button class="deleteBtn"
+
+onclick="openDeleteModal(
+'${t.id}',
+'${t.full_name || t.email}'
+)">
+
+Delete
+
+</button>
+
+</td>
+
+
+</tr>
+
+`;
+
+
+
 });
 
-/* LOGOUT */
-async function logout(){
-  await supabaseClient.auth.signOut();
-  window.location.href = "../index.html";
+
+
 }
 
-/* INIT */
-async function init(){
-  await protect();
-  loadStats();
-  loadTeachers();
+
+
+
+
+
+
+/* DELETE MODAL */
+
+
+function openDeleteModal(id,name){
+
+selectedTeacherId=id;
+
+
+document.getElementById(
+"deleteTeacherName"
+)
+.innerText=name;
+
+
+document.getElementById(
+"deleteModal"
+)
+.style.display="flex";
+
 }
+
+
+
+function closeModal(){
+
+document.getElementById(
+"deleteModal"
+)
+.style.display="none";
+
+
+selectedTeacherId=null;
+
+}
+
+
+
+
+
+
+document
+.getElementById("confirmDeleteBtn")
+.addEventListener("click",async()=>{
+
+
+if(!selectedTeacherId)
+return;
+
+
+
+await supabaseClient
+
+.from("teacher_assignments")
+
+.delete()
+
+.eq("teacher_id",
+selectedTeacherId);
+
+
+
+
+
+const {error}=
+
+await supabaseClient
+
+.from("profiles")
+
+.delete()
+
+.eq("id",
+selectedTeacherId);
+
+
+
+
+if(error){
+
+alert(error.message);
+
+}
+
+else{
+
+alert("Teacher deleted successfully");
+
+loadTeachers();
+
+loadStats();
+
+}
+
+
+
+closeModal();
+
+
+
+});
+
+
+
+
+
+
+/* LOGOUT */
+
+
+async function logout(){
+
+await supabaseClient.auth.signOut();
+
+location.href="../index.html";
+
+}
+
+
+
+
+
+
+
+async function init(){
+
+await protect();
+
+loadStats();
+
+loadTeachers();
+
+}
+
+
 
 init();
 
+
 </script>
 
+
 </body>
+
 </html>
