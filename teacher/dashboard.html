@@ -1186,16 +1186,17 @@ await loadMessages();
   }
 
  function showMenu(event,msg){
-alert ("Menu opened");
+
+  alert("Menu opened");
+
   selectedMessage = msg;
 
-  const menu =
-    document.getElementById("messageMenu");
+  const menu = document.getElementById("messageMenu");
 
   menu.style.display = "block";
 
-  menu.style.left = event.pageX + "px";
-  menu.style.top = event.pageY + "px";
+  menu.style.left = event.clientX + "px";
+  menu.style.top = event.clientY + "px";
  }
 
 
@@ -1274,7 +1275,7 @@ async function menuDelete(){
 
   <div class="chat-bubble"
 
-onclick='showMenu(event,{
+onclick='event.stopPropagation(); showMenu(event,{
 id:"${msg.id}",
 sender_id:"${msg.sender_id}",
 sender_name:${JSON.stringify(msg.sender_name || "")},
@@ -1381,15 +1382,16 @@ init();
   <div id="messageMenu" style="
 display:none;
 position:fixed;
-top:100px;
-left:100px;
-background:red;
-color:white;
-padding:20px;
+top:0;
+left:0;
+background:white;
+border-radius:12px;
+box-shadow:0 5px 25px rgba(0,0,0,.15);
+padding:8px;
 z-index:999999999;
+min-width:150px;
+border:1px solid #ddd;
 ">
-TEST MENU
-  </div>
 
   <div onclick="menuReply()" style="padding:10px;cursor:pointer;">
     ↩ Reply
