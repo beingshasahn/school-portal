@@ -9,110 +9,175 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 <style>
-*{box-sizing:border-box;font-family:Arial}
+*{
+box-sizing:border-box;
+font-family:Segoe UI,Arial;
+}
 
 body{
-  margin:0;
-  display:flex;
-  min-height:100vh;
-  background:#f4f6f9;
+margin:0;
+background:#f5f6fa;
+display:flex;
+min-height:100vh;
 }
 
 /* SIDEBAR */
 .sidebar{
-  width:240px;
-  background:#1e3c72;
-  color:white;
-  padding:15px;
+width:240px;
+background:#1e3c72;
+color:white;
+padding:20px;
 }
 
+.sidebar h3{
+margin-top:0;
+}
+  
 .sidebar a{
-  display:block;
-  color:white;
-  text-decoration:none;
-  padding:8px;
-  margin:6px 0;
-  background:rgba(255,255,255,0.1);
-  border-radius:6px;
-  font-size:14px;
+display:block;
+color:white;
+text-decoration:none;
+padding:10px;
+margin:7px 0;
+background:rgba(255,255,255,.1);
+border-radius:8px;
+font-size:14px;
 }
 
 /* MAIN */
 .main{
-  flex:1;
-  padding:15px;
+flex:1;
+padding:15px;
+padding-bottom:90px;
 }
 
-/* HEADER */
+/* TOP HEADER */
 .header{
-  background:white;
-  padding:12px;
-  border-radius:10px;
-  margin-bottom:10px;
+background:white;
+padding:15px;
+border-radius:14px;
+margin-bottom:15px;
+box-shadow:0 3px 10px rgba(0,0,0,.06);
 }
 
-/* FORM */
+/* CARDS */
 .form{
-  background:white;
-  padding:12px;
-  border-radius:10px;
-  margin-bottom:10px;
+background:white;
+padding:15px;
+border-radius:14px;
+margin-bottom:15px;
+box-shadow:0 3px 10px rgba(0,0,0,.05);
 }
 
-/* GRID INPUTS */
 .form-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:8px;
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:10px;
 }
 
-/* INPUT STYLE */
-input, select{
-  width:100%;
-  padding:8px;
-  border:1px solid #ccc;
-  border-radius:6px;
-  font-size:13px;
-  margin:0;
+input,select{
+padding:10px;
+border:1px solid #ddd;
+border-radius:10px;
 }
 
 /* BUTTON */
 button{
-  background:#1e3c72;
-  color:white;
-  padding:8px;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-  font-size:13px;
-  margin-top:8px;
+background:#1e3c72;
+color:white;
+border:none;
+padding:10px;
+border-radius:10px;
+cursor:pointer;
 }
 
 /* TABLE */
 table{
-  width:100%;
-  border-collapse:collapse;
-  background:white;
-  border-radius:10px;
-  overflow:hidden;
+width:100%;
+border-collapse:collapse;
+background:white;
+border-radius:14px;
+overflow:hidden;
+}
+
+th{
+background:#1e3c72;
+color:white;
 }
 
 th,td{
-  padding:8px;
-  border-bottom:1px solid #eee;
-  font-size:13px;
+padding:10px;
+border-bottom:1px solid #eee;
+font-size:13px;
 }
 
-/* ACTION BUTTONS */
-.deleteBtn{background:red;padding:5px 8px;border:none;color:white;border-radius:5px}
-.editBtn{background:#f0ad4e;padding:5px 8px;border:none;color:white;border-radius:5px}
 
-/* RESPONSIVE */
+/* BOTTOM NAV MOBILE */
+.bottom-nav{
+display:none;
+}
+
 @media(max-width:768px){
-  .sidebar{width:100%}
-  body{flex-direction:column}
-  .form-grid{grid-template-columns:1fr}
+body{
+display:block;
 }
+
+.sidebar{
+display:none;
+}
+
+.main{
+padding:12px;
+padding-bottom:90px;
+}
+
+/* header */
+.header h2{
+font-size:17px;
+}
+
+/* forms */
+.form-grid{
+grid-template-columns:1fr;
+}
+
+/* table scroll */
+table{
+font-size:11px;
+}
+/* bottom nav */
+
+.bottom-nav{
+display:flex;
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+height:65px;
+background:white;
+border-top:1px solid #ddd;
+justify-content:space-around;
+align-items:center;
+z-index:9999;
+
+}
+
+.nav-item{
+text-align:center;
+font-size:12px;
+color:#777;
+}
+
+.nav-item span{
+display:block;
+font-size:20px;
+}
+
+.nav-item.active{
+color:#1e3c72;
+font-weight:bold;
+}
+  }
 </style>
 </head>
 
@@ -663,6 +728,39 @@ function generateAdmissionNo(){
 }
 
 </script>
+  
+<div class="bottom-nav">
 
+<div class="nav-item">
+<span>🏠</span>
+Dashboard
+</div>
+
+
+<div class="nav-item active">
+<span>👨‍🎓</span>
+Students
+</div>
+
+
+<div class="nav-item">
+<span>👨‍🏫</span>
+Teachers
+</div>
+
+
+<div class="nav-item">
+<span>📚</span>
+Classes
+</div>
+
+
+<div class="nav-item">
+<span>⚙️</span>
+More
+</div>
+
+</div>
+  
 </body>
 </html>
