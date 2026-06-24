@@ -1277,13 +1277,17 @@ async function menuDelete(){
 
   <div class="chat-bubble"
 
-data-id="${msg.id}"
-data-sender-id="${msg.sender_id}"
-data-sender-name="${msg.sender_name || ""}"
-data-message="${msg.message || ""}"
-
-onclick="showMenu(event,this)"
+onclick='showMenu(event,{
+id:"${msg.id}",
+sender_id:"${msg.sender_id}",
+sender_name:${JSON.stringify(msg.sender_name || "")},
+message:${JSON.stringify(msg.message || "")}
+})'
 >
+
+    <div class="chat-name">
+      ${msg.sender_name || "Unknown"}
+    </div>
 
     <div class="chat-name">
       ${msg.sender_name || "Unknown"}
