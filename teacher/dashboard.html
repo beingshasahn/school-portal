@@ -1185,14 +1185,18 @@ await loadMessages();
   }
   }
 
- function showMenu(event,el){
+ function showMenu(event,msg){
+alert ("Menu opened");
+  selectedMessage = msg;
 
-  selectedMessage = {
-    id: el.dataset.id,
-    sender_id: el.dataset.senderId,
-    sender_name: el.dataset.senderName,
-    message: el.dataset.message
-  };
+  const menu =
+    document.getElementById("messageMenu");
+
+  menu.style.display = "block";
+
+  menu.style.left = event.pageX + "px";
+  menu.style.top = event.pageY + "px";
+ }
 
   const menu =
     document.getElementById("messageMenu");
@@ -1284,10 +1288,6 @@ sender_name:${JSON.stringify(msg.sender_name || "")},
 message:${JSON.stringify(msg.message || "")}
 })'
 >
-
-    <div class="chat-name">
-      ${msg.sender_name || "Unknown"}
-    </div>
 
     <div class="chat-name">
       ${msg.sender_name || "Unknown"}
@@ -1392,8 +1392,9 @@ background:white;
 border-radius:12px;
 box-shadow:0 5px 25px rgba(0,0,0,.15);
 padding:8px;
-z-index:99999;
+z-index:999999;
 min-width:150px;
+border:1px solid #ddd;
 ">
 
   <div onclick="menuReply()" style="padding:10px;cursor:pointer;">
