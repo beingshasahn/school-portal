@@ -92,12 +92,19 @@ cursor:pointer;
 }
 
 /* TABLE */
-table{
+.table-container{
 width:100%;
-border-collapse:collapse;
+overflow-x:auto;
+overflow-y:hidden;
 background:white;
 border-radius:14px;
-overflow:hidden;
+-webkit-overflow-scrolling:touch;
+}
+
+
+.table-container table{
+min-width:700px;
+width:100%;
 }
 
 th{
@@ -295,19 +302,25 @@ display:block;
 
 <!-- TABLE -->
 <table>
-  <thead>
-    <tr>
-      <th>Cand. No</th>
-      <th>Prem No</th>
-      <th>Name</th>
-      <th>Gender</th>
-      <th>Class</th>
-      <th>Action</th>
-    </tr>
-  </thead>
-  <tbody id="table"></tbody>
-</table>
+<div class="table-container">
 
+<table>
+
+<thead>
+<tr>
+<th>Cand. No</th>
+<th>Prem No</th>
+<th>Name</th>
+<th>Gender</th>
+<th>Class</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="table"></tbody>
+
+</table>
+</div>
 </div>
 
 <script>
