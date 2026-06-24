@@ -25,17 +25,13 @@ background:#f5f6fa;
 /* TOP BAR */
 
 .topbar{
-
 background:white;
 height:60px;
 padding:12px 15px;
-
 display:flex;
 justify-content:space-between;
 align-items:center;
-
 border-bottom:1px solid #eee;
-
 position:sticky;
 top:0;
 z-index:10;
@@ -44,41 +40,30 @@ z-index:10;
 
 
 .brand{
-
 display:flex;
 align-items:center;
 gap:8px;
 font-weight:bold;
 color:#111;
-
 }
 
 
 .brand-logo{
-
 width:32px;
 height:32px;
-
 background-image:url("https://bslofdobcvxkjphbjyzb.supabase.co/storage/v1/object/public/logos/school.png");
-
 background-size:contain;
 background-repeat:no-repeat;
 background-position:center;
 
 }
 
-
-
 .user{
-
 width:38px;
 height:38px;
-
 border-radius:50%;
-
 background:#1e3a8a;
 color:white;
-
 display:flex;
 align-items:center;
 justify-content:center;
@@ -87,52 +72,24 @@ font-weight:bold;
 
 }
 
-
-
 /* PAGE */
 
 .page{
-
 padding:15px;
-
 animation:fade .3s;
-
 }
 
-
 @keyframes fade{
-
 from{
 opacity:0;
 transform:translateY(10px);
 }
-
 to{
 opacity:1;
 transform:translateY(0);
 }
 
 }
-
-
-
-/* CARDS */
-
-.card{
-
-background:white;
-
-padding:15px;
-
-border-radius:14px;
-
-margin-bottom:12px;
-
-box-shadow:
-0 2px 10px rgba(0,0,0,.06);
-
-}
-
 
 
 #welcome{
@@ -142,52 +99,18 @@ font-size:15px;
 
 }
 
-
-
 /* STAT CARDS */
-
-
-.cards{
-
-display:grid;
-
-grid-template-columns:
-repeat(auto-fit,minmax(140px,1fr));
-
-gap:12px;
-
-}
-
-
 
 .stat h2{
 
 margin:0;
-
 color:#1e3a8a;
-
 }
-
-
-.stat p{
-
-margin:5px 0;
-
-color:#666;
-
-font-size:13px;
-
-}
-
 
 
 /* TABLE */
-
-
 .table-card{
-
 overflow:auto;
-
 }
 
 
@@ -220,7 +143,6 @@ font-size:13px;
 }
 
 
-
 /* BUTTON */
 
 .deleteBtn{
@@ -238,8 +160,6 @@ border-radius:8px;
 cursor:pointer;
 
 }
-
-
 
 
 /* BOTTOM NAV */
@@ -300,7 +220,45 @@ font-weight:bold;
 
 }
 
+/* STAT CARDS */
 
+.cards{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+  margin-bottom:20px;
+}
+
+.stat{
+  background:white;
+  padding:12px;
+  border-radius:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+  min-height:90px;
+}
+
+.stat h2{
+  margin:0;
+  font-size:22px;
+  color:#1e3a8a;
+}
+
+.stat p{
+  margin:5px 0 0;
+  color:#666;
+  font-size:12px;
+}
+
+
+/* kwenye screen kubwa iwe nne mstari mmoja */
+
+@media(min-width:768px){
+
+.cards{
+  grid-template-columns:repeat(4,1fr);
+}
+
+  }
 
 /* MODAL */
 
