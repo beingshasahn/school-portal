@@ -1185,11 +1185,14 @@ await loadMessages();
   }
   }
 
- function showMenu(event,msg){
+ function showMenu(event,el){
 
-  alert(msg.sender_name);
-
-  selectedMessage = msg;
+  selectedMessage = {
+    id: el.dataset.id,
+    sender_id: el.dataset.senderId,
+    sender_name: el.dataset.senderName,
+    message: el.dataset.message
+  };
 
   const menu =
     document.getElementById("messageMenu");
@@ -1274,12 +1277,12 @@ async function menuDelete(){
 
   <div class="chat-bubble"
 
-onclick="showMenu(event,{
-id:'1',
-sender_id:'1',
-sender_name:'Test User',
-message:'Hello'
-})"
+data-id="${msg.id}"
+data-sender-id="${msg.sender_id}"
+data-sender-name="${msg.sender_name || ""}"
+data-message="${msg.message || ""}"
+
+onclick="showMenu(event,this)"
 >
 
     <div class="chat-name">
