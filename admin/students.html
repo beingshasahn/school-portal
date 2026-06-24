@@ -1,431 +1,1768 @@
 <!DOCTYPE html>
 <html>
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>School Admin Dashboard</title>
+
+<title>KOROSHO SCHOOL ADMIN</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
+
 <style>
+
 *{
 box-sizing:border-box;
-font-family:Segoe UI,Arial;
+font-family:'Segoe UI',Arial;
 }
+
 
 body{
+
 margin:0;
-background:#f4f6fb;
+background:#f4f6fa;
 display:flex;
 min-height:100vh;
+
 }
+
 
 /* SIDEBAR */
+
 .sidebar{
-width:240px;
-background:#1e3c72;
-color:#fff;
-padding:18px;
+
+width:250px;
+background:#123b6d;
+color:white;
+padding:20px;
+position:fixed;
+height:100vh;
+
 }
 
-.sidebar h3{
-margin:0 0 15px 0;
+
+
+.logo{
+
+text-align:center;
+margin-bottom:25px;
+
 }
+
+
+.logo img{
+
+width:70px;
+height:70px;
+border-radius:50%;
+
+}
+
+
+.logo h3{
+
+font-size:15px;
+
+}
+
+
 
 .sidebar a{
+
 display:block;
-color:#fff;
+color:white;
 text-decoration:none;
-padding:10px;
-margin:6px 0;
-background:rgba(255,255,255,.12);
-border-radius:8px;
+padding:12px;
+border-radius:10px;
+margin:7px 0;
 font-size:14px;
+
 }
+
+
+.sidebar a:hover{
+
+background:#ffffff22;
+
+}
+
+
 
 /* MAIN */
+
 .main{
-flex:1;
-padding:15px;
-padding-bottom:90px;
+
+margin-left:250px;
+padding:20px;
+width:100%;
+padding-bottom:100px;
+
 }
+
+
+
 
 /* HEADER */
+
+
 .header{
-background:#fff;
-padding:15px;
-border-radius:12px;
-margin-bottom:15px;
-box-shadow:0 2px 10px rgba(0,0,0,.06);
+
+background:white;
+border-radius:18px;
+padding:20px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+box-shadow:0 5px 20px #0001;
+
 }
 
-.header h2{
-margin:0;
-font-size:18px;
+
+
+.profile{
+
+font-size:13px;
+color:#555;
+
 }
 
-.header small{
-color:#666;
-}
 
-/* OVERVIEW CARDS */
+
+/* CARDS */
+
+
 .cards{
+
 display:grid;
 grid-template-columns:repeat(4,1fr);
-gap:10px;
-margin-bottom:15px;
+gap:15px;
+margin:20px 0;
+
 }
+
 
 .card{
-background:#fff;
-padding:12px;
-border-radius:12px;
-box-shadow:0 2px 10px rgba(0,0,0,.05);
-text-align:center;
+
+background:white;
+padding:18px;
+border-radius:18px;
+box-shadow:0 5px 20px #0001;
+
 }
 
-.card h3{
+
+
+.card h2{
+
 margin:0;
-font-size:14px;
-color:#666;
+color:#123b6d;
+
 }
 
-.card h1{
-margin:5px 0 0;
-font-size:20px;
-color:#1e3c72;
+
+
+.card p{
+
+margin:5px 0;
+color:#777;
+
 }
 
-/* FORMS */
-.form{
-background:#fff;
-padding:15px;
-border-radius:12px;
-margin-bottom:15px;
-box-shadow:0 2px 10px rgba(0,0,0,.05);
+
+
+
+/* QUICK */
+
+
+.quick{
+
+background:white;
+padding:18px;
+border-radius:18px;
+margin-bottom:20px;
+
 }
 
-.form-grid{
+
+.quick button{
+
+background:#123b6d;
+color:white;
+border:none;
+padding:10px;
+border-radius:10px;
+margin:5px;
+
+}
+
+
+
+/* FORM */
+
+
+.box{
+
+background:white;
+padding:18px;
+border-radius:18px;
+margin-bottom:20px;
+box-shadow:0 5px 15px #0001;
+
+}
+
+
+
+.grid{
+
 display:grid;
 grid-template-columns:repeat(3,1fr);
 gap:10px;
+
 }
+
+
 
 input,select{
+
+width:100%;
 padding:10px;
+border-radius:10px;
 border:1px solid #ddd;
-border-radius:8px;
+
 }
 
-/* BUTTON */
+
+
 button{
-background:#1e3c72;
-color:#fff;
-border:none;
-padding:10px;
-border-radius:8px;
+
 cursor:pointer;
+
 }
 
-/* SEARCH */
-.search{
-margin-bottom:10px;
+
+
+/* TABLE */
+
+
+.table-box{
+
+background:white;
+border-radius:18px;
+overflow:hidden;
+
 }
 
-.search input{
-width:100%;
-}
 
-/* TABLE SCROLL ONLY */
-.table-container{
-width:100%;
+.table-scroll{
+
 overflow-x:auto;
-background:#fff;
-border-radius:12px;
-box-shadow:0 2px 10px rgba(0,0,0,.05);
+
 }
+
+
 
 table{
-min-width:800px;
+
 width:100%;
+min-width:750px;
 border-collapse:collapse;
+
 }
+
+
 
 th{
-background:#1e3c72;
-color:#fff;
-padding:10px;
+
+background:#123b6d;
+color:white;
+
 }
 
-td{
-padding:10px;
-border-bottom:1px solid #eee;
+
+
+td,th{
+
+padding:12px;
 font-size:13px;
+
 }
+
+
+
+tr:nth-child(even){
+
+background:#f7f7f7;
+
+}
+
+
+
+
+
+.badge{
+
+padding:5px 10px;
+border-radius:20px;
+background:#e7eef9;
+color:#123b6d;
+
+}
+
+
 
 /* BOTTOM NAV */
+
+
 .bottom-nav{
+
 position:fixed;
 bottom:0;
 left:0;
 right:0;
-height:65px;
-background:#fff;
+height:70px;
+background:white;
 display:flex;
+justify-content:center;
 align-items:center;
-justify-content:space-around;
-border-top:1px solid #ddd;
-z-index:999;
+gap:10px;
+box-shadow:0 -5px 20px #0002;
+z-index:9999;
 overflow-x:auto;
-white-space:nowrap;
+
 }
 
+
+
 .nav-item{
+
+min-width:100px;
+text-align:center;
+font-size:13px;
+color:#777;
+
+}
+
+
+
+.nav-item span{
+
+display:block;
+font-size:22px;
+
+}
+
+
+
+.active{
+
+color:#123b6d;
+font-weight:bold;
+
+}
+
+
+
+.footer{
+
 text-align:center;
 font-size:12px;
 color:#777;
-min-width:80px;
-flex-shrink:0;
+margin-top:20px;
+
 }
 
-.nav-item span{
-display:block;
-font-size:20px;
-}
 
-.nav-item.active{
-color:#1e3c72;
-font-weight:bold;
-}
 
-/* MOBILE */
+
+
 @media(max-width:768px){
 
-.sidebar{display:none;}
+
+.sidebar{
+
+display:none;
+
+}
+
+
+.main{
+
+margin:0;
+padding:12px;
+
+}
+
+
 
 .cards{
+
 grid-template-columns:repeat(2,1fr);
+
 }
 
-.form-grid{
+
+
+.header{
+
+display:block;
+
+}
+
+
+
+.grid{
+
 grid-template-columns:1fr;
-}
 
 }
+
+
+
+.bottom-nav{
+
+justify-content:flex-start;
+
+}
+
+
+
+.card{
+
+padding:12px;
+
+}
+
+
+}
+
+
 </style>
+
 </head>
+
 
 <body>
 
-<!-- SIDEBAR -->
+
+
 <div class="sidebar">
-<h3>KOROSHO SCHOOL</h3>
-<a href="#">Dashboard</a>
-<a href="#">Students</a>
-<a href="#">Teachers</a>
-<a href="#">Classes</a>
-<a href="#">Subjects</a>
+
+
+<div class="logo">
+
+<img src="logo.png">
+
+<h3>KOROSHO ENGLISH<br>
+MEDIUM SCHOOL</h3>
+
 </div>
 
-<!-- MAIN -->
+
+
+<a href="#">🏠 Dashboard</a>
+
+<a href="#">👨‍🎓 Students</a>
+
+<a href="#">👨‍🏫 Teachers</a>
+
+<a href="#">🏫 Classes</a>
+
+<a href="#">📚 Subjects</a>
+
+<a href="#">📝 Exams</a>
+
+<a href="#">📊 Results</a>
+
+<a href="#">⚙ Settings</a>
+
+
+
+</div>
+
+
+
 <div class="main">
 
-<!-- HEADER -->
+
 <div class="header">
-<h2>KOROSHO ENGLISH MEDIUM</h2>
-<small>Admin Dashboard System</small>
+
+
+<div>
+
+<h2>Admin Dashboard</h2>
+
+<p>
+Welcome Administrator
+</p>
+
 </div>
 
-<!-- CARDS -->
+
+
+<div class="profile">
+
+🔔  
+<br>
+Role: Administrator
+
+</div>
+
+
+</div>
+
+  <!-- OVERVIEW CARDS -->
+
 <div class="cards">
 
-<div class="card">
-<h3>Students</h3>
-<h1 id="studentsCount">0</h1>
-</div>
 
 <div class="card">
-<h3>Teachers</h3>
-<h1 id="teachersCount">0</h1>
+<h2 id="studentCount">0</h2>
+<p>👨‍🎓 Students</p>
 </div>
+
 
 <div class="card">
-<h3>Classes</h3>
-<h1 id="classesCount">0</h1>
+<h2 id="teacherCount">0</h2>
+<p>👨‍🏫 Teachers</p>
 </div>
+
 
 <div class="card">
-<h3>Subjects</h3>
-<h1 id="subjectsCount">0</h1>
+<h2 id="classCount">0</h2>
+<p>🏫 Classes</p>
 </div>
 
+
+<div class="card">
+<h2 id="subjectCount">0</h2>
+<p>📚 Subjects</p>
 </div>
+
+
+</div>
+
+
+
+<!-- QUICK ACTION -->
+
+<div class="quick">
+
+<h3>Quick Actions</h3>
+
+
+<button>
++ Add Student
+</button>
+
+
+<button>
++ Add Teacher
+</button>
+
+
+<button>
+📊 Generate Report
+</button>
+
+
+</div>
+
+
+
+
+
 
 <!-- ADD STUDENT -->
-<div class="form">
 
-<div class="form-grid">
+<div class="box">
 
-<input type="text" id="name" placeholder="Student Name">
-<input type="number" id="prem_no" placeholder="Prem No">
+
+<h3>Student Registration</h3>
+
+
+
+<div class="grid">
+
+
+<input 
+id="name"
+placeholder="Student Name">
+
+
+
+<input 
+id="prem_no"
+placeholder="Prem Number">
+
+
 
 <select id="gender">
-<option value="">Gender</option>
-<option value="Male">Male</option>
-<option value="Female">Female</option>
+
+
+<option value="">
+Select Gender
+</option>
+
+
+<option>
+Male
+</option>
+
+
+<option>
+Female
+</option>
+
+
 </select>
 
-<select id="class"></select>
+
+
+
+<select id="class">
+
+<option value="">
+Select Class
+</option>
+
+
+</select>
+
 
 </div>
 
-<button onclick="addStudent()">Add Student</button>
+
+
+<br>
+
+
+<button onclick="addStudent()"
+style="
+background:#123b6d;
+color:white;
+padding:10px;
+border-radius:10px;
+border:0">
+
+Save Student
+
+</button>
+
+
 
 </div>
+
+
+
+
+
+<!-- IMPORT -->
+
+<div class="box">
+
+
+<h3>Import Students Excel</h3>
+
+
+<button onclick="downloadTemplate()"
+style="
+background:green;
+color:white;
+padding:10px;
+border-radius:10px;
+border:0">
+
+Download Template
+
+</button>
+
+
+
+<br><br>
+
+
+<select id="import_class">
+
+<option>
+Select Class
+</option>
+
+</select>
+
+
+
+<input type="file"
+id="excelFile">
+
+
+
+<button onclick="importExcel()"
+style="
+background:#123b6d;
+color:white;
+padding:10px;
+border-radius:10px;
+border:0">
+
+Upload
+
+</button>
+
+
+
+<div id="previewSection"
+style="display:none">
+
+
+<h4>Preview</h4>
+
+
+<table>
+
+
+<thead>
+
+<tr>
+
+<th>Prem</th>
+<th>Name</th>
+<th>Gender</th>
+
+
+</tr>
+
+</thead>
+
+
+<tbody id="previewTable">
+
+</tbody>
+
+
+</table>
+
+
+<button onclick="confirmImport()"
+style="background:green;color:white">
+
+Confirm Import
+
+</button>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
 
 <!-- SEARCH -->
-<div class="form search">
-<input type="text" id="search" placeholder="Search student...">
+
+
+<div class="box">
+
+
+<input 
+id="search"
+placeholder="🔍 Search student..."
+onkeyup="searchStudent()">
+
+
+
 </div>
 
+
+
+
+
+
 <!-- TABLE -->
-<div class="table-container">
+
+
+<div class="table-box">
+
+
+<div class="table-scroll">
+
+
 <table>
+
+
 <thead>
+
+
 <tr>
-<th>Adm No</th>
+
+<th>Admission No</th>
 <th>Prem No</th>
 <th>Name</th>
 <th>Gender</th>
 <th>Class</th>
 <th>Action</th>
+
+
 </tr>
+
+
 </thead>
-<tbody id="table"></tbody>
+
+
+<tbody id="table">
+
+
+</tbody>
+
+
 </table>
-</div>
+
 
 </div>
+
+
+</div>
+
+
+
+
+
+<div class="footer">
+
+© 2026 KOROSHO ENGLISH MEDIUM PRE AND PRIMARY SCHOOL  
+<br>
+School Management System v1.0
+
+</div>
+
+
+
+
+
+</div>
+
+
+
+
 
 <!-- BOTTOM NAV -->
+
+
 <div class="bottom-nav">
 
+
 <div class="nav-item active">
+
 <span>🏠</span>
 Home
+
 </div>
 
+
 <div class="nav-item">
+
 <span>👨‍🎓</span>
 Students
+
 </div>
 
+
+
 <div class="nav-item">
+
 <span>👨‍🏫</span>
-Teachers
+Staff
+
 </div>
 
+
+
 <div class="nav-item">
+
 <span>📊</span>
 Reports
+
 </div>
+
+
 
 <div class="nav-item">
+
 <span>☰</span>
 More
-</div>
 
 </div>
+
+
+
+</div>
+
+
+
+
+
+
 
 <script>
 
-const supabaseUrl="https://bslofdobcvxkjphbjyzb.supabase.co";
-const supabaseKey="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
-const supabaseClient=supabase.createClient(supabaseUrl,supabaseKey);
+
+let previewData=[];
 
 let editingId=null;
 
+
+
+const supabaseUrl =
+"https://bslofdobcvxkjphbjyzb.supabase.co";
+
+
+
+const supabaseKey =
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
+
+
+
+const supabaseClient =
+supabase.createClient(
+supabaseUrl,
+supabaseKey
+);
+
+
+
 init();
 
+
+
+
+
 async function init(){
-await loadStudents();
-await loadCounts();
+
+
 await loadClasses();
-}
 
-/* COUNTS */
-async function loadCounts(){
+await loadStudents();
 
-let students=await supabaseClient.from("students").select("*",{count:"exact"});
-let teachers=await supabaseClient.from("teachers").select("*",{count:"exact"});
-let classes=await supabaseClient.from("classes").select("*",{count:"exact"});
-let subjects=await supabaseClient.from("subjects").select("*",{count:"exact"});
+await loadStats();
 
-document.getElementById("studentsCount").innerText=students.count||0;
-document.getElementById("teachersCount").innerText=teachers.count||0;
-document.getElementById("classesCount").innerText=classes.count||0;
-document.getElementById("subjectsCount").innerText=subjects.count||0;
 
 }
 
-/* CLASSES */
+
+
+
+
+
+async function loadStats(){
+
+
+
+let s =
+await supabaseClient
+.from("students")
+.select("*",{count:"exact",head:true});
+
+
+
+studentCount.innerHTML =
+s.count || 0;
+
+
+
+
+let c =
+await supabaseClient
+.from("classes")
+.select("*",{count:"exact",head:true});
+
+
+
+classCount.innerHTML =
+c.count || 0;
+
+
+
+
+
+let t =
+await supabaseClient
+.from("teachers")
+.select("*",{count:"exact",head:true});
+
+
+
+teacherCount.innerHTML =
+t.count || 0;
+
+
+
+
+let sub =
+await supabaseClient
+.from("subjects")
+.select("*",{count:"exact",head:true});
+
+
+
+subjectCount.innerHTML =
+sub.count || 0;
+
+
+
+}
+
+
+
+
+
+
 async function loadClasses(){
-let {data}=await supabaseClient.from("classes").select("*");
 
-document.getElementById("class").innerHTML=
-`<option value="">Select Class</option>`;
+
+let {data}=await supabaseClient
+.from("classes")
+.select("*")
+.order("class_name");
+
+
+
+class.innerHTML =
+`
+<option value="">
+Select Class
+</option>
+`;
+
+import_class.innerHTML =
+`
+<option>
+Select Class
+</option>
+`;
+
+
 
 data.forEach(c=>{
-document.getElementById("class").innerHTML+=`
-<option value="${c.id}">${c.class_name}</option>
+
+
+class.innerHTML+=`
+
+<option value="${c.id}">
+${c.class_name}
+</option>
+
 `;
+
+
+
+import_class.innerHTML+=`
+
+<option value="${c.id}">
+${c.class_name}
+</option>
+
+`;
+
+
+
 });
+
+
 }
 
-/* ADD STUDENT */
+  // ADD / UPDATE STUDENT
+
+
 async function addStudent(){
 
-let name=document.getElementById("name").value;
-let prem=document.getElementById("prem_no").value;
-let gender=document.getElementById("gender").value;
-let class_id=document.getElementById("class").value;
 
-await supabaseClient.from("students").insert([{
-student_name:name,
-prem_no:prem,
+let student_name =
+document.getElementById("name").value.trim();
+
+
+let prem_no =
+document.getElementById("prem_no").value.trim();
+
+
+let gender =
+document.getElementById("gender").value;
+
+
+let class_id =
+document.getElementById("class").value;
+
+
+
+if(!student_name || !class_id){
+
+alert("Please fill required fields");
+
+return;
+
+}
+
+
+
+
+if(editingId){
+
+
+await supabaseClient
+.from("students")
+.update({
+
+student_name,
+prem_no,
 gender,
 class_id
+
+})
+.eq("id",editingId);
+
+
+
+editingId=null;
+
+
+
+}else{
+
+
+
+await supabaseClient
+.from("students")
+.insert([{
+
+
+admission_no:
+generateAdmissionNo(),
+
+
+student_name,
+
+prem_no,
+
+gender,
+
+class_id
+
+
 }]);
 
-loadStudents();
-loadCounts();
+
+
 }
 
-/* LOAD */
+
+
+resetForm();
+
+loadStudents();
+
+loadStats();
+
+
+
+}
+
+
+
+
+
+function resetForm(){
+
+
+document.getElementById("name").value="";
+
+document.getElementById("prem_no").value="";
+
+document.getElementById("gender").value="";
+
+document.getElementById("class").value="";
+
+
+}
+
+
+
+
+
+// LOAD STUDENTS
+
+
 async function loadStudents(){
 
-let {data}=await supabaseClient.from("students").select("*");
 
-let table=document.getElementById("table");
+let {data,error}=await supabaseClient
+
+.from("students")
+
+.select("*")
+
+.order("id",{ascending:false});
+
+
+
+if(error)return;
+
+
+
+let table =
+document.getElementById("table");
+
+
+
 table.innerHTML="";
 
-data.forEach(s=>{
-table.innerHTML+=`
-<tr>
-<td>${s.admission_no||""}</td>
-<td>${s.prem_no||""}</td>
-<td>${s.student_name||""}</td>
-<td>${s.gender||""}</td>
-<td>${s.class_id||""}</td>
-<td><button>Delete</button></td>
-</tr>
-`;
-});
+
+
+
+for(let s of data){
+
+
+
+let cname="";
+
+
+
+if(s.class_id){
+
+
+let {data:c}=await supabaseClient
+
+.from("classes")
+
+.select("class_name")
+
+.eq("id",s.class_id)
+
+.single();
+
+
+
+cname =
+c?.class_name || "";
+
+
 
 }
 
+
+
+
+table.innerHTML+=`
+
+<tr>
+
+
+<td>
+<span class="badge">
+${s.admission_no || ""}
+</span>
+</td>
+
+
+
+<td>${s.prem_no||""}</td>
+
+
+
+<td>${s.student_name||""}</td>
+
+
+
+<td>${s.gender||""}</td>
+
+
+
+<td>
+<span class="badge">
+${cname}
+</span>
+</td>
+
+
+
+
+<td>
+
+
+<button
+onclick='editStudent(${JSON.stringify(s)})'
+style="
+background:#f0ad4e;
+color:white;
+border:0;
+padding:6px;
+border-radius:6px">
+
+Edit
+
+</button>
+
+
+
+<button
+
+onclick="deleteStudent('${s.id}')"
+
+style="
+background:red;
+color:white;
+border:0;
+padding:6px;
+border-radius:6px">
+
+Delete
+
+</button>
+
+
+
+</td>
+
+
+
+</tr>
+
+`;
+
+}
+
+
+
+
+}
+
+
+
+
+
+
+
+
+// EDIT
+
+
+function editStudent(s){
+
+
+editingId=s.id;
+
+
+name.value=s.student_name;
+
+
+prem_no.value=s.prem_no;
+
+
+gender.value=s.gender;
+
+
+document.getElementById("class").value=
+s.class_id;
+
+
+
+window.scrollTo({
+
+top:0,
+behavior:"smooth"
+
+});
+
+
+}
+
+
+
+
+
+
+
+// DELETE
+
+
+async function deleteStudent(id){
+
+
+if(!confirm(
+"Delete this student?"
+))
+return;
+
+
+
+await supabaseClient
+
+.from("students")
+
+.delete()
+
+.eq("id",id);
+
+
+
+loadStudents();
+
+loadStats();
+
+
+}
+
+
+
+
+
+
+
+
+// SEARCH
+
+
+function searchStudent(){
+
+
+let value =
+document.getElementById("search")
+.value.toLowerCase();
+
+
+
+let rows =
+document.querySelectorAll("#table tr");
+
+
+
+rows.forEach(r=>{
+
+
+let text =
+r.innerText.toLowerCase();
+
+
+
+r.style.display =
+text.includes(value)
+?""
+:"none";
+
+
+
+});
+
+
+}
+
+
+
+
+
+
+
+
+
+// TEMPLATE
+
+
+function downloadTemplate(){
+
+
+
+let data=[
+
+{
+
+prem_no:"001",
+
+student_name:"Student Name",
+
+gender:"Male"
+
+}
+
+];
+
+
+
+let ws =
+XLSX.utils.json_to_sheet(data);
+
+
+
+let wb =
+XLSX.utils.book_new();
+
+
+
+XLSX.utils.book_append_sheet(
+wb,
+ws,
+"Students"
+);
+
+
+
+XLSX.writeFile(
+wb,
+"students_template.xlsx"
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+// IMPORT EXCEL
+
+
+async function importExcel(){
+
+
+
+let cls =
+document.getElementById("import_class")
+.value;
+
+
+
+let file =
+document.getElementById("excelFile")
+.files[0];
+
+
+
+if(!cls || !file){
+
+alert("Select class and file");
+
+return;
+
+}
+
+
+
+
+let reader =
+new FileReader();
+
+
+
+
+reader.onload=function(e){
+
+
+
+let wb =
+XLSX.read(
+
+new Uint8Array(e.target.result),
+
+{
+type:"array"
+}
+
+);
+
+
+
+let sheet =
+wb.Sheets[
+wb.SheetNames[0]
+];
+
+
+
+let rows =
+XLSX.utils.sheet_to_json(sheet);
+
+
+
+
+previewData =
+rows.map(r=>({
+
+
+
+admission_no:
+generateAdmissionNo(),
+
+
+
+prem_no:
+r.prem_no || "",
+
+
+
+student_name:
+r.student_name || "",
+
+
+
+gender:
+r.gender || "",
+
+
+
+class_id:
+cls
+
+
+
+}));
+
+
+
+showPreview();
+
+
+
+};
+
+
+
+reader.readAsArrayBuffer(file);
+
+
+
+}
+
+
+
+
+
+
+
+
+function showPreview(){
+
+
+
+previewTable.innerHTML="";
+
+
+
+previewData.forEach(r=>{
+
+
+previewTable.innerHTML+=`
+
+<tr>
+
+<td>${r.prem_no}</td>
+
+<td>${r.student_name}</td>
+
+<td>${r.gender}</td>
+
+</tr>
+
+`;
+
+
+
+});
+
+
+
+previewSection.style.display="block";
+
+
+}
+
+
+
+
+
+
+
+
+
+async function confirmImport(){
+
+
+
+await supabaseClient
+
+.from("students")
+
+.insert(previewData);
+
+
+
+alert(
+"Students imported successfully"
+);
+
+
+
+previewData=[];
+
+
+
+previewSection.style.display="none";
+
+
+
+loadStudents();
+
+loadStats();
+
+
+
+}
+
+
+
+
+
+
+
+// ADMISSION NUMBER
+
+
+function generateAdmissionNo(){
+
+
+
+let year =
+new Date()
+.getFullYear();
+
+
+
+let number =
+Math.floor(
+10000 + Math.random()*90000
+);
+
+
+
+return `KEMPS/${year}/${number}`;
+
+
+
+}
+
+
+
+
 </script>
+
 
 </body>
 </html>
