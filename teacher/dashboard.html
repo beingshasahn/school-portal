@@ -459,6 +459,25 @@ th,td{
   display:none;
 }
 
+  .reply-box{
+  background:#eff6ff;
+  border-left:4px solid #2563eb;
+  padding:8px;
+  border-radius:8px;
+  margin-bottom:8px;
+}
+
+.reply-name{
+  font-size:11px;
+  font-weight:700;
+  color:#2563eb;
+}
+
+.reply-message{
+  font-size:11px;
+  color:#374151;
+  margin-top:2px;
+}
 </style>
 </head>
 
@@ -1105,7 +1124,9 @@ function replyMessage(id,sender,message){
     sender;
 
   document.getElementById("replyText").innerText =
-    message;
+  message.length > 80
+    ? message.substring(0,80) + "..."
+    : message;
 }
 
 function cancelReply(){
@@ -1191,41 +1212,42 @@ await loadMessages();
     box.innerHTML += `
 <div class="chat-row ${mine ? "mine" : "other"}">
 
-  <div class="chat-bubble">
+  <div class="chat-bubble"
+ondblclick="replyMessage(
+'${msg.id}',
+${JSON.stringify(msg.sender_name || "")},
+${JSON.stringify(msg.message || "")}
+)">
 
     <div class="chat-name">
       ${msg.sender_name || "Unknown"}
     </div>
 
     ${
-      msg.reply_to_message
-      ?
-      `
-      <div style="
-        background:rgba(59,130,246,.08);
-        border-left:3px solid #3b82f6;
-        padding:8px;
-        margin-bottom:8px;
-        border-radius:8px;
-      ">
-        <div style="
-          font-size:11px;
-          font-weight:bold;
-          color:#1e3a8a;
-        ">
-          Replying to ${msg.reply_to_sender}
-        </div>
+  msg.reply_to_message
+  ?
+  `
+  <div class="reply-box">
 
-        <div style="
-          font-size:11px;
-          color:#374151;
-        ">
-          ${msg.reply_to_message}
-        </div>
-      </div>
-      `
-      :
-      ""
+    <div style="
+      font-size:11px;
+      font-weight:bold;
+      color:#1e3a8a;
+    ">
+      Replying to ${msg.reply_to_sender}
+    </div>
+
+    <div style="
+      font-size:11px;
+      color:#374151;
+    ">
+      ${msg.reply_to_message}
+    </div>
+
+  </div>
+  `
+  :
+  ""
     }
 
     <div class="chat-text">
@@ -1238,10 +1260,10 @@ await loadMessages();
 
     <div
       onclick="replyMessage(
-        '${msg.id}',
-        '${(msg.sender_name || '').replace(/'/g,'')}",
-        '${(msg.message || '').replace(/'/g,'')}'
-      )"
+  '${msg.id}',
+  ${JSON.stringify(msg.sender_name || "")},
+  ${JSON.stringify(msg.message || "")}
+)"
       style="
         margin-top:6px;
         color:#2563eb;
