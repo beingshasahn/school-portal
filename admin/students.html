@@ -3,1067 +3,429 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Students Management</title>
+<title>School Admin Dashboard</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
-
 <style>
-
 *{
 box-sizing:border-box;
 font-family:Segoe UI,Arial;
 }
 
-
 body{
 margin:0;
-background:#f5f6fa;
+background:#f4f6fb;
 display:flex;
 min-height:100vh;
 }
 
-
 /* SIDEBAR */
-
 .sidebar{
-
 width:240px;
 background:#1e3c72;
-color:white;
-padding:20px;
-
+color:#fff;
+padding:18px;
 }
 
+.sidebar h3{
+margin:0 0 15px 0;
+}
 
 .sidebar a{
-
 display:block;
-color:white;
+color:#fff;
 text-decoration:none;
 padding:10px;
-margin:7px 0;
-background:rgba(255,255,255,.1);
+margin:6px 0;
+background:rgba(255,255,255,.12);
 border-radius:8px;
-
+font-size:14px;
 }
 
-
-
 /* MAIN */
-
 .main{
-
 flex:1;
 padding:15px;
 padding-bottom:90px;
-
 }
-
-
 
 /* HEADER */
-
 .header{
-
-background:white;
+background:#fff;
 padding:15px;
-border-radius:14px;
+border-radius:12px;
 margin-bottom:15px;
-box-shadow:0 3px 10px rgba(0,0,0,.08);
-
+box-shadow:0 2px 10px rgba(0,0,0,.06);
 }
 
+.header h2{
+margin:0;
+font-size:18px;
+}
 
+.header small{
+color:#666;
+}
 
-/* CARD */
+/* OVERVIEW CARDS */
+.cards{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:10px;
+margin-bottom:15px;
+}
 
+.card{
+background:#fff;
+padding:12px;
+border-radius:12px;
+box-shadow:0 2px 10px rgba(0,0,0,.05);
+text-align:center;
+}
+
+.card h3{
+margin:0;
+font-size:14px;
+color:#666;
+}
+
+.card h1{
+margin:5px 0 0;
+font-size:20px;
+color:#1e3c72;
+}
+
+/* FORMS */
 .form{
-
-background:white;
+background:#fff;
 padding:15px;
-border-radius:14px;
+border-radius:12px;
 margin-bottom:15px;
-box-shadow:0 3px 10px rgba(0,0,0,.05);
-
+box-shadow:0 2px 10px rgba(0,0,0,.05);
 }
-
-
 
 .form-grid{
-
 display:grid;
 grid-template-columns:repeat(3,1fr);
 gap:10px;
-
 }
-
-
 
 input,select{
-
-width:100%;
 padding:10px;
 border:1px solid #ddd;
-border-radius:10px;
-
+border-radius:8px;
 }
 
-
-
+/* BUTTON */
 button{
-
 background:#1e3c72;
-color:white;
-border:0;
+color:#fff;
+border:none;
 padding:10px;
-border-radius:10px;
+border-radius:8px;
 cursor:pointer;
-
 }
 
+/* SEARCH */
+.search{
+margin-bottom:10px;
+}
 
+.search input{
+width:100%;
+}
 
-/* TABLE */
-
+/* TABLE SCROLL ONLY */
 .table-container{
-
 width:100%;
 overflow-x:auto;
-overflow-y:hidden;
-background:white;
-border-radius:14px;
--webkit-overflow-scrolling:touch;
-
+background:#fff;
+border-radius:12px;
+box-shadow:0 2px 10px rgba(0,0,0,.05);
 }
 
-
-.table-container table{
-
-min-width:700px;
+table{
+min-width:800px;
 width:100%;
 border-collapse:collapse;
-
 }
-
 
 th{
-
 background:#1e3c72;
-color:white;
-
+color:#fff;
+padding:10px;
 }
 
-
-th,td{
-
+td{
 padding:10px;
 border-bottom:1px solid #eee;
 font-size:13px;
-
 }
 
-
-
-/* BOTTOM NAV ALL DEVICES */
-
-
+/* BOTTOM NAV */
 .bottom-nav{
-
 position:fixed;
 bottom:0;
 left:0;
 right:0;
-
-height:70px;
-
-background:white;
-
+height:65px;
+background:#fff;
 display:flex;
 align-items:center;
-justify-content:center;
-
+justify-content:space-around;
 border-top:1px solid #ddd;
-
-z-index:999999;
-
+z-index:999;
 overflow-x:auto;
-overflow-y:hidden;
-
 white-space:nowrap;
-
-box-shadow:0 -3px 15px rgba(0,0,0,.12);
-
 }
-
-
-
-.bottom-nav::-webkit-scrollbar{
-
-display:none;
-
-}
-
-
 
 .nav-item{
-
-min-width:110px;
 text-align:center;
-font-size:13px;
+font-size:12px;
 color:#777;
-padding:8px;
+min-width:80px;
 flex-shrink:0;
-
 }
-
-
 
 .nav-item span{
-
 display:block;
-font-size:24px;
-
+font-size:20px;
 }
-
-
 
 .nav-item.active{
-
 color:#1e3c72;
 font-weight:bold;
-
 }
 
-
-
-
+/* MOBILE */
 @media(max-width:768px){
 
+.sidebar{display:none;}
 
-body{
-display:block;
+.cards{
+grid-template-columns:repeat(2,1fr);
 }
-
-
-
-.sidebar{
-
-display:none;
-
-}
-
-
 
 .form-grid{
-
 grid-template-columns:1fr;
-
 }
 
-
-
-.header h2{
-
-font-size:17px;
-
 }
-
-
-.bottom-nav{
-
-justify-content:flex-start;
-
-}
-
-
-}
-
-
-
 </style>
-
 </head>
-
 
 <body>
 
-
+<!-- SIDEBAR -->
 <div class="sidebar">
-
-<h3>Admin Panel</h3>
-
-<a href="dashboard.html">Dashboard</a>
-<a href="teachers.html">Teachers</a>
-<a href="students.html">Students</a>
-<a href="classes.html">Classes</a>
-<a href="subjects.html">Subjects</a>
-<a href="assignments.html">Assignments</a>
-
+<h3>KOROSHO SCHOOL</h3>
+<a href="#">Dashboard</a>
+<a href="#">Students</a>
+<a href="#">Teachers</a>
+<a href="#">Classes</a>
+<a href="#">Subjects</a>
 </div>
 
-
-
-
+<!-- MAIN -->
 <div class="main">
 
-
+<!-- HEADER -->
 <div class="header">
+<h2>KOROSHO ENGLISH MEDIUM</h2>
+<small>Admin Dashboard System</small>
+</div>
 
-<h2>Students Management Dashboard</h2>
+<!-- CARDS -->
+<div class="cards">
+
+<div class="card">
+<h3>Students</h3>
+<h1 id="studentsCount">0</h1>
+</div>
+
+<div class="card">
+<h3>Teachers</h3>
+<h1 id="teachersCount">0</h1>
+</div>
+
+<div class="card">
+<h3>Classes</h3>
+<h1 id="classesCount">0</h1>
+</div>
+
+<div class="card">
+<h3>Subjects</h3>
+<h1 id="subjectsCount">0</h1>
+</div>
 
 </div>
 
-
-
+<!-- ADD STUDENT -->
 <div class="form">
-
 
 <div class="form-grid">
 
-
-<input id="name" placeholder="Student Name">
-
-
-<input id="prem_no" placeholder="Prem No">
-
+<input type="text" id="name" placeholder="Student Name">
+<input type="number" id="prem_no" placeholder="Prem No">
 
 <select id="gender">
-
 <option value="">Gender</option>
-
-<option>Male</option>
-
-<option>Female</option>
-
+<option value="Male">Male</option>
+<option value="Female">Female</option>
 </select>
-
-
 
 <select id="class"></select>
 
+</div>
+
+<button onclick="addStudent()">Add Student</button>
 
 </div>
 
-
-<button onclick="addStudent()">
-Add / Update Student
-</button>
-
-
+<!-- SEARCH -->
+<div class="form search">
+<input type="text" id="search" placeholder="Search student...">
 </div>
 
-
-
-<div class="form">
-
-
-<button onclick="downloadTemplate()" style="background:green">
-
-Download File Template
-
-</button>
-
-
-<select id="import_class">
-
-<option>
-Select Class For Import
-</option>
-
-
-</select>
-
-
-
-<input type="file" id="excelFile">
-
-
-<button onclick="importExcel()">
-
-Upload & Preview
-
-</button>
-
-
-
-<div id="previewSection" style="display:none">
-
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>Prem</th>
-<th>Name</th>
-<th>Sex</th>
-
-</tr>
-
-</thead>
-
-
-<tbody id="previewTable"></tbody>
-
-
-</table>
-
-
-<button onclick="confirmImport()" style="background:green">
-
-Confirm Import
-
-</button>
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-<div class="form">
-
-<select id="filter_class" onchange="loadStudents()">
-
-<option value="">
-
-Filter by Class
-</option>
-</select>
-</div>
-
-
+<!-- TABLE -->
 <div class="table-container">
-
 <table>
-
 <thead>
-
 <tr>
-
-<th>Cand No</th>
+<th>Adm No</th>
 <th>Prem No</th>
 <th>Name</th>
 <th>Gender</th>
 <th>Class</th>
 <th>Action</th>
-
 </tr>
-
 </thead>
-
 <tbody id="table"></tbody>
-
-
-
 </table>
-
+</div>
 
 </div>
 
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+
+<div class="nav-item active">
+<span>🏠</span>
+Home
+</div>
+
+<div class="nav-item">
+<span>👨‍🎓</span>
+Students
+</div>
+
+<div class="nav-item">
+<span>👨‍🏫</span>
+Teachers
+</div>
+
+<div class="nav-item">
+<span>📊</span>
+Reports
+</div>
+
+<div class="nav-item">
+<span>☰</span>
+More
+</div>
 
 </div>
 
-  <script>
-
-let previewData=[];
-let editingId=null;
-
+<script>
 
 const supabaseUrl="https://bslofdobcvxkjphbjyzb.supabase.co";
-
 const supabaseKey="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
+const supabaseClient=supabase.createClient(supabaseUrl,supabaseKey);
 
-
-const supabaseClient =
-supabase.createClient(
-supabaseUrl,
-supabaseKey
-);
-
-
+let editingId=null;
 
 init();
 
-
 async function init(){
-
-await loadClasses();
-
 await loadStudents();
+await loadCounts();
+await loadClasses();
+}
+
+/* COUNTS */
+async function loadCounts(){
+
+let students=await supabaseClient.from("students").select("*",{count:"exact"});
+let teachers=await supabaseClient.from("teachers").select("*",{count:"exact"});
+let classes=await supabaseClient.from("classes").select("*",{count:"exact"});
+let subjects=await supabaseClient.from("subjects").select("*",{count:"exact"});
+
+document.getElementById("studentsCount").innerText=students.count||0;
+document.getElementById("teachersCount").innerText=teachers.count||0;
+document.getElementById("classesCount").innerText=classes.count||0;
+document.getElementById("subjectsCount").innerText=subjects.count||0;
 
 }
 
-
-
-
+/* CLASSES */
 async function loadClasses(){
+let {data}=await supabaseClient.from("classes").select("*");
 
-
-const {data,error}=await supabaseClient
-.from("classes")
-.select("*")
-.order("class_name");
-
-
-if(error)return;
-
-
-let ids=[
-"class",
-"filter_class",
-"import_class"
-];
-
-
-ids.forEach(id=>{
-
-document.getElementById(id).innerHTML=
+document.getElementById("class").innerHTML=
 `<option value="">Select Class</option>`;
 
-});
-
-
-
 data.forEach(c=>{
-
-
-document.getElementById("class").innerHTML+=
-`
-<option value="${c.id}">
-${c.class_name}
-</option>
+document.getElementById("class").innerHTML+=`
+<option value="${c.id}">${c.class_name}</option>
 `;
-
-
-
-document.getElementById("filter_class").innerHTML+=
-`
-<option value="${c.id}">
-${c.class_name}
-</option>
-`;
-
-
-
-document.getElementById("import_class").innerHTML+=
-`
-<option value="${c.id}">
-${c.class_name}
-</option>
-`;
-
 });
-
-
 }
 
-
-
-
+/* ADD STUDENT */
 async function addStudent(){
 
+let name=document.getElementById("name").value;
+let prem=document.getElementById("prem_no").value;
+let gender=document.getElementById("gender").value;
+let class_id=document.getElementById("class").value;
 
-let student_name=
-document.getElementById("name").value;
-
-
-let prem_no=
-document.getElementById("prem_no").value;
-
-
-let gender=
-document.getElementById("gender").value;
-
-
-let class_id=
-document.getElementById("class").value;
-
-
-
-if(!student_name||!class_id){
-
-alert("Fill required fields");
-
-return;
-
-}
-
-
-
-if(editingId){
-
-
-await supabaseClient
-.from("students")
-.update({
-
-student_name,
-prem_no,
+await supabaseClient.from("students").insert([{
+student_name:name,
+prem_no:prem,
 gender,
 class_id
-
-})
-.eq("id",editingId);
-
-
-
-}else{
-
-
-await supabaseClient
-.from("students")
-.insert([{
-
-admission_no:generateAdmissionNo(),
-
-student_name,
-prem_no,
-gender,
-class_id
-
 }]);
 
-
-}
-
-
-
-resetForm();
-
 loadStudents();
-
-
+loadCounts();
 }
 
-
-
-
-
-function resetForm(){
-
-editingId=null;
-
-name.value="";
-prem_no.value="";
-gender.value="";
-document.getElementById("class").value="";
-
-}
-
-
-
-
-
+/* LOAD */
 async function loadStudents(){
 
+let {data}=await supabaseClient.from("students").select("*");
 
-let filter=
-document.getElementById("filter_class").value;
-
-
-let query=supabaseClient
-.from("students")
-.select("*")
-.order("id",{ascending:false});
-
-
-if(filter)
-query=query.eq("class_id",filter);
-
-
-
-let {data}=await query;
-
-
-let table=
-document.getElementById("table");
-
-
+let table=document.getElementById("table");
 table.innerHTML="";
 
-
-
-for(let s of data){
-
-
-let cname="";
-
-
-if(s.class_id){
-
-
-let {data:c}=await supabaseClient
-.from("classes")
-.select("class_name")
-.eq("id",s.class_id)
-.single();
-
-
-cname=c?.class_name||"";
-
-}
-
-
-
-
+data.forEach(s=>{
 table.innerHTML+=`
-
 <tr>
-
 <td>${s.admission_no||""}</td>
-
 <td>${s.prem_no||""}</td>
-
 <td>${s.student_name||""}</td>
-
 <td>${s.gender||""}</td>
-
-<td>${cname}</td>
-
-
-<td>
-
-
-<button onclick='editStudent(${JSON.stringify(s)})'>
-
-Edit
-
-</button>
-
-
-<button style="background:red"
-onclick="deleteStudent('${s.id}')">
-
-Delete
-
-</button>
-
-
-</td>
-
-
+<td>${s.class_id||""}</td>
+<td><button>Delete</button></td>
 </tr>
-
 `;
-
-}
-
-
-
-}
-
-
-
-
-function editStudent(s){
-
-editingId=s.id;
-
-
-name.value=s.student_name;
-
-prem_no.value=s.prem_no;
-
-gender.value=s.gender;
-
-document.getElementById("class").value=s.class_id;
-
-
-}
-
-
-
-
-async function deleteStudent(id){
-
-
-if(!confirm("Delete student?"))
-return;
-
-
-await supabaseClient
-.from("students")
-.delete()
-.eq("id",id);
-
-
-loadStudents();
-
-
-}
-
-
-
-
-
-
-
-function downloadTemplate(){
-
-
-let data=[
-
-{
-prem_no:"001",
-student_name:"Student Name",
-gender:"Male"
-}
-
-];
-
-
-let ws=XLSX.utils.json_to_sheet(data);
-
-
-let wb=XLSX.utils.book_new();
-
-
-XLSX.utils.book_append_sheet(
-wb,ws,"Students"
-);
-
-
-XLSX.writeFile(
-wb,
-"students_template.xlsx"
-);
-
-
-}
-
-
-
-
-
-
-async function importExcel(){
-
-
-let cls=
-document.getElementById("import_class").value;
-
-
-let file=
-document.getElementById("excelFile").files[0];
-
-
-if(!cls||!file){
-
-alert("Select class and file");
-
-return;
-
-}
-
-
-
-let reader=new FileReader();
-
-
-
-reader.onload=e=>{
-
-
-let wb=XLSX.read(
-new Uint8Array(e.target.result),
-{type:"array"}
-);
-
-
-let sheet=
-wb.Sheets[wb.SheetNames[0]];
-
-
-let rows=
-XLSX.utils.sheet_to_json(sheet);
-
-
-
-previewData=rows.map(r=>({
-
-admission_no:generateAdmissionNo(),
-
-prem_no:r.prem_no||"",
-
-student_name:r.student_name||"",
-
-gender:r.gender||"",
-
-class_id:cls
-
-
-}));
-
-
-
-showPreview();
-
-
-}
-
-
-
-reader.readAsArrayBuffer(file);
-
-
-
-}
-
-
-
-
-
-function showPreview(){
-
-
-previewTable.innerHTML="";
-
-
-previewData.forEach(r=>{
-
-
-previewTable.innerHTML+=`
-
-<tr>
-
-<td>${r.prem_no}</td>
-
-<td>${r.student_name}</td>
-
-<td>${r.gender}</td>
-
-
-</tr>
-
-`;
-
-
 });
 
-
-previewSection.style.display="block";
-
-
 }
-
-
-
-
-async function confirmImport(){
-
-
-await supabaseClient
-.from("students")
-.insert(previewData);
-
-
-alert("Imported successfully");
-
-
-previewData=[];
-
-
-previewSection.style.display="none";
-
-
-loadStudents();
-
-
-}
-
-
-
-
-
-function generateAdmissionNo(){
-
-
-let year=new Date().getFullYear();
-
-
-let num=Math.floor(
-10000+Math.random()*90000
-);
-
-
-return `KEMPS/${year}/${num}`;
-
-
-}
-
 
 </script>
 
-
-
-
-<!-- BOTTOM NAVIGATION -->
-
-<div class="bottom-nav">
-
-
-<div class="nav-item">
-
-<span>🏠</span>
-
-Dashboard
-
-</div>
-
-
-
-<div class="nav-item active">
-
-<span>👨‍🎓</span>
-
-Students
-
-</div>
-
-
-
-<div class="nav-item">
-
-<span>👨‍🏫</span>
-
-Teachers
-
-</div>
-
-
-
-<div class="nav-item">
-
-<span>📚</span>
-
-Classes
-
-</div>
-
-
-
-<div class="nav-item">
-
-<span>⚙️</span>
-
-More
-
-</div>
-
-
-</div>
-
-
-
 </body>
-
 </html>
