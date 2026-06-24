@@ -5,405 +5,328 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>KEMPS Admin Dashboard</title>
+<title>Admin Portal</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-
 
 <style>
 
 *{
 box-sizing:border-box;
-font-family:Segoe UI,Arial,sans-serif;
+font-family:Segoe UI,Arial;
 }
-
 
 body{
 margin:0;
-background:#f4f6fb;
-display:flex;
-min-height:100vh;
+background:#f5f6fa;
 }
 
 
-/* SIDEBAR */
+/* TOP BAR */
 
-.sidebar{
-
-width:260px;
-background:#0b2d5c;
-color:white;
-position:fixed;
-height:100vh;
-padding:20px;
-
-}
-
-
-.logo{
-
-text-align:center;
-margin-bottom:25px;
-
-}
-
-
-.logo h2{
-
-font-size:18px;
-margin:0;
-
-}
-
-
-.logo span{
-
-color:#d4af37;
-
-}
-
-
-
-.sidebar a{
-
-display:block;
-padding:12px;
-margin:7px 0;
-border-radius:10px;
-color:white;
-text-decoration:none;
-
-}
-
-
-.sidebar a:hover,
-.active{
-
-background:#ffffff22;
-
-}
-
-
-
-
-.section{
-
-font-size:11px;
-opacity:.6;
-margin-top:20px;
-
-}
-
-
-
-
-/* MAIN */
-
-
-.main{
-
-margin-left:260px;
-width:100%;
-padding:20px;
-padding-bottom:90px;
-
-}
-
-
-
-
-
-.header{
-
+.topbar{
 background:white;
-padding:18px;
-border-radius:18px;
+height:60px;
+padding:12px 15px;
 display:flex;
 justify-content:space-between;
 align-items:center;
-box-shadow:0 5px 15px #0001;
+border-bottom:1px solid #eee;
+position:sticky;
+top:0;
+z-index:10;
 
 }
 
 
+.brand{
+display:flex;
+align-items:center;
+gap:8px;
+font-weight:bold;
+color:#111;
+}
 
-.admin{
 
-background:#0b2d5c;
+.brand-logo{
+width:32px;
+height:32px;
+background-image:url("https://bslofdobcvxkjphbjyzb.supabase.co/storage/v1/object/public/logos/school.png");
+background-size:contain;
+background-repeat:no-repeat;
+background-position:center;
+
+}
+
+.user{
+width:38px;
+height:38px;
+border-radius:50%;
+background:#1e3a8a;
 color:white;
-padding:10px 18px;
-border-radius:20px;
+display:flex;
+align-items:center;
+justify-content:center;
+
+font-weight:bold;
+
+}
+
+/* PAGE */
+
+.page{
+padding:15px;
+animation:fade .3s;
+}
+
+@keyframes fade{
+from{
+opacity:0;
+transform:translateY(10px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
 
 }
 
 
+#welcome{
 
-
-
-.cards{
-
-display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:15px;
-margin:20px 0;
+font-weight:700;
+font-size:15px;
 
 }
 
+/* STAT CARDS */
 
+.stat h2{
 
-.card{
-
-background:white;
-padding:20px;
-border-radius:18px;
-box-shadow:0 5px 15px #0001;
-
-}
-
-
-
-.card h1{
-
-color:#0b2d5c;
 margin:0;
-
+color:#1e3a8a;
 }
 
 
-
-.card p{
-
-color:#777;
-
-}
-
-
-
-
-
-.panel{
-
-background:white;
-padding:20px;
-border-radius:18px;
-margin-bottom:20px;
-box-shadow:0 5px 15px #0001;
-
-}
-
-
-
-
-.grid{
-
-display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:12px;
-
-}
-
-
-
-
-input,select{
-
-width:100%;
-padding:12px;
-border:1px solid #ddd;
-border-radius:10px;
-
-}
-
-
-
-
-
-button{
-
-background:#0b2d5c;
-color:white;
-border:0;
-padding:11px 18px;
-border-radius:10px;
-cursor:pointer;
-
-}
-
-
-
-.green{
-
-background:#198754;
-
-}
-
-
-.red{
-
-background:#dc3545;
-
-}
-
-
-.gold{
-
-background:#d4af37;
-
-}
-
-
-
-
-
-.table-box{
-
+/* TABLE */
+.table-card{
 overflow:auto;
-
 }
-
 
 
 table{
 
 width:100%;
 border-collapse:collapse;
-min-width:850px;
 
 }
-
 
 
 th{
 
-background:#0b2d5c;
+background:#1e3a8a;
 color:white;
 
+padding:10px;
+
 }
 
 
+td{
 
-th,td{
+padding:10px;
 
-padding:12px;
 border-bottom:1px solid #eee;
-font-size:14px;
+
+font-size:13px;
 
 }
 
 
+/* BUTTON */
 
+.deleteBtn{
 
+background:#ef4444;
 
-.search{
+color:white;
 
-margin-bottom:15px;
+border:none;
+
+padding:7px 12px;
+
+border-radius:8px;
+
+cursor:pointer;
 
 }
 
 
-
+/* BOTTOM NAV */
 
 
 .bottom-nav{
 
 position:fixed;
+
 bottom:0;
+
 left:0;
 right:0;
-height:70px;
+
+height:65px;
+
 background:white;
+
 display:flex;
-justify-content:center;
-box-shadow:0 -5px 15px #0002;
-z-index:1000;
+
+justify-content:space-around;
+
+align-items:center;
+
+border-top:1px solid #eee;
 
 }
 
 
+.nav-item{
 
-.nav{
+font-size:12px;
 
-width:120px;
 text-align:center;
-padding:10px;
+
 color:#777;
 
+cursor:pointer;
+
 }
 
 
-.nav span{
+.nav-item span{
 
 display:block;
-font-size:22px;
+
+font-size:20px;
 
 }
 
 
 
-.nav.active{
+.nav-item.active{
 
-color:#0b2d5c;
+color:#f59e0b;
+
 font-weight:bold;
 
 }
 
+/* STAT CARDS */
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+  margin-bottom:20px;
+}
+
+.stat{
+  background:white;
+  padding:12px;
+  border-radius:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+  min-height:90px;
+}
+
+.stat h2{
+  margin:0;
+  font-size:22px;
+  color:#1e3a8a;
+}
+
+.stat p{
+  margin:5px 0 0;
+  color:#666;
+  font-size:12px;
+}
 
 
+/* kwenye screen kubwa iwe nne mstari mmoja */
 
-@media(max-width:800px){
+@media(min-width:768px){
+
+.cards{
+  grid-template-columns:repeat(4,1fr);
+}
+
+  }
+
+/* MODAL */
 
 
-.sidebar{
+#deleteModal{
 
 display:none;
 
-}
+position:fixed;
 
+top:0;
+left:0;
 
+width:100%;
+height:100%;
 
-.main{
+background:rgba(0,0,0,.5);
 
-margin:0;
-padding:12px;
+align-items:center;
+justify-content:center;
 
-}
-
-
-
-.cards{
-
-grid-template-columns:repeat(2,1fr);
+z-index:999;
 
 }
 
 
 
-.grid{
+.modal-box{
 
-grid-template-columns:1fr;
+background:white;
+
+padding:20px;
+
+width:320px;
+
+border-radius:15px;
+
+text-align:center;
+
+}
+
+
+.modal-btn{
+
+padding:9px 15px;
+
+border:none;
+
+border-radius:8px;
+
+margin:5px;
+
+cursor:pointer;
 
 }
 
 
 
-.header{
-
-flex-direction:column;
-gap:10px;
-
-}
+/* MOBILE */
 
 
+@media(max-width:700px){
 
-.bottom-nav{
+table{
 
-justify-content:flex-start;
-overflow:auto;
+font-size:12px;
 
 }
-
-
 
 }
 
@@ -411,56 +334,32 @@ overflow:auto;
 
 </style>
 
+
 </head>
 
 
 <body>
 
 
-<div class="sidebar">
+<!-- TOP -->
+
+<div class="topbar">
 
 
-<div class="logo">
+<div class="brand">
 
-<h2>KOROSHO ENGLISH</h2>
-<span>ADMIN SYSTEM</span>
+<span class="brand-logo"></span>
+
+KempsPortal Admin
 
 </div>
 
 
+<div class="user" id="userInitials">
 
-<a class="active">🏠 Dashboard</a>
+AD
 
-
-<div class="section">
-ACADEMIC
 </div>
-
-
-<a>👨‍🎓 Students</a>
-
-<a>👨‍🏫 Teachers</a>
-
-<a>🏫 Classes</a>
-
-<a>📚 Subjects</a>
-
-<a>📝 Exams & Marks</a>
-
-<a>📊 Results</a>
-
-
-
-<div class="section">
-SYSTEM
-</div>
-
-
-<a>👥 Users</a>
-
-<a>📄 Reports</a>
-
-<a>⚙ Settings</a>
 
 
 </div>
@@ -469,29 +368,27 @@ SYSTEM
 
 
 
-<div class="main">
+<!-- HOME PAGE -->
 
 
-
-<div class="header">
-
-
-<div>
-
-<h2>Admin Dashboard</h2>
-
-<small>
-School Management Portal
-</small>
+<div class="page">
 
 
-</div>
+<div class="card">
 
 
-<div class="admin">
-Administrator
-</div>
+<h3 id="welcome">
 
+Loading...
+
+</h3>
+
+
+<p style="color:#777;font-size:13px">
+
+Manage school activities easily
+
+</p>
 
 
 </div>
@@ -503,33 +400,48 @@ Administrator
 <div class="cards">
 
 
-<div class="card">
+<div class="card stat">
 
-<h1 id="studentsCount">0</h1>
-<p>Students</p>
+<h2 id="teachers">
+0
+</h2>
 
-</div>
-
-
-<div class="card">
-
-<h1 id="teachersCount">0</h1>
 <p>Teachers</p>
 
 </div>
 
 
-<div class="card">
 
-<h1 id="classesCount">0</h1>
+<div class="card stat">
+
+<h2 id="students">
+0
+</h2>
+
+<p>Students</p>
+
+</div>
+
+
+
+<div class="card stat">
+
+<h2 id="classes">
+0
+</h2>
+
 <p>Classes</p>
 
 </div>
 
 
-<div class="card">
 
-<h1 id="subjectsCount">0</h1>
+<div class="card stat">
+
+<h2 id="subjects">
+0
+</h2>
+
 <p>Subjects</p>
 
 </div>
@@ -541,125 +453,15 @@ Administrator
 
 
 
-<div class="panel">
+<div class="card table-card">
 
 
-<h3>Add Student</h3>
+<h3>
 
+Teachers Overview
 
-<div class="grid">
+</h3>
 
-
-<input id="name" placeholder="Student Name">
-
-
-<input id="prem_no" placeholder="Prem No">
-
-
-<select id="gender">
-
-<option value="">
-Gender
-</option>
-
-<option>Male</option>
-
-<option>Female</option>
-
-</select>
-
-
-
-<select id="class">
-
-<option value="">
-Select Class
-</option>
-
-</select>
-
-
-</div>
-
-
-<br>
-
-
-<button onclick="addStudent()">
-Save Student
-</button>
-
-
-</div>
-
-
-
-
-
-<div class="panel">
-
-
-<h3>Students Import</h3>
-
-
-<button class="gold" onclick="downloadTemplate()">
-Download Template
-</button>
-
-
-<select id="import_class">
-
-<option>
-Select Class
-</option>
-
-</select>
-
-
-<input type="file" id="excelFile">
-
-
-<button onclick="importExcel()">
-Preview
-</button>
-
-
-
-<div id="previewSection" style="display:none">
-
-
-<table>
-
-<tbody id="previewTable"></tbody>
-
-</table>
-
-
-<button class="green" onclick="confirmImport()">
-Confirm Import
-</button>
-
-
-</div>
-
-
-</div>
-
-  <div class="panel">
-
-
-<h3>Students List</h3>
-
-
-<input 
-class="search"
-placeholder="Search student by name or prem no..."
-onkeyup="searchStudent(this.value)"
->
-
-
-
-<div class="table-box">
 
 
 <table>
@@ -669,19 +471,22 @@ onkeyup="searchStudent(this.value)"
 
 <tr>
 
-<th>Admission No</th>
-<th>Prem No</th>
-<th>Name</th>
-<th>Gender</th>
-<th>Class</th>
+<th>No</th>
+<th>Teacher</th>
+<th>Classes</th>
+<th>Subjects</th>
+<th>Students</th>
 <th>Action</th>
 
 </tr>
 
+
 </thead>
 
 
-<tbody id="table">
+
+<tbody id="teachersTable">
+
 
 </tbody>
 
@@ -689,8 +494,6 @@ onkeyup="searchStudent(this.value)"
 </table>
 
 
-</div>
-
 
 </div>
 
@@ -699,38 +502,53 @@ onkeyup="searchStudent(this.value)"
 </div>
 
 
+
+
+
+<!-- BOTTOM NAV -->
 
 
 <div class="bottom-nav">
 
 
-<div class="nav active">
+<div class="nav-item active">
+
 <span>🏠</span>
+
 Home
+
 </div>
 
 
-<div class="nav">
-<span>🎓</span>
+<div class="nav-item"
+onclick="location.href='teachers.html'">
+
+<span>👨‍🏫</span>
+
+Teachers
+
+</div>
+
+
+
+<div class="nav-item"
+onclick="location.href='students.html'">
+
+<span>👨‍🎓</span>
+
 Students
+
 </div>
 
 
-<div class="nav">
-<span>📝</span>
-Marks
-</div>
 
+<div class="nav-item"
+onclick="logout()">
 
-<div class="nav">
-<span>📊</span>
-Results
-</div>
+<span>⚙️</span>
 
+Logout
 
-<div class="nav">
-<span>☰</span>
-More
 </div>
 
 
@@ -740,23 +558,57 @@ More
 
 
 
+
+<!-- DELETE MODAL -->
+
+
+<div id="deleteModal">
+
+
+<div class="modal-box">
+
+
+<h3>
+
+Delete Teacher?
+
+</h3>
+
+
+<p id="deleteTeacherName"></p>
+
+
+
+<button id="confirmDeleteBtn"
+class="modal-btn"
+style="background:red;color:white">
+
+Delete
+
+</button>
+
+
+
+<button onclick="closeModal()"
+class="modal-btn"
+style="background:#ddd">
+
+Cancel
+
+</button>
+
+
+</div>
+
+
+</div>
 <script>
 
-
-let editingId=null;
-let previewData=[];
-let allStudents=[];
-
-
-
-const supabaseUrl=
+const supabaseUrl =
 "https://bslofdobcvxkjphbjyzb.supabase.co";
 
-
-
-const supabaseKey=
+const supabaseKey =
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
-
 
 
 const supabaseClient =
@@ -767,195 +619,47 @@ supabaseKey
 
 
 
-
-window.onload=async()=>{
-
-
-await loadClasses();
-
-await loadStudents();
-
-await loadSummary();
-
-
-};
+let selectedTeacherId=null;
 
 
 
+/* PROTECT ADMIN */
+
+async function protect(){
+
+
+const {data:{user}} =
+await supabaseClient.auth.getUser();
 
 
 
-async function loadSummary(){
+if(!user){
 
-
-
-let students =
-await supabaseClient
-.from("students")
-.select("*",{count:"exact"});
-
-
-studentsCount.innerHTML =
-students.count || 0;
-
-
-
-
-let classes =
-await supabaseClient
-.from("classes")
-.select("*",{count:"exact"});
-
-
-classesCount.innerHTML =
-classes.count || 0;
-
-
-
-try{
-
-
-let teachers =
-await supabaseClient
-.from("teachers")
-.select("*",{count:"exact"});
-
-
-teachersCount.innerHTML =
-teachers.count || 0;
-
-
-}catch(e){}
-
-
-
-
-
-try{
-
-
-let subjects =
-await supabaseClient
-.from("subjects")
-.select("*",{count:"exact"});
-
-
-subjectsCount.innerHTML =
-subjects.count || 0;
-
-
-}catch(e){}
-
-
-
+location.href="../index.html";
+return;
 
 }
 
 
 
+const {data:profile,error}=
+
+await supabaseClient
+
+.from("profiles")
+
+.select("role,full_name")
+
+.eq("id",user.id)
+
+.maybeSingle();
 
 
 
+if(error){
 
-
-async function loadClasses(){
-
-
-
-let {data,error}=await supabaseClient
-.from("classes")
-.select("*")
-.order("class_name");
-
-
-
-if(error)return;
-
-
-
-
-let box =
-document.getElementById("class");
-
-
-let importBox =
-document.getElementById("import_class");
-
-
-
-box.innerHTML =
-`<option value="">Select Class</option>`;
-
-
-importBox.innerHTML =
-`<option value="">Select Class</option>`;
-
-
-
-
-
-data.forEach(c=>{
-
-
-box.innerHTML +=
-`
-<option value="${c.id}">
-${c.class_name}
-</option>
-`;
-
-
-
-importBox.innerHTML +=
-`
-<option value="${c.id}">
-${c.class_name}
-</option>
-`;
-
-
-
-});
-
-
-
-}
-
-
-
-
-
-
-
-async function addStudent(){
-
-
-
-let student_name =
-document.getElementById("name").value;
-
-
-
-let prem =
-document.getElementById("prem_no").value;
-
-
-
-let genderValue =
-document.getElementById("gender").value;
-
-
-
-let classValue =
-document.getElementById("class").value;
-
-
-
-
-
-if(!student_name || !classValue){
-
-alert("Fill required fields");
+document.getElementById("welcome")
+.innerText="Profile loading error";
 
 return;
 
@@ -963,242 +667,276 @@ return;
 
 
 
+if(profile?.role !== "admin"){
+
+document.getElementById("welcome")
+.innerText="Access denied";
+
+return;
+
+}
 
 
 
-if(editingId){
+let hour=new Date().getHours();
 
+let greet="Good morning";
+
+
+if(hour>=12 && hour<16){
+
+greet="Good afternoon";
+
+}
+
+else if(hour>=16){
+
+greet="Good evening";
+
+}
+
+
+
+document.getElementById("welcome")
+.innerText=
+
+`${greet}, ${profile.full_name || "Admin"}`;
+
+
+
+// initials
+
+let name =
+profile.full_name || "Admin";
+
+
+document.getElementById("userInitials")
+.innerText =
+name.substring(0,2).toUpperCase();
+
+
+
+}
+
+
+
+
+
+/* STATS */
+
+
+async function loadStats(){
+
+
+let teachers =
+await supabaseClient
+
+.from("profiles")
+
+.select("*",
+{count:"exact",head:true})
+
+.eq("role","teacher");
+
+
+
+let students =
+await supabaseClient
+
+.from("students")
+
+.select("*",
+{count:"exact",head:true});
+
+
+
+let classes =
+await supabaseClient
+
+.from("classes")
+
+.select("*",
+{count:"exact",head:true});
+
+
+
+let subjects =
+await supabaseClient
+
+.from("subjects")
+
+.select("*",
+{count:"exact",head:true});
+
+
+
+
+document.getElementById("teachers")
+.innerText =
+teachers.count || 0;
+
+
+document.getElementById("students")
+.innerText =
+students.count || 0;
+
+
+document.getElementById("classes")
+.innerText =
+classes.count || 0;
+
+
+document.getElementById("subjects")
+.innerText =
+subjects.count || 0;
+
+
+}
+
+
+
+
+
+
+/* TEACHERS TABLE */
+
+
+async function loadTeachers(){
+
+
+const {data:teachers=[]}=
 
 await supabaseClient
-.from("students")
-.update({
 
-student_name:student_name,
+.from("profiles")
 
-prem_no:prem,
-
-gender:genderValue,
-
-class_id:classValue
-
-
-})
-.eq("id",editingId);
-
-
-
-}
-else{
-
-
-await supabaseClient
-.from("students")
-.insert([{
-
-
-admission_no:
-generateAdmissionNo(),
-
-
-student_name:student_name,
-
-
-prem_no:prem,
-
-
-gender:genderValue,
-
-
-class_id:classValue
-
-
-}]);
-
-
-
-}
-
-
-
-
-
-editingId=null;
-
-
-document.getElementById("name").value="";
-
-document.getElementById("prem_no").value="";
-
-document.getElementById("gender").value="";
-
-document.getElementById("class").value="";
-
-
-
-await loadStudents();
-
-await loadSummary();
-
-
-
-}
-
-
-
-
-
-
-
-
-async function loadStudents(){
-
-
-
-let {data,error}=await supabaseClient
-.from("students")
 .select("*")
-.order("id",{ascending:false});
+
+.eq("role","teacher");
 
 
 
-if(error)return;
+const {data:assignments=[]}=
 
+await supabaseClient
 
+.from("teacher_assignments")
 
-allStudents=data || [];
-
-
-
-displayStudents(allStudents);
-
-
-
-}
-
+.select(`
+*,
+classes(class_name),
+subjects(subject_name)
+`);
 
 
 
 
+const {data:students=[]}=
 
-async function displayStudents(data){
+await supabaseClient
+
+.from("students")
+
+.select("*");
+
+
 
 
 
 let table =
-document.getElementById("table");
-
+document.getElementById("teachersTable");
 
 
 table.innerHTML="";
 
 
 
-for(let s of data){
+
+teachers.forEach((t,i)=>{
 
 
-let cname =
-await getClassName(s.class_id);
+let myAssignments =
+assignments.filter(a=>
+a.teacher_id===t.id
+);
 
 
 
-table.innerHTML +=
+let classes =
+[
+...new Set(
+myAssignments.map(
+a=>a.classes?.class_name
+))
+];
 
-`
+
+
+let subjects =
+[
+...new Set(
+myAssignments.map(
+a=>a.subjects?.subject_name
+))
+];
+
+
+
+let classIds =
+myAssignments.map(a=>a.class_id);
+
+
+
+let studentCount =
+students.filter(s=>
+classIds.includes(s.class_id)
+).length;
+
+
+
+
+
+table.innerHTML += `
 
 <tr>
 
+<td>${i+1}</td>
 
-<td>${s.admission_no || ""}</td>
+<td>${t.full_name || t.email}</td>
 
-<td>${s.prem_no || ""}</td>
+<td>${classes.join(", ")}</td>
 
-<td>${s.student_name || ""}</td>
+<td>${subjects.join(", ")}</td>
 
-<td>${s.gender || ""}</td>
-
-<td>${cname}</td>
-
+<td>${studentCount}</td>
 
 
 <td>
 
+<button class="deleteBtn"
 
-<button onclick='editStudent(${JSON.stringify(s)})'>
-Edit
-</button>
+onclick="openDeleteModal(
+'${t.id}',
+'${t.full_name || t.email}'
+)">
 
-
-<button class="red"
-onclick="deleteStudent('${s.id}')">
 Delete
-</button>
 
+</button>
 
 </td>
 
 
 </tr>
 
-
 `;
 
 
 
-}
-
-
-
-}
-
-
-
-
-
-
-async function getClassName(id){
-
-
-if(!id)return "";
-
-
-let {data}=await supabaseClient
-.from("classes")
-.select("class_name")
-.eq("id",id)
-.single();
-
-
-
-return data?.class_name || "";
-
-}
-
-
-
-
-
-function editStudent(s){
-
-
-editingId=s.id;
-
-
-name.value=s.student_name;
-
-prem_no.value=s.prem_no;
-
-gender.value=s.gender;
-
-document.getElementById("class")
-.value=s.class_id;
-
-
-window.scrollTo({
-top:0,
-behavior:"smooth"
 });
 
 
+
 }
 
 
@@ -1206,312 +944,81 @@ behavior:"smooth"
 
 
 
-async function deleteStudent(id){
+
+/* DELETE MODAL */
 
 
-if(!confirm("Delete this student?"))
+function openDeleteModal(id,name){
+
+selectedTeacherId=id;
+
+
+document.getElementById(
+"deleteTeacherName"
+)
+.innerText=name;
+
+
+document.getElementById(
+"deleteModal"
+)
+.style.display="flex";
+
+}
+
+
+
+function closeModal(){
+
+document.getElementById(
+"deleteModal"
+)
+.style.display="none";
+
+
+selectedTeacherId=null;
+
+}
+
+
+
+
+
+
+document
+.getElementById("confirmDeleteBtn")
+.addEventListener("click",async()=>{
+
+
+if(!selectedTeacherId)
 return;
 
 
 
 await supabaseClient
-.from("students")
+
+.from("teacher_assignments")
+
 .delete()
-.eq("id",id);
 
+.eq("teacher_id",
+selectedTeacherId);
 
 
-loadStudents();
 
-loadSummary();
 
 
-}
+const {error}=
 
-
-
-
-
-function searchStudent(text){
-
-
-text=text.toLowerCase();
-
-
-
-let result =
-allStudents.filter(s=>
-
-(s.student_name||"")
-.toLowerCase()
-.includes(text)
-
-||
-
-(s.prem_no||"")
-.toLowerCase()
-.includes(text)
-
-
-);
-
-
-
-displayStudents(result);
-
-
-
-}
-
-
-
-
-
-
-function generateAdmissionNo(){
-
-
-let year =
-new Date()
-.getFullYear();
-
-
-
-let num =
-Math.floor(
-10000+Math.random()*90000
-);
-
-
-
-return `KEMPS/${year}/${num}`;
-
-
-}
-  // ===============================
-// EXCEL IMPORT SYSTEM
-// ===============================
-
-
-function downloadTemplate(){
-
-
-let data=[
-
-{
-prem_no:"001",
-student_name:"Student Name",
-gender:"Male"
-}
-
-];
-
-
-
-let ws =
-XLSX.utils.json_to_sheet(data);
-
-
-
-let wb =
-XLSX.utils.book_new();
-
-
-
-XLSX.utils.book_append_sheet(
-wb,
-ws,
-"Students"
-);
-
-
-
-XLSX.writeFile(
-wb,
-"Students_Template.xlsx"
-);
-
-
-
-}
-
-
-
-
-
-
-async function importExcel(){
-
-
-
-let classId =
-document.getElementById("import_class").value;
-
-
-
-let file =
-document.getElementById("excelFile")
-.files[0];
-
-
-
-if(!classId || !file){
-
-alert("Select class and Excel file");
-
-return;
-
-}
-
-
-
-
-
-let reader =
-new FileReader();
-
-
-
-
-reader.onload = function(e){
-
-
-
-let workbook =
-XLSX.read(
-new Uint8Array(e.target.result),
-{
-type:"array"
-}
-);
-
-
-
-
-let sheet =
-workbook.Sheets[
-workbook.SheetNames[0]
-];
-
-
-
-
-let rows =
-XLSX.utils.sheet_to_json(sheet);
-
-
-
-
-
-previewData =
-rows.map(row=>({
-
-
-admission_no:
-generateAdmissionNo(),
-
-
-prem_no:
-row.prem_no || "",
-
-
-
-student_name:
-row.student_name || "",
-
-
-
-gender:
-row.gender || "",
-
-
-
-class_id:
-classId
-
-
-}));
-
-
-
-
-
-let preview =
-document.getElementById("previewTable");
-
-
-
-preview.innerHTML="";
-
-
-
-
-
-previewData.forEach(s=>{
-
-
-preview.innerHTML +=
-
-
-`
-
-<tr>
-
-<td>${s.prem_no}</td>
-
-<td>${s.student_name}</td>
-
-<td>${s.gender}</td>
-
-
-</tr>
-
-
-`;
-
-
-
-});
-
-
-
-
-
-document.getElementById("previewSection")
-.style.display="block";
-
-
-
-}
-
-
-
-
-reader.readAsArrayBuffer(file);
-
-
-
-}
-
-
-
-
-
-
-
-async function confirmImport(){
-
-
-
-if(previewData.length==0)
-return;
-
-
-
-let {error} =
 await supabaseClient
-.from("students")
-.insert(previewData);
+
+.from("profiles")
+
+.delete()
+
+.eq("id",
+selectedTeacherId);
+
 
 
 
@@ -1519,35 +1026,61 @@ if(error){
 
 alert(error.message);
 
-return;
+}
+
+else{
+
+alert("Teacher deleted successfully");
+
+loadTeachers();
+
+loadStats();
+
+}
+
+
+
+closeModal();
+
+
+
+});
+
+
+
+
+
+
+/* LOGOUT */
+
+
+async function logout(){
+
+await supabaseClient.auth.signOut();
+
+location.href="../index.html";
 
 }
 
 
 
 
-alert("Students imported successfully");
 
 
 
-previewData=[];
+async function init(){
 
+await protect();
 
+loadStats();
 
-document.getElementById("previewSection")
-.style.display="none";
-
-
-
-await loadStudents();
-
-await loadSummary();
-
-
+loadTeachers();
 
 }
 
 
+
+init();
 
 
 </script>
@@ -1555,4 +1088,4 @@ await loadSummary();
 
 </body>
 
-</html>
+  </html>
