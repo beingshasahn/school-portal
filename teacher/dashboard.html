@@ -1226,26 +1226,31 @@ async function menuCopy(){
 
 async function menuDelete(){
 
-  console.log(selectedMessage);
+  console.log("Deleting:", selectedMessage.id);
 
-  if(selectedMessage.sender_id !== teacherId){
-    showToast("You can delete only your messages");
-    return;
-  }
-
-  const { error } = await supabaseClient
+  const { data, error } = await supabaseClient
     .from("chats")
     .delete()
-    .eq("id", selectedMessage.id);
+    .eq("id", selectedMessage.id)
+    .select();
+
+  console.log("Deleted rows:", data);
+  console.log("Delete error:", error);
 
   if(error){
-    console.log(error);
     alert(error.message);
     return;
   }
 
+  if(!data || data.length === 0){
+    alert("No row deleted");
+    return;
+  }
+
   showToast("Message deleted");
-  loadMessages();
+
+  await loadMessages();
+
   hideMenu();
 }
   
