@@ -581,6 +581,36 @@ th,td{
     <div id="chatMessages" class="chat-messages">
     </div>
 
+    <div id="replyPreview" style="
+display:none;
+background:#eff6ff;
+border-left:4px solid #1e3a8a;
+padding:10px;
+margin-top:10px;
+border-radius:8px;
+">
+
+  <div id="replyName"
+       style="font-weight:bold;color:#1e3a8a;font-size:12px;">
+  </div>
+
+  <div id="replyText"
+       style="font-size:12px;margin-top:4px;">
+  </div>
+
+  <button onclick="cancelReply()" style="
+    margin-top:8px;
+    border:none;
+    background:#ef4444;
+    color:white;
+    padding:5px 10px;
+    border-radius:6px;
+    cursor:pointer;">
+    Cancel
+  </button>
+
+    </div>
+    
     <div class="chat-input-area">
 
       <input
@@ -709,7 +739,7 @@ let teacherName = "";
 let assignments = [];
 let selectedClass = null;
 let selectedSubject = null;
-
+let replyingTo = null;
 /* SUPABASE */
 const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
@@ -1061,7 +1091,29 @@ async function logout(){
     icon.style.background = "#6b7280";
   }
   }
+function replyMessage(id,sender,message){
 
+  replyingTo = {
+    id,
+    sender,
+    message
+  };
+
+  document.getElementById("replyPreview").style.display="block";
+
+  document.getElementById("replyName").innerText =
+    sender;
+
+  document.getElementById("replyText").innerText =
+    message;
+}
+
+function cancelReply(){
+
+  replyingTo = null;
+
+  document.getElementById("replyPreview").style.display="none";
+    }
   async function sendMessage(){
 
   try{
@@ -1077,10 +1129,19 @@ async function logout(){
     const { error } = await supabaseClient
       .from("chats")
       .insert([{
-        sender_id: teacherId,
-        sender_name: teacherName,
-        message: text
-      }]);
+  sender_id: teacherId,
+  sender_name: teacherName,
+  message: text,
+
+  reply_to_id:
+    replyingTo?.id || null,
+
+  reply_to_sender:
+    replyingTo?.sender || null,
+
+  reply_to_message:
+    replyingTo?.message || null
+}]);
 
     if(error){
       alert(error.message);
@@ -1089,6 +1150,7 @@ async function logout(){
     }
 
     document.getElementById("chatInput").value = "";
+    cancelReply();
 await loadMessages();
     showToast("Message sent successfully");
 
@@ -1127,26 +1189,73 @@ await loadMessages();
       });
 
     box.innerHTML += `
-      <div class="chat-row ${mine ? "mine" : "other"}">
+<div class="chat-row ${mine ? "mine" : "other"}">
 
-        <div class="chat-bubble">
+  <div class="chat-bubble">
 
-          <div class="chat-name">
-            ${msg.sender_name || "Unknown"}
-          </div>
+    <div class="chat-name">
+      ${msg.sender_name || "Unknown"}
+    </div>
 
-          <div class="chat-text">
-            ${msg.message || ""}
-          </div>
-
-          <div class="chat-time">
-            ${time}
-          </div>
-
+    ${
+      msg.reply_to_message
+      ?
+      `
+      <div style="
+        background:rgba(59,130,246,.08);
+        border-left:3px solid #3b82f6;
+        padding:8px;
+        margin-bottom:8px;
+        border-radius:8px;
+      ">
+        <div style="
+          font-size:11px;
+          font-weight:bold;
+          color:#1e3a8a;
+        ">
+          Replying to ${msg.reply_to_sender}
         </div>
 
+        <div style="
+          font-size:11px;
+          color:#374151;
+        ">
+          ${msg.reply_to_message}
+        </div>
       </div>
-    `;
+      `
+      :
+      ""
+    }
+
+    <div class="chat-text">
+      ${msg.message || ""}
+    </div>
+
+    <div class="chat-time">
+      ${time}
+    </div>
+
+    <div
+      onclick="replyMessage(
+        '${msg.id}',
+        '${(msg.sender_name || '').replace(/'/g,'')}",
+        '${(msg.message || '').replace(/'/g,'')}'
+      )"
+      style="
+        margin-top:6px;
+        color:#2563eb;
+        font-size:11px;
+        cursor:pointer;
+        font-weight:600;
+      ">
+      ↩ Reply
+    </div>
+
+  </div>
+
+</div>
+`;
   });
 
   box.scrollTop = box.scrollHeight;
