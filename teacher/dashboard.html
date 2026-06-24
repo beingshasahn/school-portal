@@ -1115,8 +1115,6 @@ async function logout(){
   }
 function replyMessage(id,sender,message){
 
-alert("Reply clicked");
-
   replyingTo = {
     id,
     sender,
@@ -1330,7 +1328,6 @@ clearTimeout(pressTimer)
     </div>
 
     <div
-      <div
   onclick="replyMessage(
     '${msg.id}',
     '${(msg.sender_name || "").replace(/'/g,"\\'")}',
@@ -1360,7 +1357,7 @@ box.clientHeight < 150;
 if(nearBottom){
   box.scrollTop = box.scrollHeight;
     }
-
+  }
   document
 .getElementById("chatInput")
 .addEventListener("keypress",function(e){
@@ -1370,6 +1367,14 @@ if(nearBottom){
   }
 
 });
+  document.addEventListener("click",function(e){
+
+  if(!e.target.closest("#messageMenu")){
+    hideMenu();
+  }
+
+});
+  
   
 init();
 
