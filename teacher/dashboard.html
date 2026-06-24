@@ -759,6 +759,9 @@ let assignments = [];
 let selectedClass = null;
 let selectedSubject = null;
 let replyingTo = null;
+let selectedMessage = null;
+let pressTimer = null;
+  
 /* SUPABASE */
 const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbG9mZG9iY3Z4a2pwaGJqeXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODY5NTEsImV4cCI6MjA5Njk2Mjk1MX0.oZ8oxXGxKyN4qwBgWrgdp9JOCkNXtREf6epTAcQg45s";
@@ -1183,6 +1186,62 @@ await loadMessages();
 
   }
   }
+
+  function showMenu(event,msg){
+
+  selectedMessage = msg;
+
+  const menu =
+    document.getElementById("messageMenu");
+
+  menu.style.display = "block";
+  menu.style.left = event.pageX + "px";
+  menu.style.top = event.pageY + "px";
+}
+
+function hideMenu(){
+  document.getElementById("messageMenu")
+    .style.display = "none";
+}
+
+function menuReply(){
+
+  replyMessage(
+    selectedMessage.id,
+    selectedMessage.sender_name,
+    selectedMessage.message
+  );
+
+  hideMenu();
+}
+
+async function menuCopy(){
+
+  await navigator.clipboard.writeText(
+    selectedMessage.message
+  );
+
+  showToast("Message copied");
+  hideMenu();
+}
+
+async function menuDelete(){
+
+  if(
+    selectedMessage.sender_id !== teacherId
+  ){
+    showToast("You can delete only your messages");
+    return;
+  }
+
+  await supabaseClient
+    .from("chats")
+    .delete()
+    .eq("id", selectedMessage.id);
+
+  loadMessages();
+  hideMenu();
+}
   
   async function loadMessages(){
 
@@ -1214,11 +1273,22 @@ await loadMessages();
 <div class="chat-row ${mine ? "mine" : "other"}">
 
   <div class="chat-bubble"
-ondblclick="replyMessage(
-'${msg.id}',
-${JSON.stringify(msg.sender_name || "")},
-${JSON.stringify(msg.message || "")}
-)">
+
+ontouchstart="
+pressTimer=setTimeout(()=>{
+showMenu(event,{
+id:'${msg.id}',
+sender_id:'${msg.sender_id}',
+sender_name:'${msg.sender_name}',
+message:${JSON.stringify(msg.message)}
+});
+},400);
+"
+
+ontouchend="
+clearTimeout(pressTimer)
+"
+>
 
     <div class="chat-name">
       ${msg.sender_name || "Unknown"}
@@ -1282,8 +1352,14 @@ ${JSON.stringify(msg.message || "")}
 `;
   });
 
+  const nearBottom =
+box.scrollHeight -
+box.scrollTop -
+box.clientHeight < 150;
+
+if(nearBottom){
   box.scrollTop = box.scrollHeight;
-              }
+    }
 
   document
 .getElementById("chatInput")
@@ -1302,5 +1378,31 @@ init();
   <audio id="uiClickSound" preload="auto">
   <source src="https://bslofdobcvxkjphbjyzb.supabase.co/storage/v1/object/public/sounds/click.mp3" type="audio/mpeg">
   </audio>
+
+  <div id="messageMenu" style="
+display:none;
+position:fixed;
+background:white;
+border-radius:12px;
+box-shadow:0 5px 25px rgba(0,0,0,.15);
+padding:8px;
+z-index:99999;
+min-width:150px;
+">
+
+  <div onclick="menuReply()" style="padding:10px;cursor:pointer;">
+    ↩ Reply
+  </div>
+
+  <div onclick="menuCopy()" style="padding:10px;cursor:pointer;">
+    📋 Copy
+  </div>
+
+  <div onclick="menuDelete()" style="padding:10px;color:red;cursor:pointer;">
+    🗑 Delete
+  </div>
+
+  </div>
+  
 </body>
 </html>
