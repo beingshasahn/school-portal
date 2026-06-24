@@ -760,7 +760,7 @@ let selectedClass = null;
 let selectedSubject = null;
 let replyingTo = null;
 let selectedMessage = null;
-let pressTimer = null;
+
   
 /* SUPABASE */
 const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
@@ -1187,15 +1187,21 @@ await loadMessages();
 
   function showMenu(event,msg){
 
+  event.stopPropagation();
+
   selectedMessage = msg;
 
   const menu =
     document.getElementById("messageMenu");
 
   menu.style.display = "block";
-  menu.style.left = event.pageX + "px";
-  menu.style.top = event.pageY + "px";
-}
+
+  menu.style.left =
+    event.pageX + "px";
+
+  menu.style.top =
+    event.pageY + "px";
+      }
 
 function hideMenu(){
   document.getElementById("messageMenu")
@@ -1272,20 +1278,12 @@ async function menuDelete(){
 
   <div class="chat-bubble"
 
-ontouchstart="
-pressTimer=setTimeout(()=>{
-showMenu(event,{
+onclick="showMenu(event,{
 id:'${msg.id}',
 sender_id:'${msg.sender_id}',
-sender_name:'${msg.sender_name}',
+sender_name:${JSON.stringify(msg.sender_name)},
 message:${JSON.stringify(msg.message)}
-});
-},400);
-"
-
-ontouchend="
-clearTimeout(pressTimer)
-"
+})"
 >
 
     <div class="chat-name">
