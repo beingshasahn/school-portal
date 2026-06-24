@@ -1112,6 +1112,8 @@ async function logout(){
   }
 function replyMessage(id,sender,message){
 
+alert("Reply clicked");
+
   replyingTo = {
     id,
     sender,
@@ -1120,8 +1122,7 @@ function replyMessage(id,sender,message){
 
   document.getElementById("replyPreview").style.display="block";
 
-  document.getElementById("replyName").innerText =
-    sender;
+  document.getElementById("replyName").innerText = sender;
 
   document.getElementById("replyText").innerText =
   message.length > 80
