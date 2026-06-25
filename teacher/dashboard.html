@@ -478,6 +478,34 @@ th,td{
   color:#374151;
   margin-top:2px;
 }
+
+.notice-card{
+  background:white;
+  padding:15px;
+  border-radius:12px;
+  margin-top:10px;
+  border-left:4px solid #1e3a8a;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+
+.notice-title{
+  font-weight:700;
+  color:#1e3a8a;
+  margin-bottom:8px;
+}
+
+.notice-message{
+  font-size:13px;
+  color:#374151;
+  line-height:1.6;
+}
+
+.notice-date{
+  font-size:11px;
+  color:#9ca3af;
+  margin-top:8px;
+}
+  
 </style>
 </head>
 
@@ -653,10 +681,11 @@ border-radius:8px;
 <!-- NOTICES -->
 <div id="notices" class="page">
   <div class="card">
-    <div class="empty">
-      📢
-      <h3>No notices</h3>
-      <p>Check back later for updates</p>
+    <h3>📢 School Notices</h3>
+    <div id="teacherNoticeList">
+      <div class="empty">
+        Loading notices...
+      </div>
     </div>
   </div>
 </div>
@@ -781,6 +810,22 @@ supabaseClient
     }
   )
   .subscribe();
+
+  supabaseClient
+  .channel("teacher-notices-live")
+  .on(
+    "postgres_changes",
+    {
+      event:"*",
+      schema:"public",
+      table:"notices"
+    },
+    ()=>{
+      loadTeacherNotices();
+    }
+  )
+  .subscribe();
+  
 /* AUTH */
 async function protect(roleRequired){
 
@@ -839,6 +884,7 @@ teacherName = name;
 
   await loadAssignments();
 await loadMessages();
+await loadTeacherNotices();
 }
 
 function handleClassChange(){
@@ -1379,7 +1425,67 @@ if(nearBottom){
   }
 
 });
-  
+async function loadTeacherNotices(){
+
+  const { data, error } = await supabaseClient
+    .from("notices")
+    .select("*")
+    .order("created_at",{ascending:false});
+
+  if(error){
+    console.log(error);
+    return;
+  }
+
+  const box =
+    document.getElementById("teacherNoticeList");
+
+  if(!box) return;
+
+  if(!data || data.length===0){
+
+    box.innerHTML = `
+      <div class="empty">
+        📢
+        <h3>No Notices</h3>
+        <p>No notice available yet</p>
+      </div>
+    `;
+
+    return;
+  }
+
+  box.innerHTML = "";
+
+  data.forEach(n=>{
+
+    let date =
+      new Date(n.created_at)
+      .toLocaleDateString();
+
+    box.innerHTML += `
+
+      <div class="notice-card">
+
+        <div class="notice-title">
+          ${n.title}
+        </div>
+
+        <div class="notice-message">
+          ${n.message}
+        </div>
+
+        <div class="notice-date">
+          ${date}
+        </div>
+
+      </div>
+
+    `;
+
+  });
+
+      }  
   
 init();
 
