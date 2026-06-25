@@ -854,10 +854,12 @@ Notices
 
 </div>
 <div class="nav-item"
-onclick="logout()">
+onclick="toggleMoreMenu(this)">
 
-<span>⚙️</span>
-Logout
+<span>☰</span>
+
+More
+
 </div>
 
 </div>
@@ -1779,15 +1781,11 @@ adminReply();
 }
 
 
-
-
 async function adminDeleteMessage(){
 
 
 if(!selectedAdminMessage)
 return;
-
-
 
 const {error}=await supabaseClient
 
@@ -1797,25 +1795,32 @@ const {error}=await supabaseClient
 
 .eq("id",selectedAdminMessage.id);
 
-
-
 if(error){
-
 alert(error.message);
-
 return;
 
 }
 
-
 loadAdminMessages();
-
 
 alert("Message deleted");
 
-
   }  
 
+  function toggleMoreMenu(el){
+let menu =
+document.getElementById("moreMenu");
+if(menu.style.display==="block"){
+
+menu.style.display="none";
+
+}else{
+
+menu.style.display="block";
+
+}
+  }
+  
 </script>
 
 <div id="adminChatMenu" class="chat-menu">
@@ -1832,6 +1837,55 @@ alert("Message deleted");
 🗑 Delete
 </div>
 
+</div>
+  <!-- MORE MENU -->
+
+<div id="moreMenu"
+style="
+display:none;
+position:fixed;
+bottom:75px;
+right:15px;
+background:white;
+width:180px;
+border-radius:15px;
+box-shadow:0 5px 20px rgba(0,0,0,.15);
+overflow:hidden;
+z-index:999;
+">
+
+
+<div onclick="location.href='results.html'"
+style="
+padding:15px;
+border-bottom:1px solid #eee;
+cursor:pointer;
+">
+
+📊 Results
+
+</div>
+
+
+<div onclick="location.href='assignments.html'"
+style="
+padding:15px;
+border-bottom:1px solid #eee;
+cursor:pointer;
+">
+
+📚 Assignments
+
+</div>
+
+<div onclick="logout()"
+style="
+padding:15px;
+cursor:pointer;
+color:#ef4444;
+">
+🚪 Logout
+</div>
 </div>
   
 </body>
