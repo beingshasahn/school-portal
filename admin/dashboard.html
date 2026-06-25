@@ -371,8 +371,7 @@ AD
 <!-- HOME PAGE -->
 
 
-<div class="page">
-
+<div id="home" class="page active">
 
 <div class="card">
 
@@ -501,24 +500,120 @@ Teachers Overview
 
 </div>
 
+<!-- ================= CHAT PAGE ================= -->
 
+<div id="chat" class="page">
+
+<div class="card chat-container">
+
+
+<div class="chat-header">
+
+<div class="chat-avatar">
+KEMPS
+</div>
+
+
+<div>
+
+<div class="chat-title">
+Korosho Staff Chat
+</div>
+
+<div class="chat-subtitle">
+Official School Communication Platform
+</div>
+
+</div>
+
+
+</div>
+
+
+
+<div id="adminChatMessages" class="chat-messages">
+
+</div>
+
+
+
+<div class="chat-input-area">
+
+
+<input 
+id="adminChatInput"
+class="chat-input"
+placeholder="Type message..."
+>
+
+
+<button 
+class="chat-send"
+onclick="adminSendMessage()">
+
+Send
+
+</button>
+
+
+</div>
+
+
+</div>
+
+</div>
+
+
+
+
+
+
+<!-- ================= NOTICES PAGE ================= -->
+
+<div id="notices" class="page">
+
+<div class="card">
+
+<h3>Create Notice</h3>
+
+<div class="notice-form">
+
+<input 
+id="noticeTitle"
+placeholder="Notice title"
+>
+<textarea 
+id="noticeMessage"
+placeholder="Write notice..."
+></textarea>
+<button 
+class="notice-btn"
+onclick="createNotice()">
+Publish Notice
+</button>
+</div>
+</div>
+<div class="card">
+<h3>School Notices</h3>
+<div id="noticeList">
+</div>
+</div>
+
+</div>
 
 
 
 <!-- BOTTOM NAV -->
 
 
-<div class="bottom-nav">
-
-
-<div class="nav-item active">
+<div class="nav-item active"
+onclick="switchAdminPage('home',this)">
 
 <span>🏠</span>
 
 Home
 
 </div>
-
 
 <div class="nav-item"
 onclick="location.href='teachers.html'">
@@ -540,7 +635,24 @@ Students
 
 </div>
 
+<div class="nav-item"
+onclick="switchAdminPage('chat',this)">
 
+<span>💬</span>
+
+Chats
+
+</div>
+
+
+<div class="nav-item"
+onclick="switchAdminPage('notices',this)">
+
+<span>📢</span>
+
+Notices
+
+</div>
 
 <div class="nav-item"
 onclick="logout()">
@@ -1082,6 +1194,625 @@ loadTeachers();
 
 init();
 
+  // ================= ADMIN EXTRA INIT =================
+
+
+async function loadAdminExtra(){
+
+
+if(document.getElementById("noticeList")){
+
+loadNotices();
+
+}
+
+
+if(document.getElementById("adminChatMessages")){
+
+loadAdminMessages();
+
+}
+
+
+}
+
+
+// run extra pages
+
+loadAdminExtra();
+
+  /* ================= CHAT PAGE ADMIN ================= */
+
+.chat-container{
+display:flex;
+flex-direction:column;
+height:70vh;
+}
+
+.chat-header{
+display:flex;
+align-items:center;
+gap:10px;
+padding-bottom:10px;
+border-bottom:1px solid #e5e7eb;
+}
+
+.chat-avatar{
+width:40px;
+height:40px;
+border-radius:50%;
+background:#1e3a8a;
+color:white;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:bold;
+font-size:12px;
+}
+
+.chat-title{
+font-weight:700;
+font-size:15px;
+}
+
+.chat-subtitle{
+font-size:11px;
+color:#777;
+}
+
+
+.chat-messages{
+flex:1;
+overflow-y:auto;
+padding:12px;
+margin-top:10px;
+background:#f8fafc;
+border-radius:12px;
+}
+
+
+.chat-row{
+display:flex;
+margin-bottom:12px;
+}
+
+.chat-row.mine{
+justify-content:flex-end;
+}
+
+.chat-row.other{
+justify-content:flex-start;
+}
+
+
+.chat-bubble{
+background:white;
+border:1px solid #eee;
+padding:10px;
+border-radius:14px;
+max-width:80%;
+box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+
+
+.chat-row.mine .chat-bubble{
+background:#1e3a8a;
+color:white;
+}
+
+
+.chat-name{
+font-size:12px;
+font-weight:bold;
+color:#1e3a8a;
+}
+
+
+.chat-row.mine .chat-name{
+color:white;
+}
+
+
+.chat-text{
+font-size:13px;
+margin-top:5px;
+}
+
+
+.chat-time{
+font-size:10px;
+opacity:.7;
+text-align:right;
+margin-top:5px;
+}
+
+
+.chat-input-area{
+display:flex;
+gap:8px;
+margin-top:10px;
+}
+
+
+.chat-input{
+flex:1;
+padding:10px;
+border:1px solid #ddd;
+border-radius:10px;
+}
+
+
+.chat-send{
+background:#1e3a8a;
+color:white;
+border:none;
+padding:10px 18px;
+border-radius:10px;
+}
+
+
+/* ================= NOTICES ================= */
+
+
+.notice-form input,
+.notice-form textarea{
+
+width:100%;
+padding:10px;
+border:1px solid #ddd;
+border-radius:10px;
+margin-top:8px;
+
+}
+
+
+.notice-form textarea{
+
+height:120px;
+resize:none;
+
+}
+
+
+.notice-btn{
+
+background:#1e3a8a;
+color:white;
+border:none;
+padding:10px;
+width:100%;
+border-radius:10px;
+margin-top:10px;
+
+}
+
+
+.notice-card{
+
+background:white;
+padding:15px;
+border-radius:12px;
+margin-top:10px;
+box-shadow:0 2px 8px rgba(0,0,0,.05);
+
+}
+
+
+.notice-card h3{
+
+margin:0;
+color:#1e3a8a;
+
+}
+
+
+.notice-card p{
+
+font-size:13px;
+color:#555;
+
+}
+
+
+.notice-date{
+
+font-size:11px;
+color:#999;
+
+}
+
+  /* ================= ADMIN PAGE SWITCH ================= */
+
+function switchAdminPage(page,el){
+
+document.querySelectorAll(".page")
+.forEach(p=>p.classList.remove("active"));
+
+
+document.getElementById(page)
+.classList.add("active");
+
+
+document.querySelectorAll(".nav-item")
+.forEach(n=>n.classList.remove("active"));
+
+
+if(el){
+el.classList.add("active");
+}
+
+
+if(page==="chat"){
+loadAdminMessages();
+}
+
+
+if(page==="notices"){
+loadNotices();
+}
+
+
+}
+
+
+
+
+/* ================= ADMIN CHAT ================= */
+
+
+async function loadAdminMessages(){
+
+
+const {data,error}=await supabaseClient
+
+.from("chats")
+
+.select("*")
+
+.order("created_at",{ascending:true});
+
+
+
+if(error){
+
+console.log(error);
+return;
+
+}
+
+
+
+const box=document.getElementById("adminChatMessages");
+
+
+box.innerHTML="";
+
+
+
+(data||[]).forEach(msg=>{
+
+
+let mine = msg.sender_id !== null;
+
+
+let time = new Date(msg.created_at)
+
+.toLocaleTimeString([],{
+
+hour:"2-digit",
+minute:"2-digit"
+
+});
+
+
+
+box.innerHTML += `
+
+
+<div class="chat-row ${mine ? "mine":"other"}">
+
+
+<div class="chat-bubble">
+
+
+<div class="chat-name">
+
+${msg.sender_name || "Unknown"}
+
+</div>
+
+
+
+<div class="chat-text">
+
+${msg.message}
+
+</div>
+
+
+<div class="chat-time">
+
+${time}
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+`;
+
+
+});
+
+
+
+box.scrollTop = box.scrollHeight;
+
+
+}
+
+async function adminSendMessage(){
+
+
+let input=document.getElementById("adminChatInput");
+
+
+let text=input.value.trim();
+
+
+
+if(!text){
+return;
+}
+
+
+
+const {data:{user}} = 
+await supabaseClient.auth.getUser();
+
+
+
+const {data:profile}=
+
+await supabaseClient
+
+.from("profiles")
+
+.select("full_name")
+
+.eq("id",user.id)
+
+.maybeSingle();
+
+
+
+await supabaseClient
+
+.from("chats")
+
+.insert([{
+
+sender_id:user.id,
+
+sender_name:
+profile?.full_name || "Admin",
+
+message:text
+
+}]);
+
+
+
+input.value="";
+
+
+loadAdminMessages();
+
+
+}
+
+
+
+
+/* REALTIME CHAT */
+
+
+supabaseClient
+
+.channel("admin-chat-live")
+
+.on(
+
+"postgres_changes",
+
+{
+
+event:"INSERT",
+
+schema:"public",
+
+table:"chats"
+
+},
+
+()=>{
+
+loadAdminMessages();
+
+}
+
+)
+
+.subscribe();
+
+
+
+
+
+
+
+/* ================= NOTICES ================= */
+
+
+async function createNotice(){
+
+
+let title =
+document.getElementById("noticeTitle").value.trim();
+
+
+let message =
+document.getElementById("noticeMessage").value.trim();
+
+
+
+if(!title || !message){
+
+alert("Fill all fields");
+
+return;
+
+}
+
+const {data:{user}} =
+await supabaseClient.auth.getUser();
+
+const {error}=await supabaseClient
+
+.from("notices")
+
+.insert([{
+
+title:title,
+
+message:message,
+
+created_by:user.id
+
+}]);
+
+
+if(error){
+
+alert(error.message);
+return;
+
+}
+
+alert("Notice published");
+
+document.getElementById("noticeTitle").value="";
+
+document.getElementById("noticeMessage").value="";
+
+loadNotices();
+
+}
+
+
+async function loadNotices(){
+
+
+const {data,error}=await supabaseClient
+
+.from("notices")
+
+.select("*")
+
+.order("created_at",{ascending:false});
+
+
+
+if(error){
+
+console.log(error);
+return;
+
+}
+
+
+
+let box =
+document.getElementById("noticeList");
+
+
+
+box.innerHTML="";
+
+
+
+
+(data||[]).forEach(n=>{
+
+
+let date = new Date(n.created_at)
+
+.toLocaleDateString();
+
+
+
+box.innerHTML += `
+
+
+<div class="notice-card">
+
+
+<h3>
+
+${n.title}
+
+</h3>
+
+
+<p>
+
+${n.message}
+
+</p>
+
+
+<div class="notice-date">
+
+${date}
+
+</div>
+
+
+</div>
+
+
+`;
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+document
+
+.getElementById("adminChatInput")
+
+?.addEventListener("keypress",function(e){
+
+if(e.key==="Enter"){
+
+adminSendMessage();
+
+}
+
+});
+  
 
 </script>
 
