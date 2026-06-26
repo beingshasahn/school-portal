@@ -505,6 +505,15 @@ th,td{
   color:#9ca3af;
   margin-top:8px;
 }
+  @keyframes blinkNotice{
+  0%{opacity:1;}
+  50%{opacity:.2;}
+  100%{opacity:1;}
+}
+
+.notice-blink{
+  animation:blinkNotice .8s infinite;
+}
   
 </style>
 </head>
@@ -740,8 +749,27 @@ border-radius:8px;
     <span>💬</span>Chat
   </div>
 
-  <div class="nav-item" onclick="switchPage('notices',this)">
-    <span>📢</span>Notices
+  <div class="nav-item" onclick="openNotices(this)">
+  <span style="position:relative;">
+    📢
+
+    <span id="noticeBadge" style="
+      display:none;
+      position:absolute;
+      top:-8px;
+      right:-10px;
+      background:red;
+      color:white;
+      font-size:9px;
+      padding:2px 5px;
+      border-radius:20px;
+      font-weight:bold;
+    ">
+      NEW
+    </span>
+
+  </span>
+  Notices
   </div>
 
   <div class="nav-item" onclick="switchPage('profile',this)">
@@ -780,7 +808,18 @@ if(page === "chat"){
 
   el.classList.add('active');
 }
+function openNotices(el){
 
+  switchPage("notices",el);
+
+  const badge =
+  document.getElementById("noticeBadge");
+
+  badge.style.display = "none";
+  badge.classList.remove("notice-blink");
+
+}
+  
 /* FIXED: removed duplicate variables */
 let teacherId = null;
 let teacherName = "";
@@ -789,7 +828,7 @@ let selectedClass = null;
 let selectedSubject = null;
 let replyingTo = null;
 let selectedMessage = null;
-
+let lastNoticeCount = 0;
   
 /* SUPABASE */
 const supabaseUrl = "https://bslofdobcvxkjphbjyzb.supabase.co";
@@ -1485,6 +1524,18 @@ async function loadTeacherNotices(){
 
   });
 
+  if(lastNoticeCount > 0 && data.length > lastNoticeCount){
+
+  const badge =
+  document.getElementById("noticeBadge");
+
+  badge.style.display = "inline-block";
+
+  badge.classList.add("notice-blink");
+
+}
+
+lastNoticeCount = data.length;
       }  
   
 init();
