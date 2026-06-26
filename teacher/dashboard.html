@@ -1496,33 +1496,47 @@ async function loadTeacherNotices(){
 
   box.innerHTML = "";
 
-  data.forEach(n=>{
+  data.forEach((n,index)=>{
 
-    let date =
-      new Date(n.created_at)
-      .toLocaleDateString();
+let date=new Date(n.created_at).toLocaleDateString();
 
-    box.innerHTML += `
+let newBadge = "";
 
-      <div class="notice-card">
+if(index===0){
+newBadge = `
+<span style="
+background:red;
+color:white;
+padding:2px 8px;
+border-radius:20px;
+font-size:10px;
+font-weight:bold;
+margin-left:8px;
+animation:blinkNotice .8s infinite;
+">
+NEW
+</span>`;
+}
 
-        <div class="notice-title">
-          ${n.title}
-        </div>
+box.innerHTML += `
+<div class="notice-card">
 
-        <div class="notice-message">
-          ${n.message}
-        </div>
+<div class="notice-title">
+${n.title}
+${newBadge}
+</div>
 
-        <div class="notice-date">
-          ${date}
-        </div>
+<div class="notice-message">
+${n.message}
+</div>
 
-      </div>
+<div class="notice-date">
+${date}
+</div>
 
-    `;
-
-  });
+</div>
+`;
+});
 
   if(lastNoticeCount > 0 && data.length > lastNoticeCount){
 
