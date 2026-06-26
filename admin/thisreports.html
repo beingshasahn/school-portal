@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>Student Report Card</title>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<div class="report">
+
+<!--================ HEADER =================-->
+
+<div class="school-header">
+
+<div class="logo">
+
+<img src="logo.png">
+
+</div>
+
+<div class="school-details">
+
+<h1>KOROSHO ENGLISH MEDIUM PRE AND PRIMARY SCHOOL</h1>
+
+<h3>P.O. Box 03 - TANDAHIMBA - MTWARA</h3>
+
+<h3>TEL:
++255715976760 /
++255623638683 /
++255655481995
+</h3>
+
+<h3>Email:
+<span>koroshoschool@gmail.com</span>
+</h3>
+
+</div>
+
+</div>
+
+<h2 class="title">
+TAARIFA YA MAENDELEO YA MWANAFUNZI
+</h2>
+
+<h3 class="term">
+MUHULA WA KWANZA 2026
+</h3>
+
+<!--================ STUDENT DETAILS =================-->
+
+<table class="student-info">
+
+<tr>
+
+<td>
+JINA LA MWANAFUNZI:
+<strong id="studentName">
+NEILA ISLAMU MBARAKA
+</strong>
+</td>
+
+<td>
+JINSI:
+<strong id="gender">
+KE
+</strong>
+</td>
+
+<td>
+DARASA:
+<strong id="className">
+III
+</strong>
+</td>
+
+</tr>
+
+</table>
+
+<!--================ SUBJECT TABLE =================-->
+
+<table class="marks-table">
+
+<thead>
+
+<tr>
+
+<th>NA.</th>
+
+<th>SOMO</th>
+
+<th>ALAMA</th>
+
+<th>DARAJA</th>
+
+<th>MAONI</th>
+
+</tr>
+
+</thead>
+
+<tbody id="marksBody">
+
+<tr>
+
+<td>1</td>
+
+<td>MATHEMATICS</td>
+
+<td>84</td>
+
+<td>A</td>
+
+<td>VIZURI SANA</td>
+
+</tr>
+
+<tr>
+
+<td>2</td>
+
+<td>SCIENCE</td>
+
+<td>100</td>
+
+<td>A</td>
+
+<td>VIZURI SANA</td>
+
+</tr>
+
+<tr>
+
+<td>3</td>
+
+<td>GEOGRAPHY</td>
+
+<td>88</td>
+
+<td>A</td>
+
+<td>VIZURI SANA</td>
+
+</tr>
+
+<tr>
+
+<td>4</td>
+
+<td>ARTS & SPORTS</td>
+
+<td>88</td>
+
+<td>A</td>
+
+<td>VIZURI SANA</td>
+
+</tr>
+
+<tr>
+
+<td>5</td>
+
+<td>KISWAHILI</td>
+
+<td>82</td>
+
+<td>A</td>
+
+<td>VIZURI SANA</td>
+
+</tr>
+
+<tr>
+
+<td>6</td>
+
+<td>H/TZ NA MAADILI</td>
+
+<td>84</td>
+
+<td>A</td>
+
+<td>VIZURI SANA</td>
+
+</tr>
+
+<tr>
+
+<td>7</td>
+
+<td>ENGLISH</td>
+
+<td>73</td>
+
+<td>B</td>
+
+<td>VIZURI</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<!--================ TOTAL =================-->
+
+<h3 class="section-title">
+2. ALAMA NA NAFASI
+</h3>
+
+<table class="summary-table">
+
+<tr>
+
+<td>JUMLA</td>
+
+<td>AMEPATA JUMLA YA ALAMA</td>
+
+<td id="totalMarks">599</td>
+
+</tr>
+
+<tr>
+
+<td>WASTANI</td>
+
+<td id="average">86</td>
+
+<td>DARAJA A</td>
+
+</tr>
+
+<tr>
+
+<td>NAFASI</td>
+
+<td id="position">1</td>
+
+<td>KATI YA 2</td>
+
+</tr>
+
+<tr>
+
+<td>MAONI YA MWALIMU WA DARASA</td>
+
+<td colspan="2" id="classTeacherRemark">
+
+Aongeze bidii zaidi.
+
+</td>
+
+</tr>
+
+</table>
+
+<!--================ TABIA =================-->
+
+<h3 class="section-title">
+
+3. UPIMAJI KITABIA
+
+</h3>
+
+<table class="behavior-table">
+
+<tr>
+
+<th>NAMBA</th>
+
+<th>TABIA</th>
+
+<th>DARAJA</th>
+
+</tr>
+
+<tr>
+
+<td>901-903</td>
+
+<td>Kufanya kazi kwa bidii na kuthamini kazi</td>
+
+<td>B</td>
+
+</tr>
+
+<tr>
+
+<td>904</td>
+
+<td>Uangalizi wa mali za shule na mali za wenzake</td>
+
+<td>A</td>
+
+</tr>
+
+<tr>
+
+<td>905-908</td>
+
+<td>Heshima, Uongozi, Utii na Uaminifu</td>
+
+<td>A</td>
+
+</tr>
+
+</table>
+
+<!--================ COMMENTS =================-->
+
+<h3 class="section-title">
+
+4. MAONI
+
+</h3>
+
+<table class="comment-table">
+
+<tr>
+
+<td>MAONI YA MWALIMU WA TAALUMA</td>
+
+<td id="academicComment">
+
+Aongeze bidii
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>MAONI YA MWALIMU MKUU</td>
+
+<td id="headTeacherComment">
+
+Aongeze jitihada zaidi
+
+</td>
+
+</tr>
+
+</table>
+
+<!--================ NOTES =================-->
+
+<h3 class="section-title">
+
+5. MAELEKEZO
+
+</h3>
+
+<ol>
+
+<li>
+
+Shule imefungwa leo tarehe
+<strong>Jumatano,03/06/2026</strong>
+
+na itafunguliwa tarehe
+
+<strong>08/07/2026</strong>
+
+</li>
+
+<li>
+
+Mwanao aje na vifaa vyote muhimu shule
+itakapofunguliwa ikiwemo ulipaji wa ada kwa wakati.
+
+</li>
+
+</ol>
+
+<!--================ SIGNATURES =================-->
+
+<div class="signatures">
+
+<div>
+
+<p>____________________</p>
+
+<h4>Class Teacher</h4>
+
+</div>
+
+<div>
+
+<p>____________________</p>
+
+<h4>Academic Teacher</h4>
+
+</div>
+
+<div>
+
+<p>____________________</p>
+
+<h4>Head Teacher</h4>
+
+</div>
+
+</div>
+
+</div>
+<style>
+  /* ==========================
+   RESET
+========================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Segoe UI",Arial,sans-serif;
+}
+
+body{
+    background:#dcdcdc;
+    padding:30px;
+}
+
+/* ==========================
+   REPORT PAPER
+========================== */
+
+.report{
+
+    width:210mm;
+    min-height:297mm;
+
+    margin:auto;
+
+    background:#fff;
+
+    border:8px double #000;
+
+    padding:18px;
+
+    position:relative;
+
+}
+
+/* decorative inner border */
+
+.report::before{
+
+    content:"";
+
+    position:absolute;
+
+    left:8px;
+    top:8px;
+    right:8px;
+    bottom:8px;
+
+    border:2px solid #000;
+
+    pointer-events:none;
+
+}
+
+/* ==========================
+   HEADER
+========================== */
+
+.school-header{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:18px;
+
+    margin-bottom:10px;
+
+}
+
+.logo{
+
+    width:95px;
+
+    height:95px;
+
+    flex-shrink:0;
+
+}
+
+.logo img{
+
+    width:100%;
+
+    height:100%;
+
+    object-fit:contain;
+
+}
+
+.school-details{
+
+    flex:1;
+
+    text-align:center;
+
+}
+
+.school-details h1{
+
+    font-size:18px;
+
+    font-weight:700;
+
+    margin-bottom:5px;
+
+}
+
+.school-details h3{
+
+    font-size:13px;
+
+    margin:4px 0;
+
+    font-weight:600;
+
+}
+
+.school-details span{
+
+    color:#0056d6;
+
+    text-decoration:underline;
+
+}
+
+/* ==========================
+   TITLES
+========================== */
+
+.title{
+
+    text-align:center;
+
+    margin-top:10px;
+
+    font-size:18px;
+
+    font-weight:700;
+
+}
+
+.term{
+
+    text-align:center;
+
+    margin:8px 0 15px;
+
+    font-size:16px;
+
+    font-weight:700;
+
+}
+
+/* ==========================
+   STUDENT INFO
+========================== */
+
+.student-info{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+    margin-bottom:14px;
+
+}
+
+.student-info td{
+
+    padding:6px;
+
+    font-size:14px;
+
+}
+
+.student-info strong{
+
+    font-size:15px;
+
+}
+
+/* ==========================
+   COMMON TABLE STYLE
+========================== */
+
+table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
+th{
+
+    border:1px solid #000;
+
+    padding:8px;
+
+    font-size:14px;
+
+    text-align:center;
+
+}
+
+td{
+
+    border:1px solid #000;
+
+    padding:7px;
+
+    font-size:14px;
+
+}
+
+/* ==========================
+   MARKS TABLE
+========================== */
+
+.marks-table{
+
+    margin-bottom:20px;
+
+}
+
+.marks-table thead th{
+
+    background:#f3f3f3;
+
+    font-weight:700;
+
+}
+
+.marks-table td:nth-child(1){
+
+    width:55px;
+
+    text-align:center;
+
+}
+
+.marks-table td:nth-child(2){
+
+    width:290px;
+
+    font-weight:600;
+
+}
+
+.marks-table td:nth-child(3){
+
+    width:90px;
+
+    text-align:center;
+
+}
+
+.marks-table td:nth-child(4){
+
+    width:90px;
+
+    text-align:center;
+
+}
+
+.marks-table td:nth-child(5){
+
+    text-align:center;
+
+}
+
+/* ==========================
+   SECTION TITLE
+========================== */
+
+.section-title{
+
+    margin:18px 0 10px;
+
+    font-size:16px;
+
+    font-weight:700;
+
+}
+
+/* ==========================
+   SUMMARY TABLE
+========================== */
+
+.summary-table td{
+
+    height:38px;
+
+}
+
+.summary-table td:first-child{
+
+    width:130px;
+
+    font-weight:700;
+
+}
+
+.summary-table td:last-child{
+
+    text-align:center;
+
+  }
+  /* ==========================
+   BEHAVIOUR TABLE
+========================== */
+
+.behavior-table{
+
+    margin-bottom:20px;
+
+}
+
+.behavior-table th{
+
+    background:#f3f3f3;
+
+    font-weight:700;
+
+}
+
+.behavior-table td{
+
+    height:35px;
+
+}
+
+
+.behavior-table td:nth-child(1){
+
+    width:130px;
+
+    text-align:center;
+
+}
+
+
+.behavior-table td:nth-child(3){
+
+    width:120px;
+
+    text-align:center;
+
+    font-weight:600;
+
+}
+
+
+/* ==========================
+   COMMENT TABLE
+========================== */
+
+
+.comment-table{
+
+    margin-bottom:20px;
+
+}
+
+
+.comment-table td{
+
+    height:40px;
+
+}
+
+
+.comment-table td:first-child{
+
+    width:50%;
+
+    font-weight:600;
+
+}
+
+
+.comment-table td:last-child{
+
+    text-align:center;
+
+}
+
+
+/* ==========================
+   NOTES SECTION
+========================== */
+
+
+ol{
+
+    margin-left:25px;
+
+    margin-top:10px;
+
+}
+
+
+ol li{
+
+    font-size:15px;
+
+    line-height:1.7;
+
+    margin-bottom:8px;
+
+}
+
+
+/* ==========================
+   SIGNATURE AREA
+========================== */
+
+
+.signatures{
+
+    margin-top:45px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    text-align:center;
+
+}
+
+
+.signatures div{
+
+    width:30%;
+
+}
+
+
+.signatures p{
+
+    border-bottom:1px solid #000;
+
+    padding-bottom:5px;
+
+    margin-bottom:8px;
+
+}
+
+
+.signatures h4{
+
+    font-size:13px;
+
+}
+
+
+/* ==========================
+   WATERMARK LOGO
+========================== */
+
+
+.report:after{
+
+    content:"";
+
+    position:absolute;
+
+    top:40%;
+
+    left:50%;
+
+    width:220px;
+
+    height:220px;
+
+    transform:translate(-50%,-50%);
+
+    background-image:url("logo.png");
+
+    background-size:contain;
+
+    background-repeat:no-repeat;
+
+    opacity:0.05;
+
+    pointer-events:none;
+
+}
+
+
+/* ==========================
+   PRINT SETTINGS
+========================== */
+
+
+@page{
+
+    size:A4;
+
+    margin:10mm;
+
+}
+
+
+
+@media print{
+
+
+    body{
+
+        background:white;
+
+        padding:0;
+
+    }
+
+
+
+    .report{
+
+        width:100%;
+
+        min-height:277mm;
+
+        border:8px double black;
+
+        box-shadow:none;
+
+    }
+
+
+
+    .no-print{
+
+        display:none;
+
+    }
+
+
+}
+
+
+/* ==========================
+   MOBILE VIEW
+========================== */
+
+
+@media(max-width:700px){
+
+
+.report{
+
+    width:100%;
+
+    padding:10px;
+
+}
+
+
+.school-header{
+
+    flex-direction:column;
+
+}
+
+
+.school-details h1{
+
+    font-size:14px;
+
+}
+
+
+table{
+
+    font-size:12px;
+
+}
+
+
+td,th{
+
+    padding:5px;
+
+}
+
+
+.signatures{
+
+    flex-direction:column;
+
+    gap:30px;
+
+}
+
+
+.signatures div{
+
+    width:100%;
+
+}
+  }
+/* =========================
+   BUTTONS
+========================= */
+
+
+.actions{
+
+    text-align:center;
+
+    margin:20px;
+
+}
+
+
+
+.actions button{
+
+    padding:12px 25px;
+
+    margin:10px;
+
+    border:none;
+
+    background:#000;
+
+    color:white;
+
+    cursor:pointer;
+
+    border-radius:5px;
+
+    font-weight:bold;
+
+}
+
+
+
+.actions button:hover{
+
+    background:#333;
+
+}
+
+
+
+
+@media print{
+
+
+.actions{
+
+    display:none;
+
+}
+
+
+}
+  
+  
+</style>
+<script src="script.js">
+  /* ===================================
+   STUDENT REPORT SYSTEM JAVASCRIPT
+=================================== */
+
+
+/* =========================
+   STUDENT DATA
+========================= */
+
+
+const student = {
+
+    name:"NEILA ISLAMU MBARAKA",
+
+    gender:"KE",
+
+    className:"III",
+
+    subjects:[
+
+        {
+            name:"MATHEMATICS",
+            mark:84
+        },
+
+        {
+            name:"SCIENCE",
+            mark:100
+        },
+
+        {
+            name:"GEOGRAPHY",
+            mark:88
+        },
+
+        {
+            name:"ARTS & SPORTS",
+            mark:88
+        },
+
+        {
+            name:"KISWAHILI",
+            mark:82
+        },
+
+        {
+            name:"H/TZ NA MAADILI",
+            mark:84
+        },
+
+        {
+            name:"ENGLISH",
+            mark:73
+        }
+
+    ],
+
+
+    position:1,
+
+    totalStudents:2
+
+};
+
+
+
+
+/* =========================
+   GRADE FUNCTION
+========================= */
+
+
+function getGrade(mark){
+
+
+    if(mark>=81){
+
+        return "A";
+
+    }
+
+    else if(mark>=61){
+
+        return "B";
+
+    }
+
+    else if(mark>=41){
+
+        return "C";
+
+    }
+
+    else if(mark>=21){
+
+        return "D";
+
+    }
+
+    else{
+
+        return "F";
+
+    }
+
+
+}
+
+
+
+
+/* =========================
+   REMARK FUNCTION
+========================= */
+
+
+function getRemark(mark){
+
+
+    if(mark>=81){
+
+        return "VIZURI SANA";
+
+    }
+
+
+    else if(mark>=61){
+
+        return "VIZURI";
+
+    }
+
+
+    else if(mark>=41){
+
+        return "WASTANI";
+
+    }
+
+
+    else if(mark>=21){
+
+        return "DHAIFU";
+
+    }
+
+
+    else{
+
+        return "DHAIFU SANA";
+
+    }
+
+
+}
+
+
+
+
+/* =========================
+   LOAD STUDENT DATA
+========================= */
+
+
+document.getElementById("studentName")
+.innerHTML = student.name;
+
+
+document.getElementById("gender")
+.innerHTML = student.gender;
+
+
+document.getElementById("className")
+.innerHTML = student.className;
+
+
+
+
+/* =========================
+   LOAD SUBJECTS
+========================= */
+
+
+let tableBody = document.getElementById("marksBody");
+
+
+tableBody.innerHTML="";
+
+
+let total = 0;
+
+
+
+student.subjects.forEach((item,index)=>{
+
+
+    total += item.mark;
+
+
+
+    let row = `
+
+    <tr>
+
+    <td>${index+1}</td>
+
+    <td>${item.name}</td>
+
+    <td>${item.mark}</td>
+
+    <td>${getGrade(item.mark)}</td>
+
+    <td>${getRemark(item.mark)}</td>
+
+    </tr>
+
+    `;
+
+
+
+    tableBody.innerHTML += row;
+
+
+
+});
+
+
+
+
+
+/* =========================
+   CALCULATIONS
+========================= */
+
+
+let average = Math.round(
+
+    total / student.subjects.length
+
+);
+
+
+
+
+let overallGrade = getGrade(average);
+
+
+
+
+/* =========================
+   DISPLAY RESULTS
+========================= */
+
+
+document.getElementById("totalMarks")
+.innerHTML = total;
+
+
+
+document.getElementById("average")
+.innerHTML = average;
+
+
+
+document.querySelector(
+".summary-table tr:nth-child(2) td:last-child"
+)
+.innerHTML = 
+"DARAJA " + overallGrade;
+
+
+
+
+document.getElementById("position")
+.innerHTML = student.position;
+
+
+
+document.querySelector(
+".summary-table tr:nth-child(3) td:last-child"
+)
+.innerHTML =
+"KATI YA " + student.totalStudents;
+
+
+
+/* =========================
+   AUTO COMMENTS
+========================= */
+
+
+if(average >=81){
+
+
+document.getElementById("classTeacherRemark")
+.innerHTML =
+"Umefanya vizuri sana, endelea kuongeza bidii.";
+
+
+}
+
+
+else if(average >=61){
+
+
+document.getElementById("classTeacherRemark")
+.innerHTML =
+"Unafanya vizuri, ongeza juhudi zaidi.";
+
+
+}
+
+
+else{
+
+
+document.getElementById("classTeacherRemark")
+.innerHTML =
+"Unahitaji kuongeza bidii katika masomo.";
+
+}
+
+
+
+
+/* =========================
+   PRINT FUNCTION
+========================= */
+
+
+function printReport(){
+
+    window.print();
+
+  }
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"> 
+/* =========================
+   PDF DOWNLOAD
+========================= */
+
+
+function downloadPDF(){
+
+
+const element = document.querySelector(".report");
+
+
+const options = {
+
+
+    margin:0,
+
+
+    filename:
+    student.name+"_Report.pdf",
+
+
+    image:{
+        type:'jpeg',
+        quality:0.98
+    },
+
+
+    html2canvas:{
+        scale:2
+    },
+
+
+    jsPDF:{
+        unit:'mm',
+        format:'a4',
+        orientation:'portrait'
+    }
+
+
+};
+
+
+
+html2pdf()
+
+.set(options)
+
+.from(element)
+
+.save();
+
+}
+  
+   </script>
+<div class="actions no-print">
+
+<button onclick="printReport()">
+PRINT REPORT
+</button>
+
+
+<button onclick="downloadPDF()">
+DOWNLOAD PDF
+</button>
+
+</div>
+
+</body>
+</html>
