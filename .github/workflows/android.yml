@@ -22,11 +22,12 @@ jobs:
     - name: Install packages
       run: npm install
 
-
     - name: Install Capacitor Android
       run: |
-        npm install @capacitor/android@6.2.0
-        npx cap add android
+    npm install @capacitor/android@6.2.0
+    npx cap add android
+    
+      
 
 
     - name: Build APK
