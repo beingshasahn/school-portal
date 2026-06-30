@@ -734,7 +734,39 @@ border-radius:8px;
   </button>
   </div>
 </div>
+<div id="ai" class="page">
+  <div class="card">
+    <h3>AI Assistant</h3>
+    <p>Ask anything: lesson plans, exams, comments, reports</p>
 
+    <select id="aiType">
+      <option value="lesson">📚 Lesson Plan</option>
+      <option value="questions">📝 Question Generator</option>
+      <option value="comments">💬 Student Comments</option>
+      <option value="analysis">📊 Marks Analysis</option>
+      <option value="sms">📩 Parent SMS</option>
+    </select>
+
+    <textarea id="aiInput" placeholder="Enter topic or instructions..." style="height:100px;margin-top:10px;"></textarea>
+
+    <button onclick="askAI()" style="
+      width:100%;
+      padding:10px;
+      margin-top:10px;
+      border:none;
+      border-radius:8px;
+      background:#1e3a8a;
+      color:#fff;
+    ">
+      Ask AI
+    </button>
+
+    <div id="aiOutput" class="card" style="margin-top:10px;white-space:pre-wrap;">
+      AI response will appear here...
+    </div>
+  </div>
+</div>
+  
 <!-- BOTTOM NAV -->
 <div class="bottom-nav">
   <div class="nav-item active" onclick="switchPage('home',this)">
@@ -777,6 +809,9 @@ border-radius:8px;
   </div>
 </div>
 <div id="saveStatus"></div>
+  <div class="nav-item" onclick="switchPage('ai',this)">
+  <span>🤖</span>AI
+  </div>
 <script>
 
 /* PAGE SWITCHER */
@@ -1551,6 +1586,63 @@ ${date}
 
 lastNoticeCount = data.length;
       }  
+
+  async function askAI(){
+
+  const type = document.getElementById("aiType").value;
+  const input = document.getElementById("aiInput").value;
+  const output = document.getElementById("aiOutput");
+
+  if(!input){
+    output.innerText = "Please enter a topic";
+    return;
+  }
+
+  output.innerText = "Thinking... 🤖";
+
+  let prompt = "";
+
+  if(type === "lesson"){
+    prompt = "Create a detailed lesson plan for teachers: " + input;
+  }
+  else if(type === "questions"){
+    prompt = "Generate exam questions (easy, medium, hard): " + input;
+  }
+  else if(type === "comments"){
+    prompt = "Generate student report comments: " + input;
+  }
+  else if(type === "analysis"){
+    prompt = "Analyze student performance trends: " + input;
+  }
+  else if(type === "sms"){
+    prompt = "Write professional SMS to parents: " + input;
+  }
+
+  try{
+
+    const res = await fetch("AQ.Ab8RN6IKo77YBgSv74gdguYGEN0UkL5zrIlSaL7d9ms1OiIVOQ", {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        contents:[{
+          parts:[{text:prompt}]
+        }]
+      })
+    });
+
+    const data = await res.json();
+
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    output.innerText = text || "No response from AI";
+
+  }catch(err){
+    output.innerText = "Error connecting to AI";
+  }
+ }
+  
   
 init();
 
